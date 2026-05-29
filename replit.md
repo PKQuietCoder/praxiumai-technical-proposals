@@ -1,6 +1,6 @@
-# [Project name]
+# PDF Viewer
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An interactive, browser-based PDF document viewer — open a PDF and read it with page navigation, zoom, a thumbnail sidebar, document outline, in-document text search, rotation, and a distraction-free fullscreen mode. All rendering happens client-side; nothing is uploaded to a server.
 
 ## Run & Operate
 
