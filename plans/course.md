@@ -80,13 +80,13 @@ The end-to-end workflow and toolchain:
 - Design an end-to-end pipeline on PraxiumAI data for your own docs.
 - Extending and building on PraxiumAI's agentic system
 
-## 11. Tool & cost tradeoffs
+## 11. (Bonus) Tool & cost tradeoffs
 
 - How to decide between Chat / CoWork / Coding agents.
 - Token/cost vs. quality vs. speed.
 - When a simpler tool wins.
 
-## 12. Iterate from feedback
+## 12. (Bonus) Iterate from feedback
 
 - Version proposals using GitHub as customer requirements change.
 - Capture review comments and re-run the pipeline without starting over.
