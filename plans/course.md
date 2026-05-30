@@ -68,10 +68,12 @@ The end-to-end workflow and toolchain:
 
 ## 9. Quality control
 
-*Tool: Skills*
+*Tool: Claude Skills*
 
-- Add QC guardrails for verifiability, traceability, and accuracy.
-- Understand the limits of Skills and when to use prompts instead
+- Spec-driven development
+- Evals for technical definitions, facts, procedures, troubleshooting, math/quants/formulas, visuals and coherence.
+- Add Quality Control guardrails for verifiability, traceability, and accuracy.
+- Understand the limits of Skills and when to use prompts instead.
 
 ## 10. (🔹 Adv) Build your own agentic workflow
 
