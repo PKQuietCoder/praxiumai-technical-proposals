@@ -1,0 +1,400 @@
+{
+  "subsection_id": "3.1.1",
+  "subsection_title": "Characterize the Neural-ART NPU Architecture",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Identify the key architectural features of the ST Neural-ART accelerator and their relevance to DNN inference workloads",
+    "Assess the NPU's 600 Gops throughput, streaming engines, and weight decompression against real-time face matching requirements",
+    "Recognize the NPU's bus interface and memory sharing model as they affect pipeline design decisions",
+    "Flag the absence of an end-to-end latency specification as a gap requiring further characterization before confirming real-time suitability"
+  ],
+  "content": {
+    "hook_sentence": "The Neural-ART NPU delivers 288 multiply-accumulate operations per clock cycle — yet the datasheet never tells you how long a face recognition inference actually takes.",
+    "introduction": "When you evaluate the STM32N6x7xx for a face recognition terminal, the Neural-ART NPU is the primary reason to choose this variant over the STM32N6x5xx. Understanding its architecture — throughput ceiling, data flow mechanisms, and bus connectivity — lets you make a defensible feasibility assessment and identify exactly where the datasheet leaves gaps that require bench characterization.",
+    "key_points": [
+      {
+        "point": "The Neural-ART NPU is a runtime-reconfigurable inference engine capable of 600 Gops at up to 1 GHz, available only on STM32N6x7xx devices.",
+        "explanation": "The NPU is not a fixed-function accelerator. It is described as a \"design time parametric and runtime reconfigurable neural network inference engine\" that \"can accelerate a wide range of neural network architectures in hardware.\" Its headline figures are 600 Gops of throughput and 288 MAC/cycle, clocked at up to 1 GHz via a dedicated PLL. The reconfigurability matters for your product: you are not locked into a single network topology, so you can swap or retrain the face recognition model without a hardware redesign. Critically, this NPU is present **only** on STM32N6x7xx devices (the \"7\" line digit in the part number denotes the Neural-ART option). If you order an STM32N6x5xx part, you get the full crypto engine but no NPU. This is the hard architectural tradeoff you must document in any variant selection recommendation.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "c3a9263c-af66-4114-859c-6342870aea21",
+            "snippet": "The neural processing unit (NPU) core (available only on STM32N6x7xx devices) is the design time parametric and runtime reconfigurable neural network inference engine. It can accelerate a wide range of neural network architectures in hardware.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_31/ChunkType.text_c3a9263c-af66-4114-859c-6342870aea21_0.png",
+            "page_number": 31,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+            "snippet": "ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+            "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "cf2f6945-070a-4a74-9553-0e30b324f667",
+            "snippet": "7 = Neural ART option (artificial intelligence); 5 = No neural ART option (artificial intelligence)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_253/ChunkType.table_cf2f6945-070a-4a74-9553-0e30b324f667_0.png",
+            "page_number": 253,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Dedicated streaming engines and on-the-fly weight decompression are the architectural features most relevant to avoiding memory bandwidth bottlenecks during inference.",
+        "explanation": "Raw MAC throughput only tells part of the story. In practice, DNN inference on an MCU is often memory-bound: the accelerator stalls waiting for weights and activations to arrive from external memory. The Neural-ART addresses this with two mechanisms. First, dedicated streaming engines are \"integrated into it to optimize data flow and minimize internal buffer usage and power.\" These engines manage the movement of data between memory and the compute units autonomously, keeping the MAC array fed without CPU intervention. Second, the accelerator supports \"on-the-fly weight decompression,\" meaning compressed model weights stored in external memory are decompressed in hardware as they stream into the NPU. For a face recognition model where weights may be stored in XSPI-connected external flash, this directly reduces the external memory bandwidth demand and the storage footprint of the model. When you write your feasibility report, cite both features as bandwidth-mitigation mechanisms — not just the 600 Gops headline.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+            "snippet": "Dedicated streaming engines are integrated into it to optimize data flow and minimize internal buffer usage and power. The accelerator supports on-the-fly weight decompression and real-time data encryption and decryption.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+            "snippet": "Flexible dedicated stream processing engine; Real-time encryption/decryption; On-the-fly weight decompression",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The NPU connects to the host system and shared memory via 64-bit AXI-4 controller ports, configured through an AHB/AXI lite target port.",
+        "explanation": "Understanding the bus topology matters when you plan the inference pipeline. The NPU subsystem has two roles on the bus fabric: it is a target (the host configures it) and a controller (it fetches data autonomously). - **Configuration:** The Cortex-M55 host configures the NPU through \"an AHB/AXI lite target port, connected to one of the ports of the system bus matrix/interconnect.\" - **Data access:** The NPU has \"two controller ports\" that are \"64-bit wide controller AXI-4 interfaces that connect to the system bus matrix/Interconnect.\" These are the ports through which the NPU reads weights and activations from shared system memory. - **Memory sharing:** \"The system memory is shared between the host subsystem and the NPU subsystem,\" and \"the used memory is configurable by software, it depends upon the complexity and target performance of the selected neural network workload.\" The AXI cache (CACHEAXI) sits on the AXI interconnect driven by the NPU to improve performance of data traffic by caching NPU data accessed in external memories. When you size your memory layout, the NPU's two 64-bit AXI ports set the maximum burst bandwidth available for weight and activation fetches.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "6c2e320d-ea97-4681-8ecc-c0737046be37",
+            "snippet": "The host configures the NPU subsystem through an AHB/AXI lite target port, connected to one of the ports of the system bus matrix/interconnect. The two controller ports of NPU are 64-bit wide controller AXI-4 interfaces that connect to the system bus matrix/Interconnect. The system memory is shared between the host subsystem and the NPU subsystem.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_6c2e320d-ea97-4681-8ecc-c0737046be37_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f73d2cb5-ee5b-4abe-945b-3dd6d72512b9",
+            "snippet": "The AXI cache (CACHEAXI) is introduced (only on STM32N6x7xx devices) on the AXI interconnect driven by the NPU (neural network) peripheral, to improve the performance of data traffic, by caching the NPU data accessed in the external memories.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_f73d2cb5-ee5b-4abe-945b-3dd6d72512b9_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "12fd5223-0159-44bb-aff5-d917a53d05f9",
+            "snippet": "The used memory is configurable by software, it depends upon the complexity and target performance of the selected neural network workload.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_12fd5223-0159-44bb-aff5-d917a53d05f9_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "60c8e862-20d8-4779-bba6-f919f2f34e5d",
+            "snippet": "The NPU subsystem connects to the host system and the shared system memory.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_60c8e862-20d8-4779-bba6-f919f2f34e5d_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The NPU has its own dedicated PLL, and its operating mode across power states is optional in Run and Stop-SVOS-high modes but retains state in Stop-SVOS-low mode.",
+        "explanation": "The clock architecture gives you independent frequency control over the NPU. The STM32N6 provides four PLLs: one for the system clock, one dedicated to the Neural-ART accelerator, and two for kernel clocks. This means you can run the NPU at its full 1 GHz while the Cortex-M55 operates at a lower frequency, or you can gate the NPU clock entirely between inference bursts to save power. From the power-mode perspective, the NPU is marked as optional (O) in Run mode and Stop-SVOS-high mode, meaning you can enable or disable it. In Stop-SVOS-low mode it is in a retained (R) state, and in Standby mode it is fully off. For a face recognition terminal that alternates between idle waiting and burst inference, this means you can clock-gate the NPU between recognition events without losing the host configuration — the NPU resumes from its retained state when Stop mode exits.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f3c3431c-e203-4681-b643-5ceb5b9707a0",
+            "snippet": "4x PLL (one for the system clock, one for the ST Neural-ART Accelerator, two for kernel clocks) with fractional mode",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_1/ChunkType.text_f3c3431c-e203-4681-b643-5ceb5b9707a0_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "120642f1-af61-43d7-8db6-f195ff3fdad2",
+            "snippet": "NPU(2): Run mode O; Stop mode SVOS high O; Stop mode SVOS low R; Standby mode —",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_28/ChunkType.table_120642f1-af61-43d7-8db6-f195ff3fdad2_0.png",
+            "page_number": 28,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The datasheet does not specify end-to-end inference latency, so 600 Gops alone cannot confirm real-time suitability — further bench characterization is required.",
+        "explanation": "This is the most important gap to flag in your feasibility report. The datasheet gives you throughput (600 Gops), MAC density (288 MAC/cycle), and maximum frequency (1 GHz), but it does not state how many milliseconds a specific face recognition model takes to execute end-to-end on the Neural-ART NPU. Gops is a peak theoretical figure. Actual inference latency depends on model architecture, weight precision, memory layout, cache hit rate, and how efficiently the streaming engines keep the MAC array utilized. A 600 Gops rating does not guarantee that a MobileNetV2-based face embedding model completes within your target latency budget (for example, under 500 ms for a responsive access control terminal). Your feasibility report should explicitly state: the 600 Gops rating and streaming engine architecture are positive indicators, but end-to-end latency for the target model must be measured on hardware or estimated using ST's neural network deployment tools before the design can be committed.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+            "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "80737a15-8a5d-4b41-af03-3dfcd921252d",
+            "snippet": "The NPU is considered as an accelerator subsystem with several specialized hardware accelerators supporting various inference kernels connected via a reconfigurable data flow",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_31/ChunkType.text_80737a15-8a5d-4b41-af03-3dfcd921252d_0.png",
+            "page_number": 31,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "You are writing a one-page feasibility assessment for your engineering manager. The requirement is real-time face matching (target: under 500 ms per recognition event). You have the STM32N6 datasheet in front of you. Based only on what the datasheet provides, can you confirm the Neural-ART NPU meets the latency requirement? What should your report conclude?",
+        "reveal": "You cannot confirm it from the datasheet alone. The datasheet states the NPU runs at up to 1 GHz and delivers 600 Gops with 288 MAC/cycle, and that dedicated streaming engines minimize internal buffer usage and power. These are strong positive indicators. However, the datasheet provides no end-to-end inference latency figure for any specific model or workload. Your report should conclude: (1) the 600 Gops rating and streaming engine architecture are consistent with real-time inference requirements; (2) on-the-fly weight decompression reduces external memory bandwidth demand, which is relevant for models stored in XSPI flash; (3) a specific latency figure cannot be derived from the datasheet — bench characterization using the target face recognition model is required before the design can be committed. Flagging this gap explicitly protects you from a late-stage surprise during integration.",
+        "hint": "Think about the difference between a peak throughput rating and a measured end-to-end latency for a specific model."
+      },
+      {
+        "prediction_prompt": "A colleague argues that since the NPU has its own dedicated PLL, you should always run it at the full 1 GHz to maximize inference speed, even during idle periods between recognition events. What is the counterargument, and what does the power-mode table tell you about a better approach?",
+        "reveal": "Running the NPU at full frequency during idle periods wastes power with no benefit. The power-mode table shows the NPU is optional (O) in Run mode — meaning you can disable it between inference bursts. The dedicated NPU PLL means you can gate the NPU clock independently of the Cortex-M55 system clock. In Stop-SVOS-low mode, the NPU enters a retained (R) state, preserving its configuration so it resumes quickly when the next face capture triggers a wake-up. The correct approach for a battery-aware or thermally constrained access control terminal is to enable the NPU only during active inference, leveraging the retained state in Stop mode for fast resume rather than keeping the NPU clocked continuously.",
+        "hint": "Look at what the power-mode table says about the NPU's state in Stop-SVOS-low mode versus Run mode."
+      }
+    ],
+    "summary": "The Neural-ART NPU's 600 Gops throughput, dedicated streaming engines, and on-the-fly weight decompression make it the right architectural choice for real-time DNN inference on the STM32N6x7xx — but the datasheet's absence of an end-to-end latency specification means you must flag this gap in your feasibility report and validate actual inference time on hardware before committing the design.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When writing a feasibility report on the Neural-ART NPU for a memory-bound inference workload, the two architectural features most relevant to cite as bandwidth-mitigation mechanisms are the dedicated streaming engines and ___.",
+      "answer": "on-the-fly weight decompression",
+      "distractors": [
+        "the AHB/AXI lite configuration port",
+        "the dedicated NPU PLL",
+        "the AXI cache SRAM mode"
+      ],
+      "explanation": "Streaming engines manage autonomous data flow to keep the MAC array fed, while on-the-fly weight decompression reduces the external memory bandwidth demand for stored model weights — both directly address memory bandwidth bottlenecks rather than raw compute throughput."
+    },
+    {
+      "after_key_point": 4,
+      "type": "matching",
+      "stem": "Match each NPU specification or feature to the correct role it plays in your feasibility assessment:",
+      "pairs": [
+        {
+          "left": "600 Gops at 1 GHz",
+          "right": "Peak throughput indicator — positive signal, but does not confirm end-to-end latency"
+        },
+        {
+          "left": "Dedicated streaming engines",
+          "right": "Minimize internal buffer usage and keep the MAC array fed autonomously"
+        },
+        {
+          "left": "On-the-fly weight decompression",
+          "right": "Reduces external memory bandwidth demand for model weights stored in flash"
+        },
+        {
+          "left": "Absence of latency specification in datasheet",
+          "right": "Gap requiring bench characterization before real-time suitability can be confirmed"
+        }
+      ],
+      "explanation": "A complete feasibility assessment distinguishes between what the datasheet confirms (throughput ceiling, bandwidth-mitigation features) and what it leaves unspecified (actual inference latency for a target model), so each piece of evidence is assigned the correct evidentiary weight."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not provide an end-to-end inference latency specification for any specific neural network model on the Neural-ART NPU, making it impossible to confirm real-time suitability (e.g., sub-500 ms face recognition) from the datasheet alone.",
+    "The datasheet does not reference specific face recognition model architectures (e.g., MobileNet, ArcFace) validated on the Neural-ART NPU, so model compatibility cannot be assessed from the datasheet.",
+    "No application note or STM32Cube firmware example for NPU configuration and model deployment is referenced in the provided chunks, which would be needed to supplement the architectural characterization."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are finalizing the hardware selection for a face recognition access control terminal. Your product requirements specify real-time DNN inference for face matching and AES-based encryption of stored biometric templates with side-channel attack protection. You are reviewing the STM32N6 datasheet feature tables.",
+        "question_text": "Based on the STM32N6 variant feature tables, which device family satisfies the real-time inference requirement, and what architectural tradeoff must you explicitly document in your selection recommendation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Select STM32N6x7xx for the Neural-ART NPU; document that this variant lacks SAES, CRYP, PKA, and MCE, so hardware-accelerated crypto with side-channel protection must be sourced externally or handled in software",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Select STM32N6x5xx for the Neural-ART NPU; document that this variant includes full crypto support but requires an external co-processor for DNN inference workloads",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Select STM32N6x7xx for both Neural-ART NPU and full crypto support; document that the SAES and MCE features are optional and must be enabled via firmware configuration at runtime",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N6x7xx variant provides the Neural-ART NPU (600 Gops) required for real-time DNN inference, but the datasheet feature tables confirm that SAES, CRYP, PKA, and MCE are all listed as 'No' for this variant. Your recommendation must explicitly state this tradeoff so the security architecture can compensate.",
+        "incorrect": "Review the STM32N6 feature tables carefully. The Neural-ART NPU is available only on STM32N6x7xx devices, not STM32N6x5xx. Additionally, no single STM32N6 variant combines both the Neural-ART NPU and the full crypto engine (SAES, CRYP, PKA, MCE) — this is a hard architectural constraint documented in the datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+          "snippet": "Neural processing unit (STM32N6x7 only): ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are architecting the camera-to-inference pipeline on an STM32N6x7xx-based face recognition terminal. A colleague proposes routing ISP output through the Cortex-M55 CPU before passing image data to the Neural-ART NPU, arguing this gives the firmware more control over preprocessing.",
+        "question_text": "Based on the STM32N6 datasheet description of the camera subsystem, what should you tell your colleague about this proposed data path?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Agree with the proposal — routing through the CPU allows the firmware to apply additional preprocessing algorithms that the ISP hardware does not support, improving face detection accuracy",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Reject the proposal — the ISP output can be fed directly to the NPU via DMA, bypassing the CPU entirely, which avoids a CPU bottleneck and is the architecture the hardware is designed to support",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Reject the proposal — the ISP and NPU share a direct hardware bus connection that does not use DMA, so inserting the CPU into the data path would require disabling this dedicated interface",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 datasheet explicitly states that the ISP output can be directly fed via DMA to the NPU, without CPU intervention. Routing through the CPU would introduce unnecessary latency and create a bottleneck in a real-time biometric pipeline — exactly the architecture the hardware is designed to avoid.",
+        "incorrect": "The STM32N6 datasheet describes a DMA-based handoff between the ISP and the NPU — not a CPU-mediated path and not a dedicated direct hardware bus. The ISP output feeds the NPU via DMA, which allows the CPU to remain free for other tasks. Review Section 3.25 of the functional overview."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are preparing a technical feasibility report for your engineering manager. The report must assess whether the Neural-ART NPU on the STM32N6x7xx can support real-time face matching. Your manager asks you to identify which NPU architectural features are most relevant to avoiding memory bandwidth bottlenecks during inference, and to flag any specification gaps.",
+        "question_text": "Which statement best reflects what your feasibility report should conclude about the Neural-ART NPU's suitability for real-time face matching?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The NPU's 600 Gops rating and dedicated streaming engines minimize memory bandwidth pressure, and on-the-fly weight decompression reduces external memory traffic; however, the datasheet does not specify end-to-end inference latency, so further characterization is required before confirming real-time suitability",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The NPU's 600 Gops rating is sufficient to confirm real-time face matching performance; the streaming engines and weight decompression are secondary features that do not affect the latency assessment for this workload",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The NPU's 1 GHz operating frequency directly determines inference latency per frame; since 1 GHz exceeds typical face recognition model requirements, no further characterization is needed to confirm real-time suitability",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. A sound feasibility assessment cites the 600 Gops throughput, identifies streaming engines and on-the-fly weight decompression as features that directly reduce memory bandwidth bottlenecks, and flags the absence of a specific latency specification in the datasheet as a gap. Raw Gops and clock frequency alone cannot confirm real-time suitability without model-specific latency data.",
+        "incorrect": "Neither raw Gops nor operating frequency alone is sufficient to confirm real-time latency for a specific face recognition workload. The streaming engines and weight decompression features are architecturally significant for bandwidth-limited inference. Critically, the datasheet does not provide an end-to-end latency specification, which is a gap your report must flag. Review Section 3.5 of the functional overview."
+      },
+      "references": [
+        {
+          "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+          "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency. Dedicated streaming engines are integrated into it to optimize data flow and minimize internal buffer usage and power. The accelerator supports on-the-fly weight decompression and real-time data encryption and decryption.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are specifying the security architecture for an STM32N6x5xx-based biometric terminal (selected for its full crypto engine). You need to assign each available security feature to a specific protection role: protecting biometric templates stored in XSPI-connected external flash, encrypting templates in memory, verifying data integrity, and isolating the secure processing domain.",
+        "question_text": "Which assignment correctly maps the STM32N6 security features to their protection roles in the biometric terminal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "MCE handles inline encryption of XSPI external flash; SAES/CRYP encrypt biometric templates in memory; HASH verifies data integrity; TrustZone isolates the secure biometric processing domain",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "SAES handles inline encryption of XSPI external flash; MCE encrypts biometric templates in memory; TrustZone verifies data integrity; HASH isolates the secure biometric processing domain",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "TrustZone handles inline encryption of XSPI external flash; HASH encrypts biometric templates in memory; MCE verifies data integrity; SAES/CRYP isolate the secure biometric processing domain",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. MCE provides system bus inline encryption and decryption for external memory regions (including XSPI-connected flash), making it the right choice for protecting data at rest in external storage. SAES and CRYP perform AES encryption of data in memory. HASH provides integrity verification. TrustZone enforces domain isolation for the secure biometric processing environment.",
+        "incorrect": "Each STM32N6 security feature has a specific architectural role. MCE is designed for inline encryption on the system bus — it operates transparently on reads and writes to external memory regions, which is exactly what is needed for XSPI-connected flash. SAES and CRYP are the AES engines for active data encryption. HASH is the integrity verification mechanism. TrustZone provides domain isolation. Review Sections 3.33–3.36 of the functional overview."
+      },
+      "references": [
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    }
+  ]
+}

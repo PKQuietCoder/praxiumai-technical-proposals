@@ -1,0 +1,63 @@
+[
+  {
+    "index": 0,
+    "name": "Derek Holloway",
+    "role": "Physical Security Systems Integrator",
+    "description": "Designs, installs, and commissions access control and biometric systems for commercial and enterprise clients, working with hardware from multiple vendors including Suprema.",
+    "experience": "5-10 years in physical security systems installation and integration",
+    "needs": "Detailed understanding of hardware interfaces (RS-485, Wiegand, relay, TTL), supported card technologies, power requirements, network connectivity options, and system topology options to correctly install and configure FaceStation 2 in diverse client environments",
+    "pain_points": "Ensuring compatibility between FaceStation 2 and existing access control infrastructure, troubleshooting connectivity issues across distributed deployments, meeting client requirements for both standalone and networked configurations",
+    "key_job_tasks": [
+      "Plan and design access control system topology using FaceStation 2 as a primary or slave device",
+      "Wire and configure hardware interfaces including RS-485, Wiegand, relay outputs, and TTL inputs",
+      "Integrate FaceStation 2 with BioStar 2 server over TCP/IP networks",
+      "Configure RFID card reader settings for multi-card-type environments",
+      "Commission and test live face detection and anti-spoofing features on-site"
+    ],
+    "background": "Technical diploma or degree in electronics, networking, or security systems; certified by manufacturers such as Suprema, HID, or Lenel",
+    "context": "Works on-site at client facilities including corporate offices, manufacturing plants, and government buildings; frequently references product datasheets during installation and troubleshooting"
+  },
+  {
+    "index": 1,
+    "name": "Priya Nambiar",
+    "role": "Technical Sales Engineer - Biometric Security Solutions",
+    "description": "Supports the sales process for physical security and biometric access control products by providing technical expertise to prospects, preparing proposals, and demonstrating product capabilities to enterprise clients.",
+    "experience": "3-7 years in security technology sales or pre-sales engineering",
+    "needs": "Ability to clearly articulate FaceStation 2's differentiating features (matching speed, illuminance range, anti-spoofing, multi-RFID support) versus competing products, and to map product specifications to client use cases such as large-scale deployments, harsh lighting environments, or high-security facilities",
+    "pain_points": "Competing against established access control brands, justifying premium pricing to cost-conscious buyers, translating technical specifications into business value for non-technical stakeholders",
+    "key_job_tasks": [
+      "Present FaceStation 2 product features and competitive advantages to prospective clients",
+      "Match product specifications (user capacity, card compatibility, interface options) to client requirements",
+      "Recommend appropriate model variants (FS2-D vs. FS2-AWB) based on site needs",
+      "Respond to technical RFP questions using specification data",
+      "Demonstrate system configuration options including standalone and BioStar 2-integrated deployments"
+    ],
+    "background": "Bachelor's degree in engineering, IT, or business; background in physical security, IT infrastructure, or building automation systems",
+    "context": "Works with enterprise security managers, IT directors, and facilities managers at mid-to-large organizations; frequently uses product datasheets and brochures as sales collateral"
+  },
+  {
+    "index": 2,
+    "name": "Marcus Osei",
+    "role": "Corporate Security & Access Control Administrator",
+    "description": "Manages and maintains the physical access control and time attendance systems across one or more corporate facilities, overseeing user enrollment, device management, and system health through the BioStar 2 platform.",
+    "experience": "2-6 years in IT security, physical security administration, or facilities management",
+    "needs": "Understanding of FaceStation 2 capabilities including user capacity limits, face enrollment procedures, log storage, RFID card management, and how the device integrates with BioStar 2 for centralized administration and remote access",
+    "pain_points": "Managing large user populations across multiple devices, ensuring reliable authentication in variable lighting conditions, maintaining audit logs for compliance, and supporting users with accessibility needs (wheelchair users, children)",
+    "key_job_tasks": [
+      "Enroll and manage user face templates and RFID credentials in BioStar 2",
+      "Monitor access logs and image logs for security incidents and compliance reporting",
+      "Configure device settings for time attendance and access control policies",
+      "Troubleshoot authentication failures related to lighting conditions or card read errors",
+      "Coordinate device placement and bracket configuration to accommodate users of varying heights and mobility needs"
+    ],
+    "background": "Background in IT administration, corporate security, or facilities management; may hold certifications such as CompTIA Security+ or Physical Security Professional (PSP)",
+    "context": "Works in a corporate, healthcare, government, or educational environment managing access for dozens to thousands of employees; responsible for both day-to-day operations and periodic audits"
+  },
+  {
+    "name": "Alex Mercer",
+    "role": "Hardware Product Owner – Biometric Access Control",
+    "description": "Owns the full product lifecycle for the FaceStation 2, from requirements definition through launch and iteration, working across engineering, sales, and operations teams to ensure the product meets market and customer needs.",
+    "needs": "Deep mastery of FaceStation 2 specifications — including matching speed, user capacity, illuminance range, hardware interfaces, card compatibility, and model variants — to make informed prioritization decisions and serve as the authoritative internal reference for cross-functional teams",
+    "pain_points": "Aligning diverse stakeholders (engineering, sales, support, and leadership) around a shared understanding of product capabilities and trade-offs, especially when translating complex technical specifications into clear product decisions and roadmap rationale"
+  }
+]

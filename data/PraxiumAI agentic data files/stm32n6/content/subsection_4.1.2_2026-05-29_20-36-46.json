@@ -1,0 +1,367 @@
+{
+  "subsection_id": "4.1.2",
+  "subsection_title": "Specify the CSI-2 Interface Parameters",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Verify that the STM32N6 CSI-2 interface can sustain the pixel throughput required by a rawBayer 10-bit sensor at 30 fps",
+    "Identify the key CSI-2 Host features that affect pipeline configuration for a face recognition terminal",
+    "Trace the complete data path from camera sensor through CSI-2 Host, DCMIPP, ISP, and DMA to the Neural-ART NPU"
+  ],
+  "content": {
+    "hook_sentence": "The STM32N6 CSI-2 interface can sustain up to 333 Mpixel/s for rawBayer 10-bit input — more than enough headroom for a 5 Mpixel sensor at 30 fps, but only if you select the right pixel format and lane configuration from the start.",
+    "introduction": "Before you commit to a hardware layout, you need to confirm that the CSI-2 interface can actually sustain your sensor's output rate and that the downstream pipeline stages connect correctly. Getting these parameters wrong at the specification stage means a board respin, not a firmware fix. This section walks you through the CSI-2 Host's key parameters and shows you how they map to the face recognition terminal's camera-to-NPU data path.",
+    "key_points": [
+      {
+        "point": "The CSI-2 serial interface supports two data lanes at up to 2.5 Gbps/lane, giving you 333 Mpixel/s for rawBayer 10-bit input.",
+        "explanation": "When you specify your sensor interface, the two numbers that matter most are lane count and pixel rate. The STM32N6 CSI-2 interface runs two D-PHY data lanes, each at up to 2.5 Gbps in high-speed (HS) mode. For rawBayer 10-bit data — the format your face recognition sensor outputs — the interface sustains up to 333 Mpixel/s. For RGB888, the ceiling drops to 200 Mpixel/s because each pixel requires more bits. A 5 Mpixel sensor at 30 fps produces 150 Mpixel/s, so you have more than 2x headroom on the rawBayer 10-bit path. This headroom matters: it means the interface will not be your bottleneck even if you later increase frame rate or add a second virtual channel.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "The CSI-2 serial interface has the following features: Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+            "snippet": "Up to two D-PHY data lanes supported — Up to 2.5 Gbit/s per lane in high-speed (HS) mode — 10 Mbit/s in low-power (LP) mode",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The CSI-2 Host implements MIPI CSI-2 v1.3 and supports all 18 standard data formats plus user-defined types, including virtual channel multiplexing.",
+        "explanation": "The CSI-2 Host is a full MIPI CSI-2 v1.3 digital controller — not a simplified subset. This matters for your terminal design in two ways. First, it supports all 18 MIPI-defined data formats, so any compliant rawBayer sensor you select will work without format adaptation. Second, it supports up to four virtual channels with interleaved packet handling. If your product roadmap includes a second sensor (for example, an IR illumination camera for liveness detection), you can multiplex both sensors on the same physical CSI-2 link using virtual channels rather than adding a second interface. The controller also provides ECC and CRC checking, which catches bit errors on the serial link before corrupted pixel data reaches the ISP. The CSI-2 Host also generates programmable interrupts tied to virtual channels: four timer interrupts anchored to SOF (start of frame) or EOF (end of frame), and four line/byte counter interrupts. These give you precise hooks for synchronizing firmware events — such as triggering an exposure adjustment — to specific points in the frame without polling.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+            "snippet": "CSI-2 virtual channel and data type filtering supporting interleaved data — Up to four virtual channels — Support the data formats specified into the MIPI Alliance standard for CSI-2 v1.3 (18 data formats, plus the user defined ones)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+            "snippet": "ECC and error correction capabilities — CRC check capability",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+            "snippet": "Four timer interrupts mapped on a selected virtual channel with starting point from SOF (start of frame) or EOF (end of frame) — Four line/byte counter interrupts mapped on a selected virtual channel to trigger an event",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "ba7ebdd8-9a25-4ed6-b42f-12f849024d1d",
+            "snippet": "The MIPI CSI-2 Host controller is a digital core that implements all protocol functions defined in the MIPI CSI-2 specification. It provides an interface between the system and the MIPI D-PHY, allowing communication with a CSI-2 compliant camera.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_ba7ebdd8-9a25-4ed6-b42f-12f849024d1d_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The CSI-2 Host connects directly to the DCMIPP pixel pipeline, which feeds three parallel ISP processing pipes — all without CPU involvement.",
+        "explanation": "Building on the pipeline architecture covered earlier, the CSI-2 Host sits at the entry point of the DCMIPP path. Pixel data flows from the D-PHY physical layer into the CSI-2 Host's lane management layer, which merges one or two data lanes into a single 32-bit ISB-Byte bus. That bus connects internally to the DCMIPP peripheral, which then distributes the raw pixel stream to the ISP's three parallel processing pipes. The critical architectural point for your latency budget: the ISP output feeds the Neural-ART NPU directly via DMA, with no CPU reads or writes in the path. The CPU is not involved in moving pixel data from the sensor to the NPU. This means your 500 ms latency budget is not at risk from CPU scheduling jitter or interrupt latency on the data path itself — only from ISP processing time and NPU inference time. The complete sequence is: camera sensor → CSI-2 D-PHY → CSI-2 Host → DCMIPP pixel pipeline → ISP processing pipes → DMA → Neural-ART NPU.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+            "snippet": "CSI-2 lane management layer connected to the D-PHY_RX to merge 1 or 2 data lanes in a single 32-bit ISB-Byte bus — ISB-Byte header generation for internal connection with the DCMIPP peripheral",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "The ISP provides processing of three parallel pipes on the same input stream... The ISP output can be directly fed via a DMA to the NPU.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "The DCMIPP path groups the DCMIPP pixel pipeline block, its included parallel interface, and the abutted CSI-2-Host and PHY.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Do not confuse the pixel rate ceiling with the lane bit rate — rawBayer 10-bit achieves a higher pixel rate than RGB888 precisely because it packs fewer bits per pixel.",
+        "explanation": "A common specification mistake is assuming that a higher bit-depth format always achieves a higher pixel rate. The opposite is true here. The CSI-2 interface has a fixed maximum bit rate per lane (2.5 Gbps). rawBayer 10-bit uses 10 bits per pixel, so at the same lane rate you can push more pixels per second than RGB888, which uses 24 bits per pixel. That is why the rawBayer 10-bit ceiling (333 Mpixel/s) is higher than the RGB888 ceiling (200 Mpixel/s) on the same physical interface. When you document your interface specification, state both the pixel rate and the data format explicitly. Stating only '2.5 Gbps per lane' without the format leaves ambiguity about whether your sensor's pixel rate is within budget.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10 — Pixel format: any MIPI CSI2 v1.3 (RGB565, 888, YUV422, rawBayer)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+            "snippet": "Up to 2.5 Gbit/s per lane in high-speed (HS) mode",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your sensor datasheet specifies a 5 Mpixel rawBayer 10-bit output at 30 fps over a 2-lane CSI-2 link. A colleague argues that you should switch to RGB888 output from the sensor to simplify the ISP demosaicing step, but is concerned the CSI-2 interface might not keep up with RGB888 at the same resolution and frame rate. What do you tell them about whether the interface can sustain RGB888 at 5 Mpixel/30 fps, and what is the tradeoff?",
+        "reveal": "5 Mpixel at 30 fps = 150 Mpixel/s. The CSI-2 interface ceiling for RGB888 is 200 Mpixel/s, so 150 Mpixel/s fits within the limit — the interface can sustain it. However, switching to RGB888 consumes 150 out of 200 Mpixel/s (75% of the ceiling), leaving only 50 Mpixel/s of headroom. In contrast, rawBayer 10-bit at the same sensor output uses 150 out of 333 Mpixel/s (45% of the ceiling). The rawBayer path gives you more than twice the headroom for future frame rate increases or virtual channel additions. The ISP's demosaicing pipe handles rawBayer natively, so there is no firmware simplification benefit to converting in the sensor — you just reduce your interface margin.",
+        "hint": "Calculate the pixel rate first, then compare it against both format ceilings."
+      },
+      {
+        "prediction_prompt": "You are reviewing a junior engineer's pipeline diagram for the face recognition terminal. Their diagram shows: camera sensor → CSI-2 interface → CPU SRAM buffer → ISP processing pipes → DMA → Neural-ART NPU. They argue that staging frames in SRAM via the CPU gives you a software checkpoint to validate frame integrity before inference. Is their pipeline correct, and how should you revise it?",
+        "reveal": "The pipeline is incorrect in two ways. First, the CPU SRAM staging step does not belong between the CSI-2 interface and the ISP — the CSI-2 Host connects internally to the DCMIPP pixel pipeline, not to a CPU-accessible SRAM buffer. Second, the ISP output feeds the NPU directly via DMA without CPU intervention; inserting a CPU read/write step would introduce scheduling jitter and potentially break the real-time latency budget. The correct sequence is: camera sensor → CSI-2 D-PHY → CSI-2 Host → DCMIPP pixel pipeline → ISP processing pipes → DMA → Neural-ART NPU. Frame integrity checking (ECC and CRC) is handled by the CSI-2 Host hardware, not by a software checkpoint.",
+        "hint": "Check where the CSI-2 Host's output bus connects, and recall what the ISP-to-NPU handoff mechanism is."
+      }
+    ],
+    "summary": "The STM32N6 CSI-2 interface provides 333 Mpixel/s for rawBayer 10-bit input across two 2.5 Gbps lanes — well above the 150 Mpixel/s your 5 Mpixel/30 fps sensor produces — and connects internally through the DCMIPP to three parallel ISP pipes that feed the Neural-ART NPU via DMA, keeping the CPU entirely out of the pixel data path.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When specifying the CSI-2 interface for a rawBayer 10-bit sensor, the correct pixel rate ceiling to compare against your sensor's output is ___.",
+      "answer": "333 Mpixel/s",
+      "distractors": [
+        "200 Mpixel/s",
+        "120 Mpixel/s",
+        "2.5 Gbps"
+      ],
+      "explanation": "The 333 Mpixel/s ceiling applies specifically to rawBayer 10-bit format; 200 Mpixel/s is the ceiling for RGB888, and 2.5 Gbps is the lane bit rate — a different unit that cannot be directly compared to a pixel rate without knowing the bit depth."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each pipeline stage to its correct role in the camera-to-NPU data path on the STM32N6:",
+      "pairs": [
+        {
+          "left": "CSI-2 Host lane management layer",
+          "right": "Merges 1 or 2 D-PHY data lanes into a single 32-bit ISB-Byte bus for the DCMIPP"
+        },
+        {
+          "left": "DCMIPP pixel pipeline",
+          "right": "Receives the ISB-Byte bus from the CSI-2 Host and distributes the raw stream to the ISP pipes"
+        },
+        {
+          "left": "DMA",
+          "right": "Transfers ISP output directly to the Neural-ART NPU without CPU involvement"
+        }
+      ],
+      "explanation": "Each stage has a distinct handoff role: the CSI-2 Host aggregates lanes, the DCMIPP routes the pixel stream to the ISP, and the DMA moves processed frames to the NPU — the CPU handles none of these transfers."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not provide register-level configuration details for the CSI-2 Host (e.g., lane enable registers, virtual channel assignment, data type filter configuration) — firmware configuration specifics would need to be sourced from the STM32N6 reference manual or STM32Cube HAL driver documentation.",
+    "The datasheet does not specify the maximum number of simultaneously active virtual channels when interleaved packets are used, beyond stating 'up to four virtual channels' — the practical throughput impact of virtual channel multiplexing at full pixel rate is not quantified.",
+    "No STM32Cube firmware example or application note for CSI-2 Host initialization on the STM32N6 is referenced in the available document chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are architecting the camera-to-inference pipeline for a face recognition terminal using the STM32N6. Your camera sensor outputs rawBayer 10-bit data over a CSI-2 serial link, and you need to confirm the interface can sustain the required pixel throughput before committing to the hardware design.",
+        "question_text": "Your sensor streams rawBayer 10-bit frames at 30 fps. Based on the STM32N6 CSI-2 interface specification, what is the maximum pixel rate the CSI-2 interface can sustain for rawBayer 10-bit input, and does this interface meet your throughput requirement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Up to 200 Mpixel/s for rawBayer 10-bit; this exceeds typical 30 fps sensor output and the interface meets the requirement",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Up to 333 Mpixel/s for rawBayer 10-bit; this exceeds typical 30 fps sensor output and the interface meets the requirement",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Up to 120 Mpixel/s for rawBayer 10-bit; this may be insufficient for high-resolution 30 fps sensors and requires validation",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 CSI-2 interface supports up to 333 Mpixel/s for rawBayer 10-bit input across its two data lanes at 2.5 Gbps/lane. The 200 Mpixel/s figure applies to RGB888 format, not rawBayer 10. The 120 MHz figure refers to the parallel interface, not the CSI-2 serial path.",
+        "incorrect": "Review the DCMIPP section of the STM32N6 datasheet. The CSI-2 serial interface specifies two distinct pixel rate limits depending on format: up to 200 Mpixel/s for RGB888 and up to 333 Mpixel/s for rawBayer 10-bit. The 120 MHz figure applies to the parallel interface only. Selecting the wrong rate could lead to an incorrect throughput assessment during hardware design."
+      },
+      "references": [
+        {
+          "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+          "snippet": "The CSI-2 serial interface has the following features: Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+          "page_number": 49,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the STM32N6 camera subsystem architecture to decide how to route pixel data from the camera sensor to the Neural-ART NPU for real-time face recognition inference. A colleague suggests that the CPU should read ISP output frames from SRAM and then write them into the NPU input buffer to maintain software control over the handoff.",
+        "question_text": "Based on the STM32N6 functional overview for the camera-to-NPU data path, how should you respond to your colleague's suggestion?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Accept the suggestion — CPU-mediated transfers give you explicit control over frame timing and allow software filtering before NPU input",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Reject the suggestion — the ISP output feeds the NPU directly via DMA without CPU intervention, which avoids CPU bottlenecks in the real-time pipeline",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Partially accept the suggestion — use the CPU for the first frame to validate data integrity, then switch to DMA for subsequent frames",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 datasheet explicitly states that the ISP output can be directly fed via DMA to the NPU, bypassing the CPU entirely. Inserting CPU-mediated transfers would introduce latency and create a bottleneck that undermines real-time face recognition performance.",
+        "incorrect": "The STM32N6 architecture is designed so that the ISP output feeds the NPU directly via DMA without CPU intervention. CPU-mediated transfers — whether full-time or partial — add unnecessary latency and defeat the purpose of the hardware-accelerated pipeline. Review the camera subsystem functional overview in the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are specifying the ISP configuration for a face recognition terminal that must simultaneously produce: (1) a full-resolution frame for storage/audit logging, (2) a downscaled and cropped region-of-interest for NPU inference, and (3) a YUV-converted stream for display preview. A junior engineer asks whether the STM32N6 ISP can handle all three outputs from a single camera input stream without duplicating the sensor data path.",
+        "question_text": "Based on the STM32N6 ISP architecture, what is the correct answer to give the junior engineer?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "No — the ISP supports only one output pipe per input stream, so a second sensor or frame buffer copy is required to produce three simultaneous outputs",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Yes — the ISP provides three parallel processing pipes on the same input stream, enabling all three outputs without duplicating the sensor data path",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Partially — the ISP supports two parallel pipes on the same input stream, so one of the three outputs must be handled by the CPU or a separate DMA copy",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 ISP provides three parallel processing pipes operating on the same input stream. This means full-resolution capture, downscaled/cropped NPU input, and YUV preview can all be produced simultaneously from a single CSI-2 camera feed — no sensor duplication or CPU-assisted copying required.",
+        "incorrect": "The STM32N6 datasheet states that the ISP provides processing of three parallel pipes on the same input stream. This is a key architectural feature that enables multi-output camera pipelines without duplicating the sensor data path. Review the camera subsystem functional overview to understand the ISP pipe count."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP provides processing of three parallel pipes on the same input stream. Supported algorithms are bad pixel, decimation, black-level tuning, exposure control, demosaicing, column conversion, contrast, cropping, downsizing, ROI isolation, gamma correction, YUV conversion, and pixel packer.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are documenting the end-to-end camera-to-inference data path for the STM32N6-based face recognition terminal. You need to correctly sequence the subsystems that pixel data passes through from the camera sensor to the NPU, including the correct interface at the entry point.",
+        "question_text": "Which sequence correctly describes the data path from camera sensor to NPU inference on the STM32N6?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Camera sensor → parallel DCMI interface → ISP processing pipes → CPU SRAM staging → Neural-ART NPU",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Camera sensor → DCMI parallel interface → DCMIPP pixel pipeline → ISP processing pipes → Neural-ART NPU",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Camera sensor → CSI-2 interface → DCMIPP pixel pipeline → ISP processing pipes → DMA → Neural-ART NPU",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. For high-resolution camera applications on the STM32N6, the recommended path is: camera sensor → CSI-2 serial interface → DCMIPP pixel pipeline (which includes the abutted CSI-2 host and PHY) → ISP processing pipes → DMA → Neural-ART NPU. The DCMI parallel interface is a lower-resolution legacy path not recommended for the primary inference pipeline.",
+        "incorrect": "The STM32N6 datasheet recommends using the DCMIPP (not the DCMI) for the primary camera pipeline, with the CSI-2 serial interface as the high-resolution input. The ISP output then feeds the NPU via DMA — not via CPU-mediated SRAM staging. Review Section 3.25 and 3.25.2 of the STM32N6 datasheet to trace the correct subsystem sequence."
+      },
+      "references": [
+        {
+          "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+          "snippet": "a high resolution path, with the DCMIPP and a high frequency parallel interface or serial CSI-2 interface (RGB or rawBayer), targeting sensors up to 5 Mpixels at 30 fps",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_48/ChunkType.text_da473eb1-8279-4b5c-8742-55824cdfa2ad_0.png",
+          "page_number": 48,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+          "snippet": "The DCMIPP path groups the DCMIPP pixel pipeline block, its included parallel interface, and the abutted CSI-2-Host and PHY.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+          "page_number": 49,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

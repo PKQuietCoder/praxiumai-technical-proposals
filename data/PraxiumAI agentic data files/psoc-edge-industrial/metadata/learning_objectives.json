@@ -1,0 +1,225 @@
+{
+  "key_content": {
+    "topics": [
+      "Multi-core processor architecture: Cortex-M55/Ethos-U55 (high-performance domain) and Cortex-M33/NNLite (low-power domain)",
+      "Power modes and domain configuration: HP, LP, Deep Sleep variants, Hibernate",
+      "Clock subsystem: IHO, PILO, ECO, WCO, DPLLs, and clock dividers",
+      "Security subsystem: TrustZone, Trusted Firmware-M (TF-M), PSA EPC2/EPC4, secure boot, Root of Trust",
+      "ML accelerators: Ethos-U55 (128 MACs/cycle, high-performance) and NNLite (low-power, always-on)",
+      "Memory architecture: system SRAM, RRAM, TCM, SMIF external flash, wait states",
+      "Peripheral configuration: SCB (I2C/SPI/UART), GPIO, SMIF, USB, I3C, TCPWM",
+      "Graphics and display pipeline: 2.5D GPU, MIPI-DSI host controller, display controller",
+      "ModusToolbox development ecosystem: SDK, PDL, configurators, application notes",
+      "DMA controllers: HPDMA (high-performance, 4-channel AXI) and DMA (low-power, 2x16-channel AHB)",
+      "Boot configuration and Device Firmware Update (DFU) via extended boot",
+      "Electrical specifications: supply voltages, current consumption by power mode, GPIO specs"
+    ],
+    "skills": [
+      "Selecting ML accelerator (Ethos-U55 vs NNLite) based on workload complexity, latency, and power requirements",
+      "Configuring power domains (HP/LP) and transitioning between system power modes",
+      "Setting up the clock tree using DPLLs and clock dividers to meet CPU and peripheral frequency targets",
+      "Partitioning workloads across Cortex-M55 and Cortex-M33 cores using the IPC block",
+      "Configuring TrustZone SPE/NSPE partitioning and selecting EPC2 vs EPC4 security level for PSA compliance",
+      "Configuring the MIPI-DSI display pipeline for terminal UI output",
+      "Selecting and configuring serial communication peripherals (SCB, SMIF, I3C) for sensor and memory interfaces",
+      "Using ModusToolbox PDL for peripheral initialization and clock/pin configuration",
+      "Interpreting electrical specifications to verify power supply and GPIO compliance"
+    ]
+  },
+  "goals": [
+    {
+      "id": "G1",
+      "statement": "You will select and configure the PSOC Edge E8 multi-core architecture — assigning ML inference workloads to the appropriate accelerator and partitioning tasks across the Cortex-M55 and Cortex-M33 domains — to meet the real-time face recognition performance requirements of a biometric access control terminal.",
+      "references": [
+        {
+          "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+          "snippet": "This product line has a multiple CPU architecture: Arm® Cortex®-M55, running at up to 320 MHz... A machine learning (ML) coprocessor with the Cortex®-M55 CPU: the Arm® Ethos-U55 CPU... Arm® Cortex®-M33 CPU, running at up to 160 MHz... A neural network (NNLite) coprocessor with the Cortex®-M33 CPU"
+        },
+        {
+          "chunk_id": "b715b1f0-02ea-4d22-9231-0a2e448ccf95",
+          "snippet": "This section outlines advanced neural net processors designed to accelerate machine learning workloads. These co-processors work alongside Cortex® CPUs to optimize neural network inference for various AI applications, ensuring efficient data handling, low power consumption, and compatibility with leading machine learning frameworks."
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "statement": "You will configure the PSOC Edge E8 power domains and clock tree to balance active ML inference performance against power budget constraints across the operating modes of a face recognition terminal.",
+      "references": [
+        {
+          "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+          "snippet": "This product line can operate in four system and three CPU power modes. These modes are intended to minimize the average power consumption in an application. Power modes supported are: System High Performance (HP)... System Low Power (LP)... CPU Active... CPU Sleep... CPU Deep Sleep"
+        },
+        {
+          "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+          "snippet": "the high-performance domain is used for high-speed communication channels (>100 MHz, display controller outputting frames via MIPI DSI), and DSP and neural network processing, where work is done as fast as possible to reduce real time constraints for applications. Additionally, the high-performance domain can be selectively powered down to save energy and reactivated when needed, while the low-power domain continues to remain active."
+        }
+      ]
+    },
+    {
+      "id": "G3",
+      "statement": "You will configure the PSOC Edge E8 security subsystem — selecting the appropriate PSA protection level, partitioning secure and non-secure processing environments, and enabling secure boot — to satisfy the PSA-compliant security requirements of an access control device.",
+      "references": [
+        {
+          "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+          "snippet": "Infineon Edge Protect Category 2 (EPC 2) supporting SESIP/PSA level 2 or Edge Protect Category 4 (EPC 4) supporting SESIP/PSA level 3 + secure enclave, depending on part number... Secure boot with hardware-based root of trust (RoT) enabled... Cryptography services"
+        },
+        {
+          "chunk_id": "e35b3a4d-ce7c-4bd0-b159-75aec0e24d08",
+          "snippet": "This product line has an isolated secure enclave and two CPUs: Cortex®-M33, and Cortex®-M55"
+        }
+      ]
+    },
+    {
+      "id": "G4",
+      "statement": "You will configure the PSOC Edge E8 display pipeline and key peripherals — including the MIPI-DSI interface, serial communication blocks, and GPIO — using the ModusToolbox PDL to support the hardware bring-up of a face recognition terminal.",
+      "references": [
+        {
+          "chunk_id": "298884e5-2156-4c9a-a1db-97c5a653dc94",
+          "snippet": "This product line has a 2.5D graphics processing unit (GPU) with a display controller. It supports displays up to 1024 x 768 with a maximum of 60 frames/second rate."
+        },
+        {
+          "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+          "snippet": "Peripheral driver library (PDL) for peripheral APIs, including SD host controller for connection to IoT devices; and ML library... Installable software development kits (SDK) for peripheral initialization, clock and pin configuration, and middleware selection"
+        }
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "id": "O1",
+      "goal_id": "G1",
+      "audience": "You (the firmware engineer)",
+      "behavior": "decide whether to assign a face recognition inference workload to the Ethos-U55 or NNLite accelerator",
+      "condition": "Given a description of a specific ML inference stage (e.g., full face recognition model vs. lightweight wake/presence detection) and its latency and power requirements",
+      "degree": "correctly matching each workload stage to the accelerator whose documented capabilities (MACs/cycle, power domain, supported NN kernels) best satisfy the stated requirements",
+      "full_statement": "Given a description of a specific ML inference stage (e.g., full face recognition model vs. lightweight wake/presence detection) and its latency and power requirements, you will decide whether to assign the workload to the Ethos-U55 or NNLite accelerator, correctly matching each workload stage to the accelerator whose documented capabilities (MACs/cycle, power domain, supported NN kernels) best satisfy the stated requirements.",
+      "references": [
+        {
+          "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+          "snippet": "This product line includes an Arm® Ethos-U55 neural net processor, which works in conjunction with the Cortex®-M55 CPU to accelerate neural net (NN) operations. It supports 8-bit weights and weight compression to reduce memory usage. It also performs 128 MACs/clock cycle."
+        },
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "This product line includes a neural network (NNLite) coprocessor, which works in conjunction with the Cortex®-M33 CPU... It is an ACTIVE state peripheral that accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR)... The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power."
+        }
+      ]
+    },
+    {
+      "id": "O2",
+      "goal_id": "G1",
+      "audience": "You (the firmware engineer)",
+      "behavior": "partition the face recognition terminal firmware tasks across the Cortex-M55 and Cortex-M33 cores using the IPC block",
+      "condition": "Given the documented capabilities of each CPU domain (high-performance domain for DSP/NN/display, low-power domain for always-on sensing and security) and a list of terminal functions (e.g., face detection inference, display rendering, access control I/O, secure key management)",
+      "degree": "assigning each function to the correct CPU domain with a written justification referencing the domain's documented clock frequency, power characteristics, and peripheral access",
+      "full_statement": "Given the documented capabilities of each CPU domain (high-performance domain for DSP/NN/display, low-power domain for always-on sensing and security) and a list of terminal functions (e.g., face detection inference, display rendering, access control I/O, secure key management), you will partition the face recognition terminal firmware tasks across the Cortex-M55 and Cortex-M33 cores using the IPC block, assigning each function to the correct CPU domain with a written justification referencing the domain's documented clock frequency, power characteristics, and peripheral access.",
+      "references": [
+        {
+          "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+          "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge."
+        },
+        {
+          "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+          "snippet": "An inter-processor communication (IPC) block is included for synchronizing the CPUs' tasks."
+        }
+      ]
+    },
+    {
+      "id": "O3",
+      "goal_id": "G2",
+      "audience": "You (the firmware engineer)",
+      "behavior": "select the system power mode and configure the clock tree (DPLL frequency, clock dividers, and clock path assignments) for each operating state of the face recognition terminal",
+      "condition": "Given a set of operating states (e.g., active face recognition, idle monitoring, deep sleep between events) and their documented maximum CPU and peripheral frequencies per power mode",
+      "degree": "producing a clock configuration table that specifies DPLL output frequency, clk_hf divider settings, and power mode for each state, consistent with the documented HP/LP mode frequency limits for CM55, CM33, and SoCMEM",
+      "full_statement": "Given a set of operating states (e.g., active face recognition, idle monitoring, deep sleep between events) and their documented maximum CPU and peripheral frequencies per power mode, you will select the system power mode and configure the clock tree (DPLL frequency, clock dividers, and clock path assignments) for each operating state of the face recognition terminal, producing a clock configuration table that specifies DPLL output frequency, clk_hf divider settings, and power mode for each state, consistent with the documented HP/LP mode frequency limits for CM55, CM33, and SoCMEM.",
+      "references": [
+        {
+          "chunk_id": "e8cfb6c9-e049-4f26-8fd7-0e065728fb76",
+          "snippet": "This product line has fully integrated clocks. It provides clocks to all blocks that require clocks... The clock sources are: Internal high-speed oscillator (IHO): 50 MHz ±1%... Three digital phase-locked loops (DPLL) are available for clock generation. They operate in the System HP and LP power modes."
+        },
+        {
+          "chunk_id": "b1e6ab63-5cf5-4e8d-b387-6968a9a65faf",
+          "snippet": "System power mode | M55/U55 | M33/NNLite — High Performance (HP): 320 MHz | 160 MHz — Low Power (LP): 140 MHz | 80 MHz"
+        }
+      ]
+    },
+    {
+      "id": "O4",
+      "goal_id": "G2",
+      "audience": "You (the firmware engineer)",
+      "behavior": "select the appropriate SRAM retention configuration and power domain state for each deep sleep variant",
+      "condition": "Given the documented Deep Sleep, Deep Sleep-RAM, and Deep Sleep-OFF modes and their associated SRAM retention options and current consumption specifications",
+      "degree": "choosing the mode that meets a stated power budget while retaining the minimum SRAM required for the terminal's wakeup context, citing the relevant current consumption values from the electrical specifications",
+      "full_statement": "Given the documented Deep Sleep, Deep Sleep-RAM, and Deep Sleep-OFF modes and their associated SRAM retention options and current consumption specifications, you will select the appropriate SRAM retention configuration and power domain state for each deep sleep variant, choosing the mode that meets a stated power budget while retaining the minimum SRAM required for the terminal's wakeup context, citing the relevant current consumption values from the electrical specifications.",
+      "references": [
+        {
+          "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+          "snippet": "SIDDSO: System Deep Sleep-OFF, PD1 Disabled | IBAT Typical: 20.7 µA... SIDDSRA: System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 21.7 µA... SIDDSD: System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled | IBAT Typical: 41.6 µA"
+        },
+        {
+          "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+          "snippet": "System Deep Sleep: Same as CPU Sleep; in addition the CPU's System Deep Sleep request signal is activated."
+        }
+      ]
+    },
+    {
+      "id": "O5",
+      "goal_id": "G3",
+      "audience": "You (the firmware engineer)",
+      "behavior": "select the correct part number (EPC2 vs EPC4) and configure the TrustZone SPE/NSPE partitioning for a PSA-compliant access control device",
+      "condition": "Given the documented EPC2 (PSA Level 2) and EPC4 (PSA Level 3 + secure enclave) security feature sets, the Cortex-M33 TrustZone architecture with SPE/NSPE environments, and the security requirements of the target access control application",
+      "degree": "identifying which EPC level satisfies the application's PSA compliance requirement and specifying which firmware components (application code, TF-M, secure enclave services) belong in the SPE vs NSPE, consistent with the documented security architecture",
+      "full_statement": "Given the documented EPC2 (PSA Level 2) and EPC4 (PSA Level 3 + secure enclave) security feature sets, the Cortex-M33 TrustZone architecture with SPE/NSPE environments, and the security requirements of the target access control application, you will select the correct part number (EPC2 vs EPC4) and configure the TrustZone SPE/NSPE partitioning for a PSA-compliant access control device, identifying which EPC level satisfies the application's PSA compliance requirement and specifying which firmware components (application code, TF-M, secure enclave services) belong in the SPE vs NSPE, consistent with the documented security architecture.",
+      "references": [
+        {
+          "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+          "snippet": "Infineon Edge Protect Category 2 (EPC 2) supporting SESIP/PSA level 2 or Edge Protect Category 4 (EPC 4) supporting SESIP/PSA level 3 + secure enclave, depending on part number... Secure boot with hardware-based root of trust (RoT) enabled... Device identifier composition engine (DICE) mechanisms for device attestation"
+        },
+        {
+          "chunk_id": "704af7e7-7ea5-4c50-8d88-f51770035c2d",
+          "snippet": "Cortex®-M33: Arm® TrustZone enabled core with two processing environments: secure (SPE) and non-secure (NSPE)... Infineon-provided Trusted firmware-M (TF-M) implemented in SPE — its services are leveraged by Cortex®-M33 NSPE and Cortex®-M55, fully enabled to use hardware accelerated crypto operations"
+        }
+      ]
+    },
+    {
+      "id": "O6",
+      "goal_id": "G4",
+      "audience": "You (the firmware engineer)",
+      "behavior": "configure the MIPI-DSI display pipeline and select the appropriate SCB peripheral mode (I2C, SPI, or UART) for each external interface in the face recognition terminal hardware design",
+      "condition": "Given the terminal's hardware interface requirements (e.g., MIPI-DSI display, I2C sensor bus, SPI flash, UART debug) and the documented capabilities of the PSOC Edge E8 display controller and SCB blocks within the ModusToolbox PDL framework",
+      "degree": "producing a peripheral configuration plan that correctly maps each interface to its PSOC Edge E8 peripheral, specifies the required GPIO HSIOM routing, and identifies any constraints (e.g., SCB0 deep-sleep-only I2C/SPI slave limitation, DSI.REXT resistor requirement) that affect the hardware design",
+      "full_statement": "Given the terminal's hardware interface requirements (e.g., MIPI-DSI display, I2C sensor bus, SPI flash, UART debug) and the documented capabilities of the PSOC Edge E8 display controller and SCB blocks within the ModusToolbox PDL framework, you will configure the MIPI-DSI display pipeline and select the appropriate SCB peripheral mode (I2C, SPI, or UART) for each external interface in the face recognition terminal hardware design, producing a peripheral configuration plan that correctly maps each interface to its PSOC Edge E8 peripheral, specifies the required GPIO HSIOM routing, and identifies any constraints (e.g., SCB0 deep-sleep-only I2C/SPI slave limitation, DSI.REXT resistor requirement) that affect the hardware design.",
+      "references": [
+        {
+          "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+          "snippet": "Frames rendered by the GPU are transferred to the MIPI display serial interface (DSI) host controller by the display controller (DC). Both DBI (command mode) and DPI (video mode) standards are supported over the DSI interface as per the MIPI standards specification."
+        },
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves. SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode."
+        },
+        {
+          "chunk_id": "a795bb27-bc8e-402e-a5e4-771426c1aa89",
+          "snippet": "If the graphics feature is used, connect the DSI.REXT pin to a 200 Ω resistor to ground. If not, tied to ground."
+        }
+      ]
+    }
+  ],
+  "gaps_identified": [
+    "Camera/image sensor input pipeline: The PSOC Edge E8 datasheet does not document a MIPI-CSI or camera input interface. The training cannot address how image data enters the system from a camera sensor — this is a critical gap for a face recognition terminal and would need to be addressed via an external processor, USB, or SPI path not fully documented here.",
+    "ML model sizing and latency targets: The datasheet does not provide specific guidance on maximum supported model sizes (parameter counts, activation memory requirements) for Ethos-U55 or NNLite in the context of face recognition workloads. Learners cannot derive concrete SRAM allocation decisions without SME input on typical face recognition model footprints.",
+    "ModusToolbox PDL API specifics: The datasheet references the PDL and ModusToolbox ecosystem but does not include API signatures, initialization code patterns, or configuration wizard screenshots. Hands-on configuration objectives would require the Architecture Reference Manual and PDL documentation as supplementary sources.",
+    "EPC2 vs EPC4 provisioning workflow: The datasheet references AN238041 for the provisioning specification but does not include provisioning steps. If the training needs to cover how to provision a device for production deployment, this content is not available in the provided source material.",
+    "Power consumption targets for face recognition: No application-specific power budget figures (e.g., mA targets for active recognition vs idle monitoring) are provided in the datasheet. Objectives referencing power budget compliance require SME-provided design constraints to be actionable."
+  ],
+  "contradictions": [],
+  "_reflection": {
+    "enabled": true,
+    "initial_score": 8.9,
+    "final_score": 8.9,
+    "refinement_applied": false,
+    "critique_summary": "The six objectives are of high overall quality and represent a strong application of the ABCD model to a technically complex embedded systems domain. All objectives use observable, job-performance verbs (decide, partition, select, configure), are grounded in realistic conditions drawn from the PSOC Edge E8 datasheet, and produce concrete work products (configuration tables, partitioning plans, peripheral configuration plans) that are assessable. The most consistent gap across all objectives is the absence of the learner persona name (Alex Kim), which is a minor but easily corrected issue. Degree statements are generally strong but several would benefit from explicit completeness criteria (e.g., 'all listed functions must be assigned') and clearer compliance thresholds (e.g., 'no configuration that violates a documented constraint') to eliminate residual subjectivity in assessment. The identified content gaps — particularly the camera input pipeline and ML model sizing — are appropriately excluded from the objectives and flagged separately, which reflects sound instructional design judgment. No objectives attempt to cover unsupported content. Overall, this objective set is ready for development with minor refinements to degree statements and audience specificity.",
+    "iterations": 1,
+    "critique_failed": false,
+    "refinement_failed": false
+  }
+}

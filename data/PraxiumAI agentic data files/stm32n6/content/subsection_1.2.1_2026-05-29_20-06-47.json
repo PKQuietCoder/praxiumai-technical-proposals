@@ -1,0 +1,402 @@
+{
+  "subsection_id": "1.2.1",
+  "subsection_title": "Analyze the NPU-vs-Crypto Tradeoff",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Evaluate the architectural consequences of choosing STM32N6x7xx (Neural-ART) versus STM32N6x5xx (full crypto) for a face recognition terminal",
+    "Assess whether the Neural-ART NPU's documented capabilities are sufficient for a real-time face matching workload, and identify what the datasheet cannot confirm",
+    "Recognize that the NPU/crypto split is a hard architectural constraint with no single-chip workaround within the STM32N6 family"
+  ],
+  "content": {
+    "hook_sentence": "A face recognition terminal needs both a 600 Gops AI accelerator and hardware AES encryption — but no single STM32N6 variant provides both, forcing a design decision that cannot be reversed after PCB layout.",
+    "introduction": "Building on the NPU/crypto architectural split you identified in the feature tables, you now need to reason through the engineering consequences of that split for your specific product. The face recognition terminal requires real-time DNN inference for face matching AND hardware-accelerated encryption for biometric template storage — two requirements that land on opposite sides of the STM32N6 family boundary. Your job here is to work through that tradeoff analytically so you can defend your variant selection at the architecture review.",
+    "key_points": [
+      {
+        "point": "The STM32N6x7xx provides the Neural-ART NPU at up to 1 GHz and 600 Gops, but ships with no hardware crypto engine whatsoever.",
+        "explanation": "Building on the NPU/crypto architectural split from the feature tables, the x7xx line encodes this in the part number itself: the '7' in the line position means 'Neural ART option (artificial intelligence).' When you select any STM32N647xx or STM32N657xx variant, you get the Neural-ART accelerator with its 600 Gops throughput, dedicated streaming engines, on-the-fly weight decompression, and real-time data encryption/decryption within the NPU subsystem. What you do not get is the system-level crypto suite: SAES, CRYPT, PKA, and MCE1.4 all read 'No' across every x7xx column in Tables 3 and 5. The NPU's internal real-time encryption/decryption is scoped to the NPU data path — it is not a substitute for the SAES coprocessor or the MCE inline memory cipher engine that protects data at rest in external flash.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+            "snippet": "Neural processing unit (STM32N6x7 only) — ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle — Specialized hardware units for DNN (deep-neural network) inference functions — Real-time encryption/decryption — On-the-fly weight decompression",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+            "snippet": "Crypto — SAES: No; CRYPT: No; PKA: No; MCE1.4: No — Accelerator — Neural-ART: Yes [for all STM32N647xx variants]",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+            "page_number": 17,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "cf2f6945-070a-4a74-9553-0e30b324f667",
+            "snippet": "Line — 7 = Neural ART option (artificial intelligence) — 5 = No neural ART option (artificial intelligence)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_253/ChunkType.table_cf2f6945-070a-4a74-9553-0e30b324f667_0.png",
+            "page_number": 253,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The STM32N6x5xx provides the full crypto suite — SAES, CRYPT, PKA, and MCE1.4 — but has no Neural-ART NPU, leaving face matching entirely to the Cortex-M55 CPU.",
+        "explanation": "The '5' line digit encodes 'No neural ART option.' Every STM32N645xx and STM32N655xx variant shows Neural-ART: No in the feature tables, while SAES, CRYPT, PKA, and MCE1.4 all read Yes on the x55xx variants. This matters for your terminal because the crypto suite covers distinct protection roles: SAES provides DPA-resistant AES for biometric template encryption, MCE1.4 provides inline encryption/decryption on the system bus for external memory regions (protecting data at rest in XSPI-connected flash without CPU overhead), and PKA handles asymmetric key operations. A colleague who proposes using the x5xx and running the face matching model on the Cortex-M55 with Helium vector processing is identifying a real tradeoff — the crypto is there, but the 600 Gops hardware accelerator is not. Whether the Cortex-M55 alone meets your latency requirement is a separate characterization question the datasheet cannot answer.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+            "snippet": "Crypto — SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes — Accelerator — Neural-ART: No [for all STM32N655xx variants]",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "b2c0eb3d-04b6-48cd-a269-d1357d71ffef",
+            "snippet": "Two AES coprocessors, including one with DPA (differential power analysis) resistance — Public key accelerator (PKA), DPA resistant — On-the-fly encryption/decryption of external memories",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_1/ChunkType.text_b2c0eb3d-04b6-48cd-a269-d1357d71ffef_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "cf2f6945-070a-4a74-9553-0e30b324f667",
+            "snippet": "Die — 4 = No crypto, 4 Mbytes — 5 = Crypto, 4 Mbytes — Line — 7 = Neural ART option — 5 = No neural ART option",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_253/ChunkType.table_cf2f6945-070a-4a74-9553-0e30b324f667_0.png",
+            "page_number": 253,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The STM32N657xx is the one exception: it provides both Neural-ART and the full crypto suite, making it the only family that satisfies both requirements simultaneously.",
+        "explanation": "Scanning Table 5 in the datasheet reveals that STM32N657xx variants show Neural-ART: Yes AND SAES: Yes, CRYPT: Yes, PKA: Yes, MCE1.4: Yes. The part number encodes this: die digit '5' (crypto, 4 Mbytes) combined with line digit '7' (Neural ART). This is the only STM32N6 family where both rows are populated. For your face recognition terminal, this resolves the apparent deadlock — you can have the 600 Gops NPU for inference and the hardware crypto suite for biometric data protection on the same device. The tradeoff you accept on x657xx is not a feature absence but a cost and availability consideration that the datasheet does not address. When you write your variant selection recommendation, citing Table 5 and the x657xx row is the correct justification.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "af61be9e-f48f-4912-ba15-db738930e0d7",
+            "snippet": "Crypto — SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes — Accelerator — Neural-ART: Yes [for all STM32N657xx variants]",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_21/ChunkType.table_af61be9e-f48f-4912-ba15-db738930e0d7_0.png",
+            "page_number": 21,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "cf2f6945-070a-4a74-9553-0e30b324f667",
+            "snippet": "Die — 5 = Crypto, 4 Mbytes — Line — 7 = Neural ART option (artificial intelligence)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_253/ChunkType.table_cf2f6945-070a-4a74-9553-0e30b324f667_0.png",
+            "page_number": 253,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The datasheet confirms the NPU's 600 Gops rating and bandwidth-reducing features, but it does not provide per-inference latency for any face recognition model — that gap requires external characterization.",
+        "explanation": "When your project manager asks you to confirm in writing that the Neural-ART NPU is sufficient for real-time face matching, you can cite specific capabilities from the datasheet: 600 Gops at up to 1 GHz, dedicated streaming engines that optimize data flow and minimize internal buffer usage, on-the-fly weight decompression (reducing external memory bandwidth demand), and real-time data encryption/decryption within the NPU path. What the datasheet does not provide is a per-inference latency figure for any specific model architecture — no milliseconds-per-frame number for MobileNet, ResNet, or any face recognition network. This means you can confirm the NPU's throughput rating and its bandwidth-reducing architectural features, but you cannot confirm end-to-end inference latency for your specific workload from the datasheet alone. Flag this gap explicitly in your assessment: further characterization using ST's AI development tools or application notes is required before you can guarantee a latency budget.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "c3a9263c-af66-4114-859c-6342870aea21",
+            "snippet": "The neural processing unit (NPU) core (available only on STM32N6x7xx devices) is the design time parametric and runtime reconfigurable neural network inference engine. It can accelerate a wide range of neural network architectures in hardware.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_31/ChunkType.text_c3a9263c-af66-4114-859c-6342870aea21_0.png",
+            "page_number": 31,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+            "snippet": "ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle — Specialized hardware units for DNN (deep-neural network) inference functions — Flexible dedicated stream processing engine — On-the-fly weight decompression",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "80737a15-8a5d-4b41-af03-3dfcd921252d",
+            "snippet": "The NPU is considered as an accelerator subsystem with several specialized hardware accelerators supporting various inference kernels connected via a reconfigurable data flow",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_31/ChunkType.text_80737a15-8a5d-4b41-af03-3dfcd921252d_0.png",
+            "page_number": 31,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The ISP output feeds the NPU directly via DMA, keeping the Cortex-M55 CPU out of the frame transfer path during inference.",
+        "explanation": "For your camera-to-inference pipeline on the x7xx variant, the data path runs: CSI-2 interface → DCMIPP pixel pipeline → ISP processing pipes → DMA transfer → Neural-ART NPU. The ISP supports three parallel processing pipes on the same input stream, handling bad pixel correction, demosaicing, gamma correction, YUV conversion, and other preprocessing steps. Critically, the ISP output can be fed directly to the NPU via DMA — the Cortex-M55 does not need to manage each frame transfer. This is the architecture that keeps CPU load low during continuous face matching. If you were using the x5xx variant and running inference on the Cortex-M55 instead, the CPU would be handling both the inference workload and any frame management, which is the core performance risk in your colleague's proposal.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "For camera applications, a parallel and CSI interface together with an integrated hardware ISP is foreseen. The ISP provides processing of three parallel pipes on the same input stream... The ISP output can be directly fed via a DMA to the NPU.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6c2e320d-ea97-4681-8ecc-c0737046be37",
+            "snippet": "The host configures the NPU subsystem through an AHB/AXI lite target port, connected to one of the ports of the system bus matrix/interconnect. The two controller ports of NPU are 64-bit wide controller AXI-4 interfaces that connect to the system bus matrix/Interconnect.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_6c2e320d-ea97-4681-8ecc-c0737046be37_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your architecture review board presents this scenario: 'We have two candidate devices. Device A is the STM32N647X0H3Q. Device B is the STM32N655X0H3Q. Our face recognition terminal requires real-time DNN inference AND hardware AES encryption for biometric templates stored in external flash. Which device do you recommend, and what tradeoff must you explicitly state in your recommendation?' Before reading the reveal, write down your recommendation and the tradeoff.",
+        "reveal": "Neither device alone satisfies both requirements without a tradeoff. Device A (STM32N647X0H3Q, x7xx family) provides Neural-ART: Yes but SAES: No, CRYPT: No, PKA: No, MCE1.4: No — you get the 600 Gops NPU for inference but lose all hardware crypto. Device B (STM32N655X0H3Q, x5xx family) provides SAES: Yes, CRYPT: Yes, PKA: Yes, MCE1.4: Yes but Neural-ART: No — you get the full crypto suite but face matching falls entirely on the Cortex-M55 CPU without the hardware accelerator. The correct recommendation for a product requiring both is the STM32N657xx family, which Tables 5 shows as the only family with Neural-ART: Yes AND the full crypto suite. Your written recommendation must explicitly state: 'STM32N647xx and STM32N655xx each satisfy only one of the two primary requirements; STM32N657xx is the only variant that satisfies both, per Table 5 of the datasheet.'",
+        "hint": "Check Table 5 (STM32N657xx) in addition to Tables 3 and 4 before concluding that the tradeoff is unavoidable."
+      },
+      {
+        "prediction_prompt": "A colleague argues: 'The STM32N6x5xx has the full crypto engine — SAES, CRYPT, PKA, and MCE — which is essential for protecting biometric templates. We can run the face matching model on the Cortex-M55 CPU with Helium vector processing instead of a dedicated NPU.' You need to assess this proposal before the architecture review. What is accurate in this proposal, and what is the critical risk it introduces?",
+        "reveal": "The proposal is factually correct about the x5xx crypto capabilities: STM32N655xx variants do provide SAES, CRYPT, PKA, and MCE1.4 per Table 4. The critical risk is the inference workload. The Neural-ART NPU provides 600 Gops at up to 1 GHz with dedicated streaming engines and on-the-fly weight decompression. The Cortex-M55 with Helium provides vector processing capability, but the datasheet does not claim it achieves equivalent DNN inference throughput. The proposal shifts the entire face matching workload to the CPU without the hardware accelerator, and the datasheet provides no latency figure for either path — so you cannot confirm from the datasheet alone whether the Cortex-M55 meets your real-time requirement. Your response at the architecture review: 'The crypto claim is correct, but the proposal introduces an uncharacterized inference latency risk. We need benchmark data on Cortex-M55 + Helium for our specific face recognition model before accepting this tradeoff.'",
+        "hint": "Separate what the datasheet confirms (crypto presence, NPU absence on x5xx) from what it does not confirm (whether Cortex-M55 alone meets your latency budget)."
+      }
+    ],
+    "summary": "The STM32N657xx is the only STM32N6 family that provides both Neural-ART and the full crypto suite; for any other family, you must explicitly state which requirement you are trading away and flag the inference latency gap as requiring characterization beyond the datasheet.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each product requirement to the STM32N6 variant family that satisfies it, based on the feature tables:",
+      "pairs": [
+        {
+          "left": "Real-time DNN inference via dedicated hardware accelerator",
+          "right": "STM32N6x7xx (Neural-ART: Yes, crypto: No)"
+        },
+        {
+          "left": "Hardware AES encryption with DPA resistance for biometric templates",
+          "right": "STM32N6x5xx (SAES: Yes, Neural-ART: No)"
+        },
+        {
+          "left": "Both DNN inference acceleration and hardware crypto on a single device",
+          "right": "STM32N657xx (Neural-ART: Yes, full crypto: Yes)"
+        }
+      ],
+      "explanation": "The feature tables encode the NPU/crypto split at the family level: x7xx gets Neural-ART but no crypto, x5xx gets crypto but no Neural-ART, and only x657xx provides both — making it the correct selection when both requirements must be met on a single device."
+    },
+    {
+      "after_key_point": 3,
+      "type": "fill_blank",
+      "stem": "When assessing NPU sufficiency for real-time face matching, you can confirm the 600 Gops throughput rating from the datasheet, but you cannot confirm ___ without additional characterization.",
+      "answer": "per-inference latency for a specific face recognition model",
+      "distractors": [
+        "the NPU operating frequency",
+        "whether streaming engines are present",
+        "the number of MAC operations per cycle"
+      ],
+      "explanation": "The datasheet specifies throughput (600 Gops), frequency (up to 1 GHz), and architectural features (streaming engines, weight decompression), but provides no end-to-end latency figure for any specific model architecture — that gap requires external benchmarking or application note data."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not provide a per-inference latency specification for the Neural-ART NPU on any specific face recognition model architecture, making it impossible to verify from the datasheet alone whether 600 Gops meets a target latency such as under 500 ms.",
+    "The datasheet does not reference ST application notes, STM32Cube AI tools, or benchmark results that would allow learners to characterize Cortex-M55 + Helium inference performance as an alternative to the Neural-ART NPU on x5xx variants.",
+    "The datasheet does not address cost or availability differences between STM32N657xx (both NPU and crypto) and the x647xx/x655xx single-capability families, which would be relevant to the architecture decision in practice."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are evaluating STM32N6 variants for a face recognition access control terminal. Your product requirements specify: (1) real-time DNN inference for face matching, (2) camera input via CSI-2, and (3) hardware-accelerated AES encryption for biometric template storage. You are reviewing the STM32N6 datasheet feature tables to select a variant.",
+        "question_text": "Based on the STM32N6 datasheet feature tables, which variant family satisfies the real-time DNN inference requirement, and what is the architectural tradeoff you must accept?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "STM32N6x7xx provides the Neural-ART NPU for DNN inference, but you must accept the absence of SAES, CRYP, PKA, and MCE hardware crypto engines on this variant",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "STM32N6x5xx provides the Neural-ART NPU for DNN inference, but you must accept reduced SRAM capacity compared to the STM32N6x7xx variant",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "STM32N6x7xx provides both the Neural-ART NPU and the full crypto engine, but you must accept a lower maximum NPU clock frequency of 800 MHz instead of 1 GHz",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The datasheet feature tables confirm that Neural-ART is available only on STM32N6x7xx devices, while SAES, CRYP, PKA, and MCE1.4 are all listed as 'No' for every STM32N647xx part number. This is the core NPU-vs-crypto tradeoff: you gain the 600 Gops accelerator but lose the dedicated hardware crypto engines.",
+        "incorrect": "Check the datasheet feature tables carefully. The STM32N6x5xx variants (e.g., STM32N645xx, STM32N655xx) list Neural-ART as 'No' — the NPU is exclusive to the STM32N6x7xx family. Additionally, no variant combines both Neural-ART and the full crypto suite (SAES, CRYP, PKA, MCE); this is a hard architectural constraint, not a clock frequency limitation."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "Your team is debating two candidate devices for the face recognition terminal. A colleague argues: 'We should use the STM32N6x5xx because it has the full crypto engine — SAES, CRYP, PKA, and MCE — which is essential for protecting biometric templates. We can run the face matching model on the Cortex-M55 CPU with Helium vector processing instead of a dedicated NPU.' You need to assess this proposal before the architecture review meeting.",
+        "question_text": "Which response most accurately evaluates your colleague's proposal against the STM32N6 datasheet specifications?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The proposal is sound — the STM32N6x5xx Cortex-M55 with Helium can substitute for the Neural-ART NPU because both achieve 600 Gops throughput for DNN inference workloads",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The proposal identifies a real tradeoff — the STM32N6x5xx does provide SAES, CRYP, PKA, and MCE, but it lacks the Neural-ART NPU, so the face matching workload would fall entirely on the Cortex-M55 CPU without the 600 Gops hardware accelerator",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The proposal is incorrect — the STM32N6x5xx does not include SAES or MCE, so it cannot provide the hardware crypto features your colleague claims, making the STM32N6x7xx the better choice for security",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. Your colleague's crypto claim is accurate — the STM32N6x5xx (e.g., STM32N655xx) does include SAES, CRYP, PKA, and MCE1.4. However, the Neural-ART NPU (600 Gops, 288 MAC/cycle) is exclusive to the STM32N6x7xx family. The Cortex-M55 with Helium provides vector processing capability but is not equivalent to the dedicated NPU accelerator. This is the core architectural tradeoff your team must resolve.",
+        "incorrect": "Review the feature tables for both variant families. The STM32N6x5xx (STM32N655xx) does include SAES, CRYP, PKA, and MCE1.4 — your colleague's crypto claim is correct. The flaw in the proposal is the assumption that the Cortex-M55 CPU can substitute for the Neural-ART NPU's 600 Gops throughput, not that the crypto features are absent."
+      },
+      "references": [
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+          "snippet": "ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle; Specialized hardware units for DNN (deep-neural network) inference functions",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "e8841dce-49ec-4313-baa6-4f6ba27cde36",
+          "snippet": "Arm 32-bit Cortex-M55, frequency up to 800 MHz; Arm MVE (M-Profile vector extension), Helium technology, TrustZone MPU, NVIC",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_e8841dce-49ec-4313-baa6-4f6ba27cde36_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are architecting the camera-to-inference pipeline on the STM32N6x7xx for your face recognition terminal. You need to route live camera frames from the CSI-2 input through image signal processing and into the Neural-ART NPU for face matching, while minimizing CPU load during inference.",
+        "question_text": "According to the STM32N6 datasheet functional overview, what is the correct sequence of subsystems that camera data passes through on its way to the NPU, and how does the ISP hand off data to the NPU?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "CSI-2 interface → DCMIPP pixel pipeline → ISP processing pipes → CPU memory copy → Neural-ART NPU, with the Cortex-M55 managing each frame transfer between ISP and NPU",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "CSI-2 interface → DCMIPP pixel pipeline → ISP processing pipes → DMA transfer → Neural-ART NPU, with the ISP output fed directly to the NPU via DMA without CPU intervention",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "CSI-2 interface → Neural-ART NPU input buffer → ISP processing pipes → DMA transfer → AXISRAM, with the NPU performing raw Bayer preprocessing before inference",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The datasheet states that the ISP output can be directly fed via a DMA to the NPU, bypassing the CPU for frame transfers. The pipeline flows from the CSI-2 interface through the DCMIPP pixel pipeline, through the ISP's processing pipes, and then via DMA into the Neural-ART NPU — enabling real-time inference without CPU bottlenecks on each frame.",
+        "incorrect": "The datasheet explicitly describes a CPU-free handoff path: 'The ISP output can be directly fed via a DMA to the NPU.' The CPU does not need to manage frame transfers between the ISP and NPU. Additionally, the ISP performs image preprocessing (demosaicing, gamma correction, YUV conversion, etc.) before the NPU receives the data — the NPU does not process raw Bayer input directly."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "For camera applications, a parallel and CSI interface together with an integrated hardware ISP is foreseen. The ISP provides processing of three parallel pipes on the same input stream... The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "Your project manager asks you to confirm in writing that the STM32N6x7xx Neural-ART NPU is sufficient for real-time face matching before committing to the device. You have reviewed the STM32N6 datasheet section on the Neural-ART accelerator, which specifies 600 Gops at up to 1 GHz, with streaming engines, on-the-fly weight decompression, and real-time data encryption/decryption. The datasheet does not include a per-inference latency figure for any specific face recognition model.",
+        "question_text": "Which statement most accurately reflects what you can and cannot confirm from the datasheet alone when assessing NPU sufficiency for your real-time face matching requirement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "You can confirm sufficiency — 600 Gops at 1 GHz exceeds the computational demands of any face recognition model currently in production use, so no further characterization is needed",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "You cannot confirm sufficiency — the datasheet provides no NPU throughput specification, so the 600 Gops figure must be independently verified through ST application notes before any assessment is possible",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "You can confirm the NPU's 600 Gops rating and bandwidth-reducing features, but you cannot confirm end-to-end inference latency for a specific face recognition model without additional characterization beyond the datasheet",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The datasheet does specify 600 Gops at up to 1 GHz, along with streaming engines and on-the-fly weight decompression as features that reduce memory bandwidth bottlenecks. However, the datasheet does not provide a per-inference latency figure for any specific model or workload. Confirming real-time sufficiency for your face matching target requires profiling the actual model on the hardware — this is a gap that must be flagged in your assessment.",
+        "incorrect": "The datasheet does provide the 600 Gops throughput figure and describes the streaming engine and weight decompression features. However, raw Gops alone cannot confirm whether a specific face recognition model will meet a latency target (e.g., <500 ms per match) — model size, architecture, and memory access patterns all affect real-world inference time. The datasheet does not include per-model latency data, so further characterization is required before you can confirm sufficiency."
+      },
+      "references": [
+        {
+          "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+          "snippet": "ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle; Specialized hardware units for DNN (deep-neural network) inference functions; Flexible dedicated stream processing engine; Real-time encryption/decryption; On-the-fly weight decompression",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "c3a9263c-af66-4114-859c-6342870aea21",
+          "snippet": "The neural processing unit (NPU) core (available only on STM32N6x7xx devices) is the design time parametric and runtime reconfigurable neural network inference engine. It can accelerate a wide range of neural network architectures in hardware.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_31/ChunkType.text_c3a9263c-af66-4114-859c-6342870aea21_0.png",
+          "page_number": 31,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

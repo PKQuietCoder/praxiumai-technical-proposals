@@ -1,0 +1,431 @@
+{
+  "subsection_id": "2.1.2",
+  "subsection_title": "Configure Deep Sleep SRAM Retention",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Select the correct Deep Sleep sub-mode and SRAM retention size to meet a stated power budget while preserving the minimum wakeup context",
+    "Explain the wakeup latency trade-off between System Deep Sleep and System Deep Sleep-RAM",
+    "Identify when System Hibernate is preferable to any Deep Sleep variant for overnight or extended dormant states"
+  ],
+  "content": {
+    "hook_sentence": "Retaining just one extra 512 KB SRAM partition you don't need can more than double your dormant current draw — and that difference compounds across thousands of access events per day.",
+    "introduction": "Building on the Deep Sleep sub-mode decision framework from §2.1.1, you now need to translate that decision into a concrete SRAM retention configuration. The PSOC Edge E8 gives you fine-grained control over which SRAM banks stay powered during deep sleep, but every bank you retain costs current. Getting this wrong in either direction — retaining too much or choosing the wrong sub-mode entirely — either wastes battery or forces a cold boot when the terminal needs to respond quickly to a door-approach event.",
+    "key_points": [
+      {
+        "point": "The low-power domain SRAM is configurable in 64 KB increments, giving you precise control over retention size.",
+        "explanation": "The PSOC Edge E8 has 1 MB of SRAM in the low-power CPU subsystem (Cortex-M33). During System Deep Sleep, you can retain portions of this SRAM in 64 KB increments — you are not forced to retain the full 1 MB or nothing. This means if your Cortex-M33 wakeup handler and its local state fit within 64 KB, you configure retention for exactly that amount and pay only the current cost for that single bank. Separately, the high-performance domain contains 5120 KB of System SRAM (\"SoCMEM\"), organized as ten 512 KB partitions. Each partition can be individually retained or powered off. When PD1 (the high-performance domain) is disabled, all SoCMEM partitions are off regardless of retention settings — so if your wakeup context lives entirely in the low-power SRAM, you gain nothing by keeping PD1 enabled.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "SRAM: 1 MB in the low power CPU subsystem (Cortex-M33). Portions of this SRAM can be retained during the System Deep Sleep power mode; the retained amount is selectable in 64-KB increments.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "System SRAM (\"SoCMEM\"): 5120 KB in the high-performance domain. This memory is organized in ten partitions of 512-KB each, with retention of individual partitions.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "System Deep Sleep-RAM with 64 KB retention is the lowest-current option that still preserves a warm-boot wakeup context — but it costs you a warm boot, not a direct resume.",
+        "explanation": "Building on the sub-mode comparison from §2.1.1, the key operational difference is wakeup behavior. System Deep Sleep resumes execution in under 20 µs — the CPU state is retained and execution picks up where it left off. System Deep Sleep-RAM powers the CPU off entirely; wakeup triggers a warm boot, which takes approximately 25.5 ms (typical). That is roughly 1275x longer than a plain Deep Sleep resume. For a battery-powered terminal (VBAT = 3.3 V), the current cost of each configuration is: - System Deep Sleep-OFF, PD1 Disabled (SIDDSO): 20.7 µA IBAT typical - System Deep Sleep-RAM, 64 KB SRAM, PD1 Disabled (SIDDSRA): 21.7 µA IBAT typical - System Deep Sleep, 64 KB SRAM, PD1 Disabled (SIDDSA): 26.1 µA IBAT typical - System Deep Sleep, 512 KB SRAM, PD1 Disabled (SIDDSB): 28.2 µA IBAT typical - System Deep Sleep, 64 KB SRAM + 1024 KB SoCMEM+TCM, PD1 and CM55 Enabled (SIDDSD): 41.6 µA IBAT typical If your power budget is 25 µA and you need to preserve the wakeup handler state across dormancy, System Deep Sleep-RAM at 64 KB (21.7 µA) is the only configuration that fits. Plain System Deep Sleep at 64 KB (26.1 µA) exceeds the budget. System Deep Sleep-OFF (20.7 µA) is slightly cheaper but loses all SRAM — wakeup is a cold boot, not a warm boot.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSRA: System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 21.7",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSA: System Deep Sleep, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 26.1",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSO: System Deep Sleep-OFF, PD1 Disabled | IBAT Typical: 20.7",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "38813451-5cad-4903-8635-18a5f9d39bf8",
+            "snippet": "SID14A: System Deep Sleep-RAM to Active transition time | Typ: 25.5 ms",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_79/ChunkType.table_38813451-5cad-4903-8635-18a5f9d39bf8_0.png",
+            "page_number": 79,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+            "snippet": "Wake action — System Deep Sleep: Resume | System Deep Sleep-RAM: Warm boot | System Deep Sleep-Off: Reset/cold boot",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+            "snippet": "Wake time — System Deep Sleep: < 20 µs | System Deep Sleep-RAM: Deep sleep+warm boot | System Deep Sleep-Off: Deep sleep+cold boot",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Enabling PD1 or retaining SoCMEM partitions significantly increases dormant current — only do this if the high-performance domain wakeup context is genuinely required.",
+        "explanation": "Every SoCMEM partition you retain while PD1 is enabled adds measurable current. Compare these battery-powered figures: - System Deep Sleep-RAM, 64 KB SRAM + 512 KB SoCMEM, PD1 Enabled (SIDDSRB): 26.7 µA IBAT typical - System Deep Sleep-RAM, 64 KB SRAM + 5.0 MB SoCMEM, PD1 Enabled (SIDDSRC): 45.9 µA IBAT typical For the face recognition terminal, the Cortex-M55 and Ethos-U55 are off during dormancy — there is no reason to retain SoCMEM or keep PD1 enabled unless you are preserving a large inference model that would be expensive to reload. In most idle-monitoring scenarios, PD1 Disabled with minimal low-power SRAM retention is the correct choice. Retaining the full 5 MB SoCMEM when only 64 KB is needed costs more than twice the current of the minimum configuration.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSRB: System Deep Sleep-RAM, 64 kB SRAM + 512 kB System SRAM, PD1 Enabled | IBAT Typical: 26.7",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSRC: System Deep Sleep-RAM, 64 kB SRAM + 5.0 MB System SRAM retention, PD1 Enabled | IBAT Typical: 45.9",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSD: System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled | IBAT Typical: 41.6",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "For extended overnight dormancy with no SRAM retention needed, System Hibernate is the correct choice — not any Deep Sleep variant.",
+        "explanation": "When the terminal has no need to preserve any SRAM across a dormant period and wakeup will trigger a full cold boot anyway, System Hibernate draws far less current than any Deep Sleep variant. In battery-powered configuration: - System Hibernate, No Clocks (SIDHIBA): 0.3 µA IBAT typical - System Hibernate, PILO+WDT (SIDHIBB): 0.3 µA IBAT typical - System Hibernate, WCO+RTC (SIDHIBC): 0.3 µA IBAT typical In supply-powered configuration (VDDD = 1.8 V), Hibernate draws 5.6–6.7 µA IDDD typical — still far below the 20–50 µA range of any Deep Sleep variant. The trade-off is that wakeup from Hibernate is always a cold boot (POR + cold boot, under 1275 ms), and almost all functionality is powered off. Only the RTC, WDT, LPComp, a limited set of GPIO wakeup pins, and backup registers remain available. If your overnight dormancy scenario requires no warm-boot context and the terminal can tolerate a full reinitialization on wakeup, Hibernate is the right mode.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDHIBA: No Clocks | IBAT Typical: 0.3 | SIDHIBB: PILO+WDT | IBAT Typical: 0.3 | SIDHIBC: WCO+RTC | IBAT Typical: 0.3",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "1152f40f-2649-4d83-ac15-3709172f8fe3",
+            "snippet": "SIDHIBA: No Clocks | Typical: 5.6 | SIDHIBB: ILO+WDT | Typical: 6.7 | SIDHIBC: WCO+RTC | Typical: 5.7",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_1152f40f-2649-4d83-ac15-3709172f8fe3_0.png",
+            "page_number": 78,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "18b85f7d-8129-4fb6-8287-6c33a398242a",
+            "snippet": "System Hibernate: This is the lowest current mode. Almost all functionality is powered off in this mode except for the RTC, watchdog timer (WDT), and low-power comparators (LPCOMP), along with the ability to wake up on activity on a limited set of pins and retaining limited application data using backup registers. Wakeup is tantamount to a cold boot.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_18b85f7d-8129-4fb6-8287-6c33a398242a_0.png",
+            "page_number": 18,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+            "snippet": "Wake action — System Hibernate: Reset | Wake time — System Hibernate: POR+coldboot; < 1 ms",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "A known silicon errata affects LPComp wakeup from Deep Sleep-OFF and Deep Sleep-RAM — always reconfigure LPComp after wakeup from these modes.",
+        "explanation": "On current silicon, the LP Comparator interrupt bit is not set after a wakeup event triggered by an LPComp interrupt from Deep Sleep-OFF or Deep Sleep-RAM. Because the interrupt bit is not set, it cannot be cleared, which causes a continuous interrupt that prevents the application from continuing. The workaround: always reconfigure the LPComp before enabling the LPComp interrupt after any Deep Sleep-OFF or Deep Sleep-RAM wakeup event. Since you cannot check whether LPComp was the actual wakeup source (the interrupt bit is absent), your wakeup handler must unconditionally reconfigure LPComp every time the terminal exits either of these modes. This applies directly to the face recognition terminal if you use LPComp as a presence-detection wakeup source during dormancy.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "99aba87d-3369-449c-8b73-073544e80c50",
+            "snippet": "LPComp interrupt glitch on wakeup from Deep Sleep-Off/RAM: The LP Comparator interrupt bit is not set after a Deep Sleep Off or Deep Sleep RAM wake event caused by an LP Comparator interrupt. Since the LP Comparator interrupt bit is not set, it cannot be cleared.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_129/ChunkType.table_99aba87d-3369-449c-8b73-073544e80c50_0.png",
+            "page_number": 129,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "99aba87d-3369-449c-8b73-073544e80c50",
+            "snippet": "When using the LP Comparator interrupt as a wake source for Deep Sleep Off or Deep Sleep RAM, reconfigure the LP Comparator before enabling the LP Comparator interrupt. As the interrupt bit is not set, there is no method to check that the LP Comparator was the wake source. This means that the application should always reconfigure the LP Comparator after a Deep Sleep Off or Deep Sleep RAM wake event.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_129/ChunkType.table_99aba87d-3369-449c-8b73-073544e80c50_0.png",
+            "page_number": 129,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition terminal is battery-powered (VBAT = 3.3 V). Between access events, it must stay dormant with a 25 µA IBAT budget. The Cortex-M33 wakeup handler and its state fit in 64 KB of low-power SRAM. PD1 does not need to stay powered. You have three candidates: System Deep Sleep-OFF (SIDDSO), System Deep Sleep-RAM 64 KB PD1 Disabled (SIDDSRA), and System Deep Sleep 64 KB PD1 Disabled (SIDDSA). Which do you choose, and why does the runner-up fail?",
+        "reveal": "You choose System Deep Sleep-RAM, 64 KB SRAM, PD1 Disabled (SIDDSRA) at 21.7 µA IBAT typical. It is the only option that both fits within the 25 µA budget and retains the 64 KB wakeup context.\n\nSystem Deep Sleep-OFF (SIDDSO) at 20.7 µA is slightly cheaper, but it retains no SRAM — wakeup is a cold boot, and the handler state is lost. That fails the requirement to preserve the wakeup context.\n\nSystem Deep Sleep at 64 KB (SIDDSA) at 26.1 µA retains the context and resumes in under 20 µs, but it exceeds the 25 µA budget by 1.1 µA. Over thousands of dormancy cycles, that excess accumulates into meaningful battery drain.\n\nSIDDSRA is the correct choice: it meets the budget, retains the minimum required context, and accepts the warm-boot wakeup latency (~25.5 ms) as the trade-off.",
+        "hint": "Check each candidate against both constraints: power budget AND context retention requirement."
+      },
+      {
+        "prediction_prompt": "The terminal is deployed in a building that is unoccupied from 10 PM to 6 AM. During this window, no SRAM context needs to be preserved and the terminal can tolerate a full cold boot on the first morning access attempt. Your colleague argues that System Deep Sleep-OFF is the best choice for overnight dormancy because it is already the cheapest Deep Sleep variant. Do you agree?",
+        "reveal": "No. System Hibernate is the correct choice for this scenario, not System Deep Sleep-OFF.\n\nSystem Deep Sleep-OFF draws 20.7 µA IBAT typical (battery-powered) or 36.1 µA IDDD typical (supply-powered). System Hibernate draws only 0.3 µA IBAT typical (battery-powered) or 5.6–6.7 µA IDDD typical (supply-powered) — roughly 5–6x lower current.\n\nSince no SRAM retention is needed and wakeup will be a cold boot regardless (both Deep Sleep-OFF and Hibernate result in a reset/cold boot), there is no functional reason to prefer Deep Sleep-OFF. Hibernate is the lowest-current mode on the device and is specifically designed for this scenario: extended dormancy with no retention requirement, waking only on RTC, WDT, LPComp, or limited GPIO activity.",
+        "hint": "When both modes result in a cold boot and no SRAM is needed, the decision reduces to a single variable."
+      }
+    ],
+    "summary": "Match your SRAM retention configuration to the minimum context your wakeup handler actually needs: use 64 KB increments for the low-power SRAM, disable PD1 when the high-performance domain is not required, and choose System Hibernate over any Deep Sleep variant when no retention is needed at all. Always reconfigure LPComp unconditionally after waking from Deep Sleep-OFF or Deep Sleep-RAM.",
+    "figures": [
+      {
+        "chunk_id": "c86d33e2-31d3-4b2f-8e99-4f4c329831c8",
+        "after_key_point": 0,
+        "caption": "The VLDO.SRAM rail feeds the SRAM through a power mux, while VLDO.RET supplies the CM33 retention flops and peripheral state. Configuring which SRAM banks are retained during deep sleep controls how much current VLDO.SRAM draws.",
+        "alt_text": "Block diagram showing three LDO outputs: VCCD connected to ROM, RRAM, MIPI D-PHY VDD, and USB DVDD; VLDO.RET connected to M55/U55 retention flops (M55 CORE, U-55 CORE, DSI Controller) and CM33 retention flops (M33 CORE, GPIO, TCPWM, SCB, I3C, I2C, TDM, PDWMPCM, LPCOMP, 1x SCB Deep Sleep, NNLite); VLDO.SRAM connected through a PWR MUX to SRAM and MIPI VP Analog; VLDO.DSI shown as NC for E81 and E83 series devices.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.figure_c86d33e2-31d3-4b2f-8e99-4f4c329831c8_0.png",
+        "page_number": 17
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When your power budget is tight and you need to preserve the Cortex-M33 wakeup handler state across dormancy, but plain System Deep Sleep exceeds the budget, the correct sub-mode to select is ___.",
+      "answer": "System Deep Sleep-RAM",
+      "distractors": [
+        "System Deep Sleep-OFF",
+        "System Hibernate",
+        "System Deep Sleep with PD1 Enabled"
+      ],
+      "explanation": "System Deep Sleep-RAM retains selected SRAM banks while powering the CPU off, drawing less current than plain System Deep Sleep. The trade-off is a warm boot on wakeup rather than a direct resume, but it is the only option that both preserves context and meets a tighter power budget."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each dormancy scenario to the most appropriate power mode:",
+      "pairs": [
+        {
+          "left": "No SRAM retention needed; terminal can cold boot; minimize current over 8-hour overnight period",
+          "right": "System Hibernate"
+        },
+        {
+          "left": "64 KB wakeup context must survive dormancy; power budget is tight; warm boot is acceptable",
+          "right": "System Deep Sleep-RAM, 64 KB, PD1 Disabled"
+        },
+        {
+          "left": "Wakeup must resume in under 20 µs; 64 KB context retained; power budget is less constrained",
+          "right": "System Deep Sleep, 64 KB, PD1 Disabled"
+        }
+      ],
+      "explanation": "The choice between these modes depends on two independent constraints: whether SRAM context must survive dormancy, and whether wakeup latency is critical. Hibernate wins when neither constraint applies; Deep Sleep-RAM wins when context is needed but latency tolerance is high; plain Deep Sleep wins when sub-20 µs resume is required."
+    }
+  ],
+  "content_gaps": [
+    "PDL API specifics for configuring SRAM retention bank selection (e.g., the PDL register or function call used to specify which 64 KB banks to retain) are not available in the provided datasheet chunks. The datasheet references ModusToolbox PDL but does not include API signatures or initialization code patterns for SRAM retention configuration.",
+    "The exact mechanism by which the firmware specifies which 64 KB SRAM banks to retain (e.g., a bitmask register, a PDL configuration structure) is not documented in the provided chunks. This would be covered in the Architecture Reference Manual or PDL documentation."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring the deep sleep behavior for a face recognition terminal built on PSOC Edge E8. The terminal is battery-powered (VBAT = 3.3 V) and must remain dormant between access events. Your power budget for the dormant state is 25 µA (IBAT typical). The wakeup handler requires only the 64 KB low-power SRAM to be retained, and the high-performance domain (PD1) does not need to remain powered.",
+        "question_text": "Which deep sleep mode and SRAM retention configuration should you select to meet the 25 µA power budget while retaining the minimum required context?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled (SIDDSRA: 21.7 µA IBAT typical)",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System Deep Sleep, 64 KB SRAM retention, PD1 Disabled (SIDDSA: 26.1 µA IBAT typical)",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled (SIDDSD: 41.6 µA IBAT typical)",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. System Deep Sleep-RAM with 64 KB retention and PD1 Disabled (SIDDSRA) draws only 21.7 µA IBAT typical, which is within the 25 µA budget. It retains exactly the minimum SRAM needed for the wakeup context without powering the high-performance domain.",
+        "incorrect": "Review the battery-powered deep sleep current table. SIDDSA (System Deep Sleep, 64 KB, PD1 Disabled) draws 26.1 µA, which exceeds the 25 µA budget. SIDDSD retains far more SRAM than needed and draws 41.6 µA. Only System Deep Sleep-RAM (SIDDSRA) at 21.7 µA meets both the power budget and the minimum retention requirement."
+      },
+      "references": [
+        {
+          "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+          "snippet": "SIDDSRA: System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 21.7 µA... SIDDSD: System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled | IBAT Typical: 41.6 µA",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+          "page_number": 73,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "4e8ec375-3632-46a3-bfe9-7f754a133a61",
+          "snippet": "SIDDSA: System Deep Sleep, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 26.1 µA",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_72/ChunkType.table_4e8ec375-3632-46a3-bfe9-7f754a133a61_0.png",
+          "page_number": 72,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O4",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the wakeup behavior requirements for the face recognition terminal. The terminal must resume face recognition processing as quickly as possible after a door-approach event triggers a wakeup. A colleague suggests using System Deep Sleep-RAM mode to save power during idle periods. You need to evaluate whether this is appropriate given the wakeup latency constraints.",
+        "question_text": "Compared to System Deep Sleep mode, what is the key trade-off you must accept when using System Deep Sleep-RAM mode for the terminal's idle state?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Deep Sleep-RAM retains less SRAM than System Deep Sleep, so the wakeup context is more limited",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System Deep Sleep-RAM requires a warm boot on wakeup rather than a direct resume, increasing wakeup latency to tens of milliseconds",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "System Deep Sleep-RAM disables all deep-sleep-capable peripherals, so no wakeup source can be configured",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. System Deep Sleep-RAM wakes via a warm boot (typical transition time ~25.5 ms), whereas System Deep Sleep resumes execution directly in under 20 µs. If the terminal requires near-instant response to a door-approach event, this latency difference is a critical trade-off to evaluate.",
+        "incorrect": "Check the power mode support table. Both System Deep Sleep and System Deep Sleep-RAM support the same deep-sleep-capable wake sources. The key difference is the wake action: System Deep Sleep resumes directly (< 20 µs), while System Deep Sleep-RAM performs a warm boot (~25.5 ms). SRAM retention options in Deep Sleep-RAM can be equal to or greater than standard Deep Sleep configurations."
+      },
+      "references": [
+        {
+          "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+          "snippet": "Wake action: System Deep Sleep → Resume; System Deep Sleep-RAM → Warm boot... Wake time: System Deep Sleep < 20 µs; System Deep Sleep-RAM → Deep sleep+warm boot",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+          "page_number": 18,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "38813451-5cad-4903-8635-18a5f9d39bf8",
+          "snippet": "SID14A: System Deep Sleep-RAM to Active transition time (TDSR_ACT) Typ: 25.5 ms",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_79/ChunkType.table_38813451-5cad-4903-8635-18a5f9d39bf8_0.png",
+          "page_number": 79,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the power architecture for the face recognition terminal. During extended overnight periods, the terminal must enter its lowest-power dormant state. The system has no need to retain any SRAM contents across this period, and wakeup will trigger a full cold boot. Your colleague proposes System Deep Sleep-OFF mode, while another suggests System Hibernate mode.",
+        "question_text": "You need to choose between System Deep Sleep-OFF and System Hibernate for the overnight dormant state. Which mode is the better choice, and what is the primary reason?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Deep Sleep-OFF, because it supports deep-sleep-capable peripheral wake sources and draws 36.1 µA (IDDD typical) at VDDD = 1.8 V",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System Hibernate, because it draws approximately 5.6–6.7 µA (IDDD typical) and is the lowest-current mode when no SRAM retention is needed",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "System Deep Sleep-OFF, because it retains GPIO states and allows faster wakeup than System Hibernate",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. System Hibernate is the lowest-current mode at approximately 5.6–6.7 µA IDDD typical, compared to System Deep Sleep-OFF at 36.1 µA. When no SRAM retention is required and a cold boot on wakeup is acceptable, Hibernate provides the greatest power savings for an extended overnight dormant period.",
+        "incorrect": "Compare the current consumption values from Table 19. System Deep Sleep-OFF draws 36.1 µA IDDD typical, while System Hibernate draws only 5.6–6.7 µA — roughly 5–6× lower. Both modes result in a cold boot/reset on wakeup, and both retain GPIO states. When no SRAM retention is needed and minimum power is the priority, Hibernate is the correct choice."
+      },
+      "references": [
+        {
+          "chunk_id": "1152f40f-2649-4d83-ac15-3709172f8fe3",
+          "snippet": "SIDDSO: System Deep Sleep-OFF, PD1 Disabled | IDDD Typical: 36.1 µA... SIDHIBA: No Clocks | IDDD Typical: 5.6 µA... SIDHIBB: ILO+WDT | IDDD Typical: 6.7 µA",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_1152f40f-2649-4d83-ac15-3709172f8fe3_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "18b85f7d-8129-4fb6-8287-6c33a398242a",
+          "snippet": "System Hibernate: This is the lowest current mode. Almost all functionality is powered off in this mode except for the RTC, watchdog timer (WDT), and low-power comparators (LPCOMP)... Wakeup is tantamount to a cold boot. GPIO states are retained in this mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_18b85f7d-8129-4fb6-8287-6c33a398242a_0.png",
+          "page_number": 18,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring deep sleep SRAM retention for the face recognition terminal. During deep sleep, the Cortex-M33 wakeup handler and its local variables must be preserved. The handler fits entirely within the low-power domain's 1 MB SRAM. You want to retain only the minimum amount of this SRAM to reduce power consumption, and the high-performance domain (PD1) must remain disabled.",
+        "question_text": "The low-power domain SRAM is 1 MB total. What is the smallest retention granularity you can configure for this SRAM during System Deep Sleep, and what does this mean for your configuration?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "128 KB increments, so the minimum retention configuration is 128 KB of low-power SRAM",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "512 KB increments, so you must retain at least 512 KB even if the handler requires less",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "64 KB increments, so you can retain as little as 64 KB of the low-power SRAM if the handler fits within that region",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The low-power domain SRAM retention is selectable in 64 KB increments during System Deep Sleep. If the wakeup handler fits within 64 KB, you can configure the minimum 64 KB retention, minimizing power consumption while preserving the required context.",
+        "incorrect": "Review the SRAM architecture description. The 1 MB low-power SRAM supports retention in 64 KB increments during System Deep Sleep — not 128 KB or 512 KB. This allows fine-grained control so you retain only what is needed, directly impacting the deep sleep current draw."
+      },
+      "references": [
+        {
+          "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+          "snippet": "SRAM: 1 MB in the low power CPU subsystem (Cortex-M33). Portions of this SRAM can be retained during the System Deep Sleep power mode; the retained amount is selectable in 64-KB increments.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+          "page_number": 25,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

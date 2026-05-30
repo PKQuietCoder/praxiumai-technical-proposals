@@ -1,0 +1,413 @@
+{
+  "subsection_id": "5.1.2",
+  "subsection_title": "Select and Configure SCB Peripheral Modes",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Select the correct SCB instance and mode (I2C, SPI, or UART) for each external interface in the face recognition terminal design",
+    "Identify the SCB0 deep-sleep constraint and apply it correctly when assigning always-on sensor buses",
+    "Route SCB signals to GPIO ports using the HSIOM function group settings",
+    "Recognize the SPI high-speed mode capability and apply it when interface throughput exceeds standard SCB limits"
+  ],
+  "content": {
+    "hook_sentence": "Assigning an I2C master bus to SCB0 compiles without error, passes bench testing in active mode, and then silently fails every time the system enters Deep Sleep — a bug that can take days to trace.",
+    "introduction": "Choosing the right SCB instance is not just about picking an available peripheral number. Each SCB has mode restrictions, speed limits, and power-domain behavior that directly affect whether your interface works across all operating states of the terminal. Getting this mapping wrong at the design stage means rework after PCB fabrication.",
+    "key_points": [
+      {
+        "point": "SCB0 is the only instance that survives System Deep Sleep, but it is restricted to slave modes only.",
+        "explanation": "Building on the SCB0 deep-sleep constraint introduced earlier: the hardware detail that matters for your peripheral configuration plan is the role restriction. SCB0 can operate in System Deep Sleep with an external clock, but it **only supports I2C slave mode and SPI slave mode**. It cannot act as a master. This means SCB0 is the correct choice for an always-on sensor bus only when the PSOC Edge E8 is the slave and an external device drives the clock. If your design requires the PSOC to initiate transactions (polling a sensor, commanding a peripheral), SCB0 cannot fulfill that role regardless of power mode. For the face recognition terminal's presence-detection sensor bus that must remain active during Deep Sleep, you must architect the bus so the external sensor acts as the I2C master, or accept that the bus will be unavailable during Deep Sleep and use a different wake mechanism.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+            "snippet": "SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "d8d71563-9d11-4593-be32-fadf6923bb40",
+            "snippet": "SCB: Y, Y, N, SCB0 is supported in System Deep Sleep power mode, N",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_19/ChunkType.table_d8d71563-9d11-4593-be32-fadf6923bb40_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "SCB1 through SCB11 support I2C, SPI, and UART in master or slave roles, but only in CPU Active and CPU Sleep modes.",
+        "explanation": "For every interface that does not need to survive Deep Sleep, SCB1 through SCB11 give you full flexibility. Each can be configured as I2C master or slave, SPI master or slave, or UART. This covers the terminal's UART debug console, I2C touch controller bus, and SPI connections to peripheral ICs. All 11 of these instances are in the low-power domain and are available in CPU Active and CPU Sleep modes. They are not available in System Deep Sleep. When you enter Deep Sleep, any transaction in progress on SCB1–SCB11 will be interrupted, so your firmware must complete or abort bus activity before requesting Deep Sleep entry.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+            "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "61c3d775-87bf-4945-a9dc-9a73df8c7411",
+            "snippet": "I²C, SPI, and UART via serial communication blocks (SCB). SCB0 supports only I²C and SPI",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_61c3d775-87bf-4945-a9dc-9a73df8c7411_0.png",
+            "page_number": 9,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "One SCB supports SPI high-speed mode at up to 50 Mbps; all others are capped at 25 Mbps as externally clocked slaves.",
+        "explanation": "SPI throughput varies significantly across SCB instances. One SCB can run SPI in high-speed mode at up to 50 Mbps. The remaining SCBs support SPI at up to 25 Mbps as externally clocked slaves. In SPI master mode, the output frequency is $F_{SCB}/4$, where $F_{SCB}$ is the SCB peripheral clock. In high-speed master mode, $F_{SCB}$ can reach 200 MHz, giving a maximum master output of 50 MHz. For the terminal's NOR flash link at 30 Mbps, only the high-speed SCB instance can meet that requirement as a master. Assign that instance to the flash link and use any other SCB for lower-speed interfaces like UART and I2C. The I2C maximum bit rate across all SCBs is 1 Mbps.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "16307d89-61d0-4c7e-ba28-6f58c4b51215",
+            "snippet": "One SCB can run SPI in high speed mode at up to 50 Mbps. The remaining SCBs can run SPI at up to 25 Mbps.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_16307d89-61d0-4c7e-ba28-6f58c4b51215_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f7a5b762-2b6c-4bfd-b1a7-55bb52fcabba",
+            "snippet": "SPI Operating frequency Master (Fscb is SPI clock) FSPIEXTHS — Max: Fscb/4 MHz; 0.9 V; Fscb max is 200 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_108/ChunkType.table_f7a5b762-2b6c-4bfd-b1a7-55bb52fcabba_0.png",
+            "page_number": 108,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "f7a5b762-2b6c-4bfd-b1a7-55bb52fcabba",
+            "snippet": "Fixed I2C AC Specifications: Bit Rate FI2C1 — Max: 1 Mbps; At all core voltages",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_108/ChunkType.table_f7a5b762-2b6c-4bfd-b1a7-55bb52fcabba_0.png",
+            "page_number": 108,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Each SCB has a 256-byte Rx and Tx FIFO, and all SCBs support DMA transfers.",
+        "explanation": "When you configure a high-throughput SPI link or a UART console that logs debug output continuously, the 256-byte FIFO on each SCB reduces CPU intervention. For I2C, the deep FIFO reduces the need for clock stretching caused by the CPU not reading data in time. For all modes, you can offload data movement entirely by connecting the SCB to a DMA channel. On the face recognition terminal, this matters for the SPI flash link: pairing the high-speed SCB with a DMA channel lets the Cortex-M55 continue inference work while bulk data transfers proceed in the background without CPU polling.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "d3d8ab0a-5df1-4f17-9dfd-fbf8fa17d968",
+            "snippet": "Each SCB has a 256-byte FIFO for receive (Rx) and transmit (Tx). This reduces the need for I2C clock stretching caused by the CPU not having read data on time. The FIFO is available for all modes.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_d3d8ab0a-5df1-4f17-9dfd-fbf8fa17d968_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a6239465-a613-4eda-a15f-afff1515d0ab",
+            "snippet": "All of the SCB blocks support DMA transfers.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_a6239465-a613-4eda-a15f-afff1515d0ab_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "GPIO routing to SCB signals requires selecting the correct HSIOM function group and port; not every port supports SCB in every mode.",
+        "explanation": "After selecting an SCB instance and mode, you must route its signals to physical GPIO pins using the High-Speed I/O Matrix (HSIOM). The HSIOM bitfield setting determines which function group is active on a pin. For SCB signals in CPU Active mode, the relevant settings are ACT #4 through ACT #8 (bitfield values 16–20), and the ports that support SCB vary by setting. For example, HSIOM setting 16 (ACT #4) routes SCB to P0 and P21. Setting 18 (ACT #6) routes SCB to a broader set including P6, P7, P9, P10, P11, P13, P14, P15, P16, P17, P20, and P21. Port 8 (P8) is a special case: it supports SCB0 only, via the deep-sleep function groups DS #2 (SPI only) and DS #3 (I2C only) at HSIOM settings 14 and 15. P8 does not appear in the ACT SCB groups, so you cannot route SCB1–SCB11 signals through P8. Port 9 (P9) supports SCB via ACT settings and is a valid choice for routing general SCB UART, SPI, or I2C signals in active mode.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "e25fbc60-9778-4d0f-bce6-ec3017251261",
+            "snippet": "14: DS #2: SCB 0 (SPI only): P8. 15: DS #3: SCB 0 (I2C only): P8. 18: ACT #6: SCB: P6, P7, P9, P10, P11, P13, P14, P15, P16, P17, P20, P21",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_48/ChunkType.table_e25fbc60-9778-4d0f-bce6-ec3017251261_0.png",
+            "page_number": 48,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "b7b69f86-ed24-40ff-84dd-0ee04a197dc8",
+            "snippet": "P8: 0-7: Hibernate wakeup, SWD, cal wave, SCB, PDM, trigger input, TCPWM. P9: 0-3: SCB, PDM, TCPWM.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_47/ChunkType.table_b7b69f86-ed24-40ff-84dd-0ee04a197dc8_0.png",
+            "page_number": 47,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "e25fbc60-9778-4d0f-bce6-ec3017251261",
+            "snippet": "16: ACT #4: SCB: P0, P21. 19: ACT #7: SCB: P6, P9, P10, P11, P16, P17. 20: ACT #8: SCB: P6, P9, P10, P11, P13, P14, P15, P16, P17",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_48/ChunkType.table_e25fbc60-9778-4d0f-bce6-ec3017251261_0.png",
+            "page_number": 48,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your terminal design has three serial interfaces: a 30 Mbps SPI NOR flash, a UART debug console, and an I2C capacitive touch controller. You also need an I2C presence-detection sensor that must poll during System Deep Sleep. You have SCB0 through SCB11 available. Before reading the reveal, sketch out which SCB instance you would assign to each interface and why.",
+        "reveal": "The 30 Mbps SPI flash requires the one high-speed SCB instance, since standard SCBs top out at 25 Mbps as externally clocked slaves and the master output frequency is Fscb/4 with a standard 100 MHz Fscb ceiling, giving only 25 MHz. Assign the high-speed SCB to the flash link. The UART debug console and I2C touch controller can go to any two of SCB1–SCB11, since both interfaces operate only in active mode and have no throughput requirements that challenge the standard limits. For the presence-detection sensor bus that must survive Deep Sleep: SCB0 is the only candidate, but it supports only I2C slave mode. This means the PSOC Edge E8 cannot initiate the poll — the external sensor or a dedicated microcontroller must drive the bus. If the sensor cannot act as master, you need a different wake architecture (for example, a GPIO interrupt from the sensor rather than an I2C poll).",
+        "hint": "Start with the constraint that eliminates options first: which interface has a throughput requirement, and which has a power-mode requirement?"
+      },
+      {
+        "prediction_prompt": "A junior engineer routes the UART debug console TX and RX signals through Port 8 (P8) using HSIOM ACT settings, targeting SCB3. The design compiles and the board is fabricated. What happens when the terminal boots?",
+        "reveal": "The UART console will not function. P8 supports SCB only through the deep-sleep function groups DS #2 and DS #3 at HSIOM settings 14 and 15, and those settings are restricted to SCB0 in SPI-only and I2C-only modes respectively. P8 does not appear in any ACT SCB group (settings 16–20), so there is no valid HSIOM path to route SCB3 UART signals through P8 in active mode. The correct fix is to reroute the UART signals to a port that appears in an ACT SCB group, such as P9 (supported under ACT #6, #7, and #8) or P6, P10, P11, P13, P14, P15, P16, P17, P20, or P21.",
+        "hint": "Check which HSIOM function groups P8 actually supports for SCB, and whether those groups cover active-mode UART."
+      }
+    ],
+    "summary": "Map each terminal interface to its SCB instance by applying three constraints in order: power-mode survival (SCB0 only for Deep Sleep, slave roles only), throughput (high-speed SCB for links above 25 Mbps), and GPIO port compatibility (verify the target port appears in the correct HSIOM ACT group for the chosen SCB).",
+    "figures": [
+      {
+        "chunk_id": "2edab2cd-3c89-44b7-862d-133345563b4f",
+        "after_key_point": 1,
+        "caption": "The ModusToolbox Peripherals configurator tab shows SCB instances 0 through 7 as individually selectable checkboxes. Enable only the SCB instances your design requires, then configure each one's mode in the subsequent settings panel.",
+        "alt_text": "Screenshot of the ModusToolbox Project Creator showing the Peripherals tab with a Communication section expanded. Serial Communication Block (SCB) instances 0 through 7 are listed as checkboxes. SCB 2 is checked while SCB 0, 1, 3, 4, 5, 6, and 7 are unchecked. The window also shows CAN FD, QSPI, and SD Host Controller options above the SCB list.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.figure_2edab2cd-3c89-44b7-862d-133345563b4f_0.png",
+        "page_number": 11
+      },
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 0,
+        "caption": "The PSOC Edge E8 block diagram shows SCB0 in the Deep Sleep domain (labeled '1x SCB (Deep Sleep) I2C, SPI') and the 11 remaining SCBs in the low-power domain. This physical separation explains why only SCB0 can sustain operation during System Deep Sleep.",
+        "alt_text": "Detailed block diagram of the PSOC Edge E8. The Deep Sleep domain at the top contains a block labeled '1x SCB (Deep Sleep) I2C, SPI'. The Low Power domain below it contains a block labeled '11x SCB (UART, I2C, SPI)'. The High Performance domain at the bottom contains the graphics subsystem, audio interfaces, and high-performance CPU subsystem with Cortex-M55 and Ethos-U55.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When a sensor bus must remain active during System Deep Sleep and the PSOC Edge E8 must respond to incoming transactions, the correct SCB instance to assign is SCB0 configured as ___.",
+      "answer": "I2C slave or SPI slave",
+      "distractors": [
+        "I2C master",
+        "SPI master",
+        "UART receiver"
+      ],
+      "explanation": "SCB0 is the only instance that operates in System Deep Sleep, but it is restricted to slave modes. Master roles require the PSOC to initiate transactions, which SCB0 cannot do in any power mode."
+    },
+    {
+      "after_key_point": 4,
+      "type": "matching",
+      "stem": "Match each GPIO port to its correct SCB routing capability based on HSIOM function group support:",
+      "pairs": [
+        {
+          "left": "P8",
+          "right": "SCB0 only, via deep-sleep function groups (I2C or SPI slave)"
+        },
+        {
+          "left": "P9",
+          "right": "General SCB (any mode) via ACT function groups in active mode"
+        },
+        {
+          "left": "P0",
+          "right": "SCB via ACT #4 only, limited port with fewer SCB HSIOM options"
+        }
+      ],
+      "explanation": "P8 appears only in DS #2 and DS #3 HSIOM groups, restricting it to SCB0 slave modes. P9 appears in multiple ACT SCB groups, making it suitable for general SCB routing. P0 supports SCB only under ACT #4, giving it fewer routing options than mid-range ports."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not specify which numbered SCB instance is the high-speed SPI capable one (only that 'one SCB' supports 50 Mbps). Learners cannot identify the specific instance number without the Architecture Reference Manual or PDL documentation.",
+    "ModusToolbox PDL API calls for SCB mode configuration (e.g., Cy_SCB_I2C_Init, Cy_SCB_SPI_Init) are not present in the datasheet chunks. Hands-on configuration steps require the PDL API reference as a supplementary source.",
+    "The extended boot use of SCB1 for serial interface configuration is mentioned in the source but not elaborated. If learners need to understand boot-time SCB1 pin assignments versus application-time assignments, additional source material is needed."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are bringing up the PSOC Edge E8 hardware for a face recognition terminal. The design requires a low-power I2C sensor bus that must remain active while the system is in System Deep Sleep, polling a presence-detection sensor between recognition events.",
+        "question_text": "Which SCB instance should you assign to this always-on I2C sensor bus, and in what role?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "SCB0 configured as I2C slave mode, using an external clock to operate in System Deep Sleep",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "SCB1 configured as I2C master mode, relying on the internal IHO clock to remain active in System Deep Sleep",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "SCB5 configured as I2C master mode, using a DPLL-derived clock to sustain operation in System Deep Sleep",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. SCB0 is the only SCB that supports operation in System Deep Sleep power mode, and it does so only with an external clock. Furthermore, SCB0 is restricted to I2C slave mode and SPI slave mode — it cannot act as a master. If the sensor bus requires a slave-mode I2C interface active during Deep Sleep, SCB0 with an external clock is the correct choice.",
+        "incorrect": "SCB1 through SCB11 are not functional in System Deep Sleep — only SCB0 supports that power mode. Additionally, SCB0 requires an external clock (not the IHO, which is off in Deep Sleep) and is limited to slave modes. Review the SCB power mode support table and the SCB0 constraints in section 5.11.2."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "d8d71563-9d11-4593-be32-fadf6923bb40",
+          "snippet": "SCB: Y [CPU Active], Y [CPU Sleep], N, SCB0 is supported in System Deep Sleep power mode [System Deep Sleep], N [System Hibernate]",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_19/ChunkType.table_d8d71563-9d11-4593-be32-fadf6923bb40_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O6",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are selecting SCB peripherals for the face recognition terminal's external interfaces. The design calls for three serial links: a high-throughput SPI connection to an external NOR flash running at 30 Mbps, a UART debug console, and an I2C bus to a capacitive touch controller. You have SCB0 through SCB11 available.",
+        "question_text": "The hardware team asks whether any standard SCB can drive the 30 Mbps SPI flash link as a master. What should you tell them?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "No standard SCB supports 30 Mbps SPI master operation; you must route the flash through the SMIF interface instead",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "One SCB supports SPI master at up to 50 Mbps in high-speed mode; assign that SCB to the flash link and use any other SCB for UART and I2C",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "All SCBs support SPI master at up to 25 Mbps, so any available SCB can handle the 30 Mbps requirement without restriction",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. Exactly one SCB can run SPI in high-speed mode at up to 50 Mbps, which covers the 30 Mbps requirement. The remaining SCBs top out at 25 Mbps as masters, which would be insufficient. You should reserve the high-speed SCB for the flash link and assign separate SCBs for the UART debug console and I2C touch controller.",
+        "incorrect": "The standard SPI master limit for most SCBs is 25 Mbps — below the 30 Mbps requirement. However, one SCB does support a high-speed SPI mode up to 50 Mbps, making it the correct choice for this link. SMIF is a separate dedicated serial memory interface and is not a substitute for a general-purpose SPI master SCB. Review the SPI mode specifications in the SCB section."
+      },
+      "references": [
+        {
+          "chunk_id": "16307d89-61d0-4c7e-ba28-6f58c4b51215",
+          "snippet": "One SCB can run SPI in high speed mode at up to 50 Mbps. The remaining SCBs can run SPI at up to 25 Mbps.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_16307d89-61d0-4c7e-ba28-6f58c4b51215_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring GPIO routing for the face recognition terminal's UART debug console. You need to assign the UART TX and RX signals to physical pins using the HSIOM (High-Speed I/O Matrix). You are considering Port 8 (P8) and Port 9 (P9) as candidates.",
+        "question_text": "Based on the documented HSIOM port-to-function mappings, which port is a valid choice for routing SCB UART signals in CPU Active mode?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "P8, using HSIOM ACT settings, because P8 supports general SCB functions in active mode",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "P9, using HSIOM ACT settings, because P9 supports SCB functions in active mode",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Either P8 or P9 interchangeably, because all ports support all SCB modes through any HSIOM ACT setting",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. P9 is listed as supporting SCB functions via HSIOM ACT settings and is a valid port for routing UART signals. P8's HSIOM Deep Sleep settings (DS #2 and DS #3) are restricted to SCB0 SPI-only and SCB0 I2C-only respectively — not general UART routing. Not all ports support all SCB modes, so port selection must be verified against the HSIOM table.",
+        "incorrect": "P8's SCB-related HSIOM entries (DS #2 and DS #3) are Deep Sleep settings limited to SCB0 in SPI slave or I2C slave mode — they do not support UART. P9 supports SCB via ACT HSIOM settings and is the correct choice for a UART interface. Always verify port-function compatibility in the HSIOM settings table before assigning pins. Review Table 10 and Table 11 in the GPIO section."
+      },
+      "references": [
+        {
+          "chunk_id": "b7b69f86-ed24-40ff-84dd-0ee04a197dc8",
+          "snippet": "P8: Hibernate wakeup, SWD, cal wave, SCB, PDM, trigger input, TCPWM ... P9: SCB, PDM, TCPWM",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_47/ChunkType.table_b7b69f86-ed24-40ff-84dd-0ee04a197dc8_0.png",
+          "page_number": 47,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "e25fbc60-9778-4d0f-bce6-ec3017251261",
+          "snippet": "14 | DS #2 | SCB 0 (SPI only) | P8 ... 15 | DS #3 | SCB 0 (I2C only) | P8 ... 18 | ACT #6 | SCB | P6, P7, P9, P10, P11, P13, P14, P15, P16, P17, P20, P21",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_48/ChunkType.table_e25fbc60-9778-4d0f-bce6-ec3017251261_0.png",
+          "page_number": 48,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O6",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a junior engineer's peripheral configuration plan for the face recognition terminal. They have proposed using SCB3 in UART mode for the debug console, SCB0 in I2C master mode to poll a fingerprint sensor during Deep Sleep, and a dedicated SCB in SPI mode for a 10 Mbps connection to a display bridge IC.",
+        "question_text": "Which part of this configuration plan contains a design error that must be corrected before hardware bring-up?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The SPI assignment for the display bridge IC, because SCB SPI master mode is not supported at 10 Mbps on any SCB instance",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The UART assignment for the debug console, because SCB3 does not support UART mode and must be replaced with SCB1 or higher",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The I2C master assignment for SCB0, because SCB0 supports only I2C slave mode and SPI slave mode, not master mode",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. SCB0 is restricted to I2C slave mode and SPI slave mode — it cannot operate as an I2C master. Assigning SCB0 as an I2C master to poll a sensor is a design error. The engineer should use SCB1 through SCB11 for any master-mode I2C or SPI operation. SCB3 through SCB11 all support UART, and 10 Mbps SPI is well within the 25 Mbps limit of standard SCBs.",
+        "incorrect": "SCB1 through SCB11 all support UART mode, so SCB3 for UART is valid. Standard SCBs support SPI master up to 25 Mbps, so 10 Mbps is within spec. The actual error is assigning SCB0 as an I2C master — SCB0 only supports slave modes. Review the SCB0 constraints documented in section 5.11.2."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "16307d89-61d0-4c7e-ba28-6f58c4b51215",
+          "snippet": "The remaining SCBs can run SPI at up to 25 Mbps.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_16307d89-61d0-4c7e-ba28-6f58c4b51215_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

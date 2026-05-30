@@ -1,0 +1,450 @@
+{
+  "subsection_id": "1.2.1",
+  "subsection_title": "Navigate ModusToolbox Resources",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Locate the correct ModusToolbox resource (application note, PDL, code example, or configurator) for a given PSOC Edge E8 development task",
+    "Use the four-step ModusToolbox workflow — Project Creator, peripheral configurators, Library Manager, and IDE — to set up a multi-core PSOC Edge E8 project"
+  ],
+  "content": {
+    "hook_sentence": "The PSOC Edge E8 has over a dozen application notes covering everything from provisioning to PCB layout — knowing which one to open first can save you hours of searching through the wrong reference.",
+    "introduction": "With the domain architecture and task partitioning decisions behind you, your next step is translating those decisions into firmware. ModusToolbox is the development environment where that work happens, and it organizes its resources into distinct layers: hardware documentation, SDK tooling, and runtime libraries. Knowing which layer answers which question keeps you moving instead of hunting.",
+    "key_points": [
+      {
+        "point": "The PSOC Edge E8 resource set is organized into four categories: architecture/register references, application notes, code examples, and development kits.",
+        "explanation": "When you need to understand a hardware block's behavior, the **Architecture Reference Manual** (covering E8x2, E8x3, E8x5, E8x6) is your primary source for block descriptions, and the **Registers Reference Manual** gives you the bit-field details you need for direct register access. For task-specific guidance, application notes cover targeted topics: AN235935 gets you started on ModusToolbox, AN237849 covers security, AN237976 covers low-power modes, and AN239774 covers memory selection for power and performance. When you want working firmware to adapt rather than starting from scratch, Infineon's GitHub repositories host code examples for peripherals and middleware. For hardware bring-up, the KIT_PSE84_EVAL (general purpose) and KIT_PSE84_AI (AI/ML focus) kits include schematics and layout files.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "PSOC Edge E8x2, E8x3, E8x5, E8x6 Architecture Reference Manual: This document contains architectural descriptions of hardware blocks",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "PSOC Edge E8x2, E8x3, E8x5, E8x6 Registers Reference Manual: This document contains a list of registers and bit-fields in the hardware blocks",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "AN235935: Getting started with PSOC Edge E84 on ModusToolbox software... AN237849: Getting started with PSOC Edge security... AN237976: PSOC Edge E84 MCU low-power modes and power reduction techniques",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "Code Examples: Numerous example applications featuring various peripherals and system middleware are available on Infineon GitHub repositories",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "General purpose evaluation kit: KIT_PSE84_EVAL... Artificial Intelligence/Machine Learning kit: KIT_PSE84_AI",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "ModusToolbox follows a four-step workflow: create a project for your BSP, configure peripherals, manage libraries, then write and debug code in your IDE of choice.",
+        "explanation": "The workflow is designed to be IDE-neutral, so you can use Visual Studio Code, IAR, Keil, or Eclipse depending on your team's toolchain. Step 1 is the **Project Creator**, where you select your BSP (for the face recognition terminal, `APP_KIT_PSOCE84_EVK`) and target IDE. The project creator generates a multi-core project structure with separate sub-projects for `proj_cm33_ns`, `proj_cm33_s`, and `proj_cm55` — matching the domain partitioning you defined earlier. Step 2 is the **peripheral configurator**, where you enable specific blocks (for example, checking SCB2 for your UART debug interface while leaving SCB0 available for deep-sleep I2C). Step 3 is the **Library Manager**, which resolves and updates dependencies including the PDL, middleware, and RTOS support. Step 4 is optional Eclipse IDE integration, though the same build and debug operations are available in VS Code or your preferred environment.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "dadcadef-78b3-43a0-be66-3862cd0f6504",
+            "snippet": "ModusToolbox software is IDE-neutral and easily adaptable to your workflow and preferred development environment. It supports Windows, Linux, MacOS, IAR, Keil, and Visual Studio Code.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.text_dadcadef-78b3-43a0-be66-3862cd0f6504_0.png",
+            "page_number": 11,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "dadcadef-78b3-43a0-be66-3862cd0f6504",
+            "snippet": "it includes (1) a project creator, (2) peripheral and library configurators, (3) a library manager, and (4) an optional Eclipse IDE for ModusToolbox software.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.text_dadcadef-78b3-43a0-be66-3862cd0f6504_0.png",
+            "page_number": 11,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "dadcadef-78b3-43a0-be66-3862cd0f6504",
+            "snippet": "For information on using Infineon tools, refer to the documentation delivered with ModusToolbox software, and AN235935 – Getting started with PSOC Edge E84 on ModusToolbox software.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.text_dadcadef-78b3-43a0-be66-3862cd0f6504_0.png",
+            "page_number": 11,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The Peripheral Driver Library (PDL) is the runtime layer you call in firmware to initialize peripherals, configure clocks and pins, and invoke middleware — including the ML library.",
+        "explanation": "The PDL provides the API surface for everything you configure in the peripheral configurator. When you enable SCB2 as a UART in the configurator, the PDL gives you the initialization functions and interrupt handlers to drive it in firmware. Beyond communication peripherals, the PDL includes an SD host controller API for IoT device connectivity and an ML library for interfacing with the Ethos-U55 and NNLite accelerators. The SDK also provides installable packages for peripheral initialization, clock and pin configuration, and middleware selection, so you can pull in only what your project needs. CMSIS pack support and FreeRTOS integration are included, which matters for the face recognition terminal where you will run concurrent tasks on the M55 and M33.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "Peripheral driver library (PDL) for peripheral APIs, including SD host controller for connection to IoT devices; and ML library",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "Installable software development kits (SDK) for peripheral initialization, clock and pin configuration, and middleware selection",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "61c3d775-87bf-4945-a9dc-9a73df8c7411",
+            "snippet": "Code development and debugging in a cross-OS (Windows, Linux, Mac OS) IDE-neutral environment supporting Visual Studio Code, IAR, Keil and Eclipse IDEs... Industry-standard CMSIS pack support... RTOS support, including FreeRTOS",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_61c3d775-87bf-4945-a9dc-9a73df8c7411_0.png",
+            "page_number": 9,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "For the face recognition terminal specifically, three application notes are the highest-priority references: AN235935 (ModusToolbox getting started), AN237849 (security), and AN237976 (low-power modes).",
+        "explanation": "AN235935 is the entry point for any new PSOC Edge E84 project on ModusToolbox — it walks through the full project setup flow. AN237849 covers TrustZone partitioning, TF-M, and PSA compliance, which you need for the secure key management functions running on the M33. AN237976 covers low-power modes and power reduction techniques, directly supporting the deep sleep configuration decisions for the terminal's between-event idle states. Two additional notes are relevant for your specific hardware: AN239191 covers graphics on PSOC Edge MCU (relevant for the MIPI-DSI display pipeline), and AN240096 covers Trusted Firmware-M setup. Bookmarking these five before you start peripheral bring-up will prevent the common mistake of discovering a constraint late in integration.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+            "snippet": "AN235935: Getting started with PSOC Edge E84 on ModusToolbox software... AN239191: Getting started with graphics on PSOC Edge MCU... AN237849: Getting started with PSOC Edge security... AN240096: Getting started with Trusted Firmware-M (TF-M) on PSOC Edge... AN237976: PSOC Edge E84 MCU low-power modes and power reduction techniques",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_10/ChunkType.text_536f3ac5-2813-4242-a95e-437ac0c202d5_0.png",
+            "page_number": 10,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2c174358-39bc-40a9-bc2e-a5fa7d551d2f",
+            "snippet": "ModusToolbox software ecosystem providing embedded development tools and run-time assets, including support for multiple IDE/toolchains, extensive example projects, and middleware resources",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_1/ChunkType.text_2c174358-39bc-40a9-bc2e-a5fa7d551d2f_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "You are starting the face recognition terminal project. You need to enable a UART debug interface on SCB2, add FreeRTOS support, and ensure the project generates separate build targets for the M33 secure, M33 non-secure, and M55 cores. In what order do you use the four ModusToolbox tools, and which tool handles each requirement?",
+        "reveal": "You start with the Project Creator (step 1): select `APP_KIT_PSOCE84_EVK` as your BSP and your target IDE. The creator generates the three-core project structure (`proj_cm33_s`, `proj_cm33_ns`, `proj_cm55`) automatically. Next, open the peripheral configurator (step 2) and check SCB2 in the Communication section — this enables the UART interface and generates the PDL initialization code. Then open the Library Manager (step 3) and add the FreeRTOS library; the manager resolves dependencies and logs any conflicts. Finally, open your IDE (step 4) to write application code, referencing the PDL UART APIs generated in step 2 and the FreeRTOS task APIs added in step 3. Trying to add FreeRTOS by manually editing makefiles instead of using the Library Manager is the most common source of dependency conflicts on multi-core PSOC Edge projects.",
+        "hint": "Each tool in the workflow has a distinct responsibility — think about which tool owns hardware configuration versus software dependency management."
+      },
+      {
+        "prediction_prompt": "During integration testing, you discover that the proximity sensor on the I2C bus is not waking the system from deep sleep. You check your SCB assignment and find the I2C sensor bus is configured on SCB3. What is the problem, and which application note would you consult to resolve it?",
+        "reveal": "SCB3 cannot operate during System Deep Sleep — only SCB0 supports deep-sleep I2C slave mode with an external clock. The sensor cannot generate a wakeup event because SCB3's clock is gated when the system enters deep sleep. The fix is to reassign the I2C sensor bus to SCB0 in the peripheral configurator. To understand the full set of deep-sleep peripheral constraints and the correct power mode transition sequence, you would consult AN237976 (PSOC Edge E84 MCU low-power modes and power reduction techniques). This is exactly the type of constraint that is easy to miss during initial peripheral assignment and expensive to discover late in hardware bring-up.",
+        "hint": "Think about which SCB has documented deep-sleep capability, and which application note covers power mode behavior."
+      }
+    ],
+    "summary": "ModusToolbox organizes PSOC Edge E8 development into a four-step workflow — Project Creator, peripheral configurators, Library Manager, and IDE — backed by a structured set of application notes and the PDL runtime library; knowing which resource answers which question is the skill that keeps peripheral bring-up on schedule.",
+    "figures": [
+      {
+        "chunk_id": "2edab2cd-3c89-44b7-862d-133345563b4f",
+        "after_key_point": 1,
+        "caption": "The four-step ModusToolbox workflow for a PSOC Edge E84 project: (1) Project Creator selects the BSP and generates the multi-core project structure, (2) the peripheral configurator enables specific blocks like SCB2, (3) Library Manager resolves dependencies including FreeRTOS, and (4) the Eclipse IDE (optional) provides build, debug, and code editing.",
+        "alt_text": "Four overlapping software windows labeled 1 through 4. Window 1 shows the Project Creator 2.10 dialog with BSP set to KIT_PSOCE84_EVK and Target IDE set to Eclipse IDE for ModusToolbox. Window 2 shows the Peripherals tab with the Communication section expanded, listing CAN FD, QSPI, SDHC, and Serial Communication Blocks 0 through 7, with SCB2 checked. Window 3 shows the Library Manager 2.10 with APP_KIT_PSOCE84_EVK active and sub-projects proj_cm33_ns, proj_cm33_s, and proj_cm55 listed, alongside the Eclipse IDE Project Explorer showing the Hello_World project folder structure. Window 4 shows a code editor with main.c open, displaying include directives for cyhal.h, cybsp.h, FreeRTOS.h, task.h, and timers.h, along with macro definitions for a CM33 blinky task.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.figure_2edab2cd-3c89-44b7-862d-133345563b4f_0.png",
+        "page_number": 11
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each development task to the ModusToolbox tool that handles it:",
+      "pairs": [
+        {
+          "left": "Select BSP and generate multi-core project structure",
+          "right": "Project Creator"
+        },
+        {
+          "left": "Enable SCB2 as UART and generate PDL initialization code",
+          "right": "Peripheral configurator"
+        },
+        {
+          "left": "Add FreeRTOS and resolve middleware dependencies",
+          "right": "Library Manager"
+        },
+        {
+          "left": "Write application code and launch debug sessions",
+          "right": "IDE (Eclipse, VS Code, IAR, or Keil)"
+        }
+      ],
+      "explanation": "Each ModusToolbox tool owns a distinct phase of the workflow: project structure and BSP selection, hardware block configuration, software dependency management, and code authoring/debugging. Mixing these responsibilities — for example, manually editing makefiles to add libraries instead of using the Library Manager — is a common source of dependency conflicts on multi-core projects."
+    },
+    {
+      "after_key_point": 3,
+      "type": "fill_blank",
+      "stem": "When you need to understand the deep-sleep peripheral constraints that affect your I2C sensor bus assignment, the most targeted resource to consult is ___.",
+      "answer": "AN237976 (low-power modes and power reduction techniques)",
+      "distractors": [
+        "the Architecture Reference Manual",
+        "AN235935 (getting started)",
+        "the Library Manager log"
+      ],
+      "explanation": "Application notes are scoped to specific topics: AN237976 covers low-power modes and power reduction techniques, making it the correct reference for deep-sleep peripheral behavior. The Architecture Reference Manual covers hardware block descriptions broadly, and AN235935 covers initial project setup — neither is optimized for power mode constraint lookup."
+    }
+  ],
+  "content_gaps": [
+    "ModusToolbox PDL API signatures and initialization code patterns are not included in the provided datasheet chunks. Hands-on configuration examples (e.g., exact PDL function calls for SCB UART initialization or clock tree setup) require the Architecture Reference Manual and PDL API documentation as supplementary sources.",
+    "DEEPCRAFT Studio is mentioned in the source material as enabling the ML model development journey but no procedural detail is available in the provided chunks to cover its workflow for Ethos-U55 or NNLite model deployment."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are bringing up firmware for a face recognition terminal based on the PSOC Edge E8. The terminal must run a full face recognition model continuously during active use, requiring high throughput and low latency. A separate lightweight presence-detection model runs in the background at all times to wake the system when a person approaches.",
+        "question_text": "You need to assign each inference workload to the correct ML accelerator. Which assignment correctly matches each workload to the accelerator best suited for its requirements?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Assign the full face recognition model to the Ethos-U55 (high-performance domain, 128 MACs/cycle) and the presence-detection model to the NNLite (low-power domain, always-on)",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Assign the full face recognition model to the NNLite (low-power domain, always-on) and the presence-detection model to the Ethos-U55 (high-performance domain, 128 MACs/cycle)",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Assign both the full face recognition model and the presence-detection model to the Ethos-U55, since it provides higher throughput and supports a broader set of neural network kernels",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The Ethos-U55 operates in the high-performance domain alongside the Cortex-M55 at up to 320 MHz and delivers 128 MACs/cycle, making it the right choice for a computationally intensive face recognition model with strict latency requirements. The NNLite is optimized for low-to-moderate complexity models such as wake word detection and human activity recognition, operates in the low-power domain, and is designed for always-on use cases — exactly matching the presence-detection workload.",
+        "incorrect": "The NNLite is documented as being optimized for low-to-moderate complexity ML models (e.g., wake word detection, human activity recognition) in the low-power domain for always-on use. It is not suited for a full face recognition model requiring high throughput. The Ethos-U55, with 128 MACs/cycle in the high-performance domain, is the correct accelerator for the demanding face recognition workload. Review the ML accelerator capabilities in the PSOC Edge E8 documentation."
+      },
+      "references": [
+        {
+          "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+          "snippet": "This product line includes an Arm® Ethos-U55 neural net processor, which works in conjunction with the Cortex®-M55 CPU to accelerate neural net (NN) operations. It supports 8-bit weights and weight compression to reduce memory usage. It also performs 128 MACs/clock cycle.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_b7cefb2c-3147-4b25-8a63-f80a20d5af0f_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "This product line includes a neural network (NNLite) coprocessor, which works in conjunction with the Cortex®-M33 CPU... It is an ACTIVE state peripheral that accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR)... The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are partitioning firmware tasks for the face recognition terminal across the PSOC Edge E8's two CPU domains. The terminal performs the following functions: (1) running the face detection inference model, (2) rendering the UI on the MIPI-DSI display, (3) monitoring the door lock GPIO and handling access control I/O, and (4) managing secure key storage and TF-M services.",
+        "question_text": "Which partitioning plan correctly assigns all four functions to the appropriate CPU domain based on the documented capabilities of each domain?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Face detection inference → Cortex-M33; display rendering → Cortex-M33; access control I/O → Cortex-M55; secure key management → Cortex-M55",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Face detection inference → Cortex-M55; display rendering → Cortex-M55; access control I/O → Cortex-M33; secure key management → Cortex-M33",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Face detection inference → Cortex-M55; display rendering → Cortex-M33; access control I/O → Cortex-M55; secure key management → Cortex-M33",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The Cortex-M55 operates in the high-performance domain (up to 320 MHz), which is documented as the domain for DSP, neural network processing, and high-speed display output via MIPI-DSI. The Cortex-M33 operates in the low-power domain (up to 160 MHz) and hosts TrustZone with TF-M for secure services, making it the correct domain for always-on access control I/O and secure key management. The IPC block synchronizes tasks between the two cores.",
+        "incorrect": "The PSOC Edge E8 documentation specifies that the high-performance domain (Cortex-M55) is used for high-speed compute tasks including DSP, neural network processing, and display controller output via MIPI-DSI. The low-power domain (Cortex-M33) is designed for always-on sensing, security services (TF-M/TrustZone), and lower-frequency I/O tasks. Assigning display rendering or inference to the Cortex-M33, or placing secure key management on the Cortex-M55, contradicts the documented domain capabilities. Review the CPU domain architecture in the PSOC Edge E8 documentation."
+      },
+      "references": [
+        {
+          "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+          "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+          "snippet": "the high-performance domain is used for high-speed communication channels (>100 MHz, display controller outputting frames via MIPI DSI), and DSP and neural network processing, where work is done as fast as possible to reduce real time constraints for applications. Additionally, the high-performance domain can be selectively powered down to save energy and reactivated when needed, while the low-power domain continues to remain active.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+          "page_number": 17,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+          "snippet": "An inter-processor communication (IPC) block is included for synchronizing the CPUs' tasks.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_9a63d279-e06e-4bb1-b60b-64c37a335521_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring the clock tree for the face recognition terminal's active recognition state. In this state, the Cortex-M55 must run at its maximum documented frequency for the System High Performance (HP) power mode, and the Cortex-M33 must also run at its maximum documented frequency for HP mode. You are using DPLL_LP0 as the clock source for `clk_hf[0]`, `clk_hf[1]`, and `clk_hf[2]`, with all dividers set to 1.",
+        "question_text": "What DPLL_LP0 output frequency should you configure to meet both CPU frequency targets simultaneously in System HP mode?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "160 MHz, because the Cortex-M33 maximum in HP mode sets the lower bound and both CPUs share the same clock path",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "240 MHz, because this is the midpoint between the two CPU maximums and satisfies both cores without exceeding either limit",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "320 MHz, because the DPLL must be set to the greater of the two CPU frequency requirements, and the Cortex-M55 maximum in HP mode is 320 MHz",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The documented System HP mode maximums are 320 MHz for the Cortex-M55/Ethos-U55 and 160 MHz for the Cortex-M33/NNLite. When a single DPLL feeds both clock paths with dividers set to 1, the DPLL output must be set to the greater of the two CPU frequency requirements — 320 MHz — so that the Cortex-M55 reaches its maximum. The Cortex-M33 clock path would then require a divide-by-2 divider on `clk_hf[0]` to bring it down to 160 MHz.",
+        "incorrect": "The PSOC Edge E8 documentation specifies System HP mode maximums of 320 MHz for the Cortex-M55 and 160 MHz for the Cortex-M33. When a single DPLL sources both clock paths, it must be set to the highest required frequency (320 MHz for the Cortex-M55). The Cortex-M33 clock path is then divided down separately. Setting the DPLL to 160 MHz would under-clock the Cortex-M55; 240 MHz is not a documented target frequency for either core. Review the clock tree configuration and HP/LP mode frequency limits in the PSOC Edge E8 documentation."
+      },
+      "references": [
+        {
+          "chunk_id": "b1e6ab63-5cf5-4e8d-b387-6968a9a65faf",
+          "snippet": "System power mode | M55/U55 | M33/NNLite — High Performance (HP): 320 MHz | 160 MHz — Low Power (LP): 140 MHz | 80 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.table_b1e6ab63-5cf5-4e8d-b387-6968a9a65faf_0.png",
+          "page_number": 23,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+          "snippet": "DPLL_LP0 frequency: Greater of CM33 or CM55 condition frequency — DPLL output frequency is lowest to meet CPU frequency(s) in specification CM33 and CM55 columns",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+          "page_number": 66,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are optimizing the face recognition terminal's power consumption during periods between recognition events. The terminal must retain only a small wakeup context (under 64 KB of SRAM) and must meet a battery current budget of no more than 25 µA. The terminal does not need to retain the full system SRAM or TCM contents between events.",
+        "question_text": "Which deep sleep configuration should you select to meet both the SRAM retention requirement and the 25 µA current budget?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Deep Sleep-OFF (PD1 Disabled): approximately 20.7 µA typical, no SRAM retention",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System Deep Sleep-RAM (64 KB SRAM retention, PD1 Disabled): approximately 21.7 µA typical, retains 64 KB SRAM",
+          "is_correct": true,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "System Deep Sleep (64 KB SRAM + 1024 KB System SRAM + TCM retention, PD1 and CM55 Enabled): approximately 41.6 µA typical, retains full SRAM and TCM",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. System Deep Sleep-RAM retains 64 KB of SRAM — sufficient for the wakeup context — and draws approximately 21.7 µA typical, which is within the 25 µA budget. System Deep Sleep-OFF would not retain any SRAM, losing the wakeup context. System Deep Sleep retains far more SRAM than needed and draws approximately 41.6 µA, exceeding the power budget.",
+        "incorrect": "System Deep Sleep-OFF (approximately 20.7 µA) meets the current budget but retains no SRAM, which means the wakeup context would be lost. System Deep Sleep (approximately 41.6 µA) retains more SRAM than required but exceeds the 25 µA budget. System Deep Sleep-RAM is the correct choice: it retains exactly 64 KB of SRAM for the wakeup context and draws approximately 21.7 µA, satisfying both constraints. Review the deep sleep mode current consumption specifications in the PSOC Edge E8 electrical specifications."
+      },
+      "references": [
+        {
+          "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+          "snippet": "SIDDSO: System Deep Sleep-OFF, PD1 Disabled | IBAT Typical: 20.7 µA... SIDDSRA: System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 21.7 µA... SIDDSD: System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled | IBAT Typical: 41.6 µA",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+          "page_number": 73,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_2"
+    },
+    {
+      "mcq_id": "MCQ5",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are completing the hardware bring-up plan for the face recognition terminal. The terminal requires a UART debug interface that must operate as a master, an I2C sensor bus that must remain active during System Deep Sleep so a proximity sensor can wake the system, and a SPI interface for an external NOR flash chip operating as a master.",
+        "question_text": "Which SCB assignment correctly satisfies all three interface requirements given the documented constraints of the PSOC Edge E8 SCB blocks?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "UART debug → SCB0; I2C sensor bus (Deep Sleep) → SCB3; SPI flash master → SCB5",
+          "is_correct": false,
+          "id": "MCQ5_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "UART debug → SCB2; I2C sensor bus (Deep Sleep) → SCB0; SPI flash master → SCB7",
+          "is_correct": true,
+          "id": "MCQ5_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "UART debug → SCB0; I2C sensor bus (Deep Sleep) → SCB0; SPI flash master → SCB4",
+          "is_correct": false,
+          "id": "MCQ5_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. SCB0 is the only SCB that can operate in System Deep Sleep mode, but it supports only I2C slave mode and SPI slave mode — not UART and not master modes. Assigning the Deep Sleep I2C sensor bus to SCB0 in slave mode satisfies the always-on wakeup requirement. The UART debug interface (master) and SPI flash master must use SCB1–SCB11, which support I2C, UART, and SPI in both master and slave configurations.",
+        "incorrect": "SCB0 has a critical documented constraint: it can operate in System Deep Sleep, but it only supports I2C slave mode and SPI slave mode — it cannot be configured as a UART or as a master. Assigning UART to SCB0 violates this constraint. Additionally, a single SCB cannot be assigned to two interfaces simultaneously. The I2C sensor bus requiring Deep Sleep operation must use SCB0 (as an I2C slave), while the UART debug and SPI flash master interfaces must use SCB1–SCB11. Review the SCB block constraints in the PSOC Edge E8 documentation."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves. SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ5_opt_2"
+    }
+  ]
+}

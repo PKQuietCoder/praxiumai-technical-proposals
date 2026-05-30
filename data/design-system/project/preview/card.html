@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);background:var(--grey-50);color:var(--fg-1);padding:22px;}
+  .wrap{display:flex;gap:18px;}
+  .card{width:248px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-1);transition:box-shadow var(--duration) var(--ease);}
+  .card.hover{box-shadow:var(--shadow-2);}
+  .thumb{height:96px;background:linear-gradient(135deg,var(--ocean-100),var(--ocean-300));display:flex;align-items:center;justify-content:center;color:#fff;}
+  .thumb svg{width:34px;height:34px;}
+  .body{padding:14px 16px 16px;}
+  .ov{font:var(--overline);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);}
+  h3{font:var(--display-05);margin:5px 0 6px;color:var(--fg-1);}
+  p{font:var(--body-03);color:var(--fg-2);margin:0 0 12px;}
+  a{font:var(--label);color:var(--ocean-600);text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  a svg{width:15px;height:15px;}
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="card"><div class="thumb"><i data-lucide="cpu"></i></div><div class="body"><div class="ov">Automotive</div><h3>AURIX™ TC4x</h3><p>Scalable microcontrollers for ADAS, e-mobility and connectivity.</p><a href="#">Learn more <i data-lucide="arrow-right"></i></a></div></div>
+    <div class="card hover"><div class="thumb" style="background:linear-gradient(135deg,var(--green),#3f7a12)"><i data-lucide="zap"></i></div><div class="body"><div class="ov">Industrial Power · hover</div><h3>CoolSiC™ MOSFET</h3><p>650 V silicon-carbide for efficient power conversion.</p><a href="#">Learn more <i data-lucide="arrow-right"></i></a></div></div>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

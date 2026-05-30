@@ -1,0 +1,74 @@
+[
+  {
+    "index": 0,
+    "name": "David Nakamura",
+    "role": "Embedded Firmware Engineer - Edge AI and Vision Systems",
+    "description": "Develops firmware and middleware for embedded systems products incorporating the STM32N6 series, including peripheral drivers, RTOS integration, and neural network inference pipelines for camera-based applications.",
+    "experience": "4-10 years in embedded C/C++ development on ARM Cortex-M platforms",
+    "background": "Electrical engineering or computer engineering degree; familiar with STM32 HAL/LL drivers, CMSIS, and embedded ML frameworks such as STM32Cube.AI",
+    "needs": "Understand how to configure and use the Cortex-M55 core features (Helium/MVE, TCM, caches), set up DMA (GPDMA/HPDMA) for high-throughput data pipelines, interface the NPU/Neural-ART accelerator, configure the ISP and camera subsystem, manage clock trees and low-power modes, and correctly use communication peripherals (SPI, I2C, I3C, UART, USB, Ethernet, FDCAN)",
+    "pain_points": "Navigating the large number of peripherals and their interdependencies, correctly configuring alternate functions and GPIO multiplexing, optimizing power consumption across multiple operating modes, integrating the NPU inference engine with the camera ISP pipeline without CPU bottlenecks",
+    "key_job_tasks": [
+      "Configure GPIO alternate functions and peripheral clocks using RCC and SYSCFG registers",
+      "Set up GPDMA and HPDMA linked-list transfers for camera, audio, and memory-to-peripheral data flows",
+      "Implement and optimize neural network inference using the Neural-ART NPU subsystem",
+      "Manage power modes (Run, Sleep, Stop, Standby) and wake-up sources for low-power applications",
+      "Write and debug communication peripheral drivers (SPI, I2C, I3C, UART, USB OTG, Ethernet)"
+    ],
+    "context": "Works in a product development team building embedded vision, industrial IoT, or edge AI devices; references the datasheet daily alongside the STM32N6 reference manual and STM32CubeIDE"
+  },
+  {
+    "index": 1,
+    "name": "Priya Subramaniam",
+    "role": "Hardware Design Engineer - Embedded Systems PCB Design",
+    "description": "Designs schematics and PCB layouts for products built around the STM32N6 microcontroller family, responsible for power supply design, signal integrity, package selection, and ensuring electrical compliance.",
+    "experience": "5-12 years in hardware/PCB design for embedded products",
+    "background": "Electrical engineering degree; proficient with schematic capture and PCB layout tools (Altium, KiCad, Cadence); familiar with BGA fanout, signal integrity, and power integrity analysis",
+    "needs": "Understand package options and mechanical dimensions (VFBGA142 through VFBGA264), pin assignments and ballout diagrams, power supply domain architecture (SMPS, VDDCORE, VDDA18, VDDIO domains), absolute maximum ratings and operating conditions, I/O electrical characteristics (voltage levels, drive strength, ESD ratings), and timing requirements for external memory interfaces (XSPI, FMC, SDMMC)",
+    "pain_points": "Selecting the correct package variant for I/O count and board space constraints, designing the multi-rail power supply scheme (SMPS step-down, backup domain, analog supply) correctly, meeting signal integrity requirements for high-speed interfaces (XSPI at 200 MHz DTR, Gigabit Ethernet, CSI-2), and ensuring ESD/latch-up compliance",
+    "key_job_tasks": [
+      "Select the appropriate VFBGA package variant based on I/O requirements and PCB constraints",
+      "Design the multi-domain power supply network including SMPS, VDDCORE, VDDA18, and VDDIO rails",
+      "Assign pins and verify ballout diagrams for schematic capture and PCB fanout",
+      "Verify electrical compliance against absolute maximum ratings, voltage characteristics, and ESD ratings",
+      "Review timing diagrams for external memory interfaces (XSPI, FMC SDRAM, SDMMC) to ensure signal integrity"
+    ],
+    "context": "Works closely with firmware engineers and systems architects; uses the datasheet as the primary hardware reference during schematic design and PCB layout reviews"
+  },
+  {
+    "index": 2,
+    "name": "Marcus Hoffmann",
+    "role": "Field Application Engineer (FAE) - Microcontroller Solutions",
+    "description": "Provides pre-sales and post-sales technical support to customers evaluating and designing with STM32N6 microcontrollers, helping them select the right device variant and resolve design challenges.",
+    "experience": "6-15 years in embedded systems, with 2-5 years in an FAE or applications engineering role",
+    "background": "Electrical or computer engineering background with broad knowledge of embedded hardware and software; experienced with STM32 ecosystem tools and application notes",
+    "needs": "Comprehensive understanding of all STM32N6 device variants (N645xx, N647xx, N655xx, N657xx) and their feature differentiation (crypto vs. no crypto, Neural-ART vs. no Neural-ART), peripheral capabilities and counts, ordering information, package options, and key electrical specifications to answer customer questions and guide device selection",
+    "pain_points": "Quickly finding the right device variant for a customer's specific requirements (I/O count, security features, AI acceleration, package size), explaining trade-offs between STM32N6x5xx (crypto, no NPU) and STM32N6x7xx (NPU, no crypto) variants, and supporting customers who encounter hardware bring-up or peripheral configuration issues",
+    "key_job_tasks": [
+      "Guide customers through device selection by comparing feature tables across STM32N6 variants",
+      "Explain peripheral capabilities and limitations to hardware and firmware engineers during design reviews",
+      "Interpret electrical characteristics and timing specifications to resolve customer signal integrity or power issues",
+      "Support customers with package selection, footprint recommendations, and thermal characteristics",
+      "Provide ordering information and clarify part number nomenclature for procurement teams"
+    ],
+    "context": "Interfaces with customers ranging from startups to large OEMs across industrial, consumer, and automotive-adjacent markets; uses the datasheet as the primary customer-facing technical reference document"
+  },
+  {
+    "name": "Jin-ho Park",
+    "role": "Firmware Engineer - Biometric Access Control Systems",
+    "description": "Evaluates and integrates the STM32N6 microcontroller into a face recognition access control terminal (similar to Suprema FaceStation 2), responsible for assessing device variant suitability and implementing firmware for facial biometric pipelines including camera capture, ISP processing, and neural network inference.",
+    "needs": [
+      "Understand the differences between STM32N6x5xx and STM32N6x7xx variants to select the right device for a face recognition product",
+      "Evaluate the Neural-ART NPU subsystem for running deep neural network inference on facial biometric data",
+      "Configure the camera/ISP subsystem and DMA pipelines for real-time face capture under varying lighting conditions",
+      "Assess security features (TrustZone, crypto engine) relevant to access control and biometric data protection",
+      "Understand memory architecture (SRAM, TCM, external memory interfaces) to support low-latency inference pipelines"
+    ],
+    "pain_points": [
+      "Choosing between STM32N6x5xx (crypto, no NPU) and STM32N6x7xx (NPU, no crypto) given that a face recognition terminal needs both AI acceleration and strong security",
+      "Determining whether the Neural-ART NPU throughput (600 Gops) is sufficient for real-time face matching at the required speed and accuracy",
+      "Integrating the camera ISP pipeline with the NPU inference engine without CPU bottlenecks, especially under variable lighting conditions",
+      "Navigating the large peripheral set and interdependencies to build a reliable, low-latency biometric access control firmware stack"
+    ]
+  }
+]

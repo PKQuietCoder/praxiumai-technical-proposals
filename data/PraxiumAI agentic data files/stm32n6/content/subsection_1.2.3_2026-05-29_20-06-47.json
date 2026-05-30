@@ -1,0 +1,289 @@
+{
+  "subsection_id": "1.2.3",
+  "subsection_title": "Write your variant selection recommendation",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Produce a written variant selection recommendation that identifies which STM32N6 variant satisfies the face recognition terminal's NPU, crypto, and I/O requirements",
+    "Explicitly state the NPU/crypto architectural tradeoff and its mitigation in a recommendation memo"
+  ],
+  "content": {
+    "hook_sentence": "A variant selection recommendation that omits the NPU/crypto tradeoff is not a recommendation — it is a deferred risk that will surface at PCB spin two.",
+    "introduction": "You have confirmed the STM32N657xx meets your Neural-ART and crypto requirements, and you have narrowed the package to VFBGA223 or VFBGA264 based on I/O count. The final step before handing off to your hardware team is writing a traceable recommendation memo that captures the variant choice, the architectural tradeoff you accepted, and the mitigation strategy for the missing capability. This is the document your team will reference when a reviewer asks why you chose this device — and when you revisit the decision six months later.",
+    "key_points": [
+      {
+        "point": "State the variant choice and the hard requirement it satisfies first.",
+        "explanation": "Your recommendation should open with the selection decision and the primary driver. For the face recognition terminal, the STM32N6x7xx is the correct variant because it provides the Neural-ART NPU — the only path to on-device DNN inference without an external AI co-processor. The STM32N6x5xx provides the full crypto engine (SAES, CRYP, PKA, MCE) but has no Neural-ART NPU, making it unable to satisfy the real-time inference requirement on its own. Write this as a direct statement: \"We select the STM32N6x7xx variant. This variant provides the Neural-ART accelerator required for real-time face matching inference. The STM32N6x5xx was evaluated and rejected because it does not include the Neural-ART NPU.\" This framing makes the decision traceable and prevents the common mistake of burying the rationale in a footnote.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+            "snippet": "STM32N647xx features and peripheral counts — Neural-ART: Yes; Crypto (SAES, CRYPT, PKA, MCE1.4): No",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+            "page_number": 17,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+            "snippet": "STM32N655xx features and peripheral counts — Crypto (SAES, CRYPT, PKA, MCE1.4): Yes; Neural-ART: No",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Explicitly name the capability gap and state it as an open architectural risk.",
+        "explanation": "The STM32N6x7xx does not include SAES, CRYP, PKA, or MCE. Your recommendation must name this gap directly — not soften it. A statement like \"crypto support is limited\" is insufficient. Write: \"The STM32N6x7xx does not provide SAES, CRYP, PKA, or MCE. Hardware-accelerated AES with side-channel attack protection, asymmetric key operations, and inline memory encryption are absent on this variant.\" This matters because your product requires encrypted storage of biometric templates. Leaving the gap unnamed means the next engineer reading the document may not realize the security architecture needs a compensating control. The MCE feature — which provides system bus inline encryption and decryption for XSPI-connected external memory — is specifically absent, meaning biometric templates stored in external flash will not have hardware-transparent encryption unless you add it at the software layer or through an external secure element. The SAES, available only on STM32N655xx and STM32N657xx devices, provides AES encryption certified to SESIP and PSA security assurance level 3, including differential power analysis protection. None of that is available on the NPU variant.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+            "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+            "page_number": 54,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "773e666c-102c-43f1-8b41-f8cdac78c359",
+            "snippet": "The cryptographic processor (CRYP) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. This function is available only on STM32N655xx and STM32N657xx devices.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_55/ChunkType.text_773e666c-102c-43f1-8b41-f8cdac78c359_0.png",
+            "page_number": 55,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Propose a concrete mitigation for the missing crypto capability.",
+        "explanation": "A recommendation that identifies a gap without proposing a mitigation is incomplete. Your memo should include at least one of the following compensating controls, with a note that the choice requires further security architecture review: - **Software crypto library on the Cortex-M55**: The STM32N6x7xx still includes TrustZone, which lets you isolate a secure processing domain. A software AES implementation running in the secure world can handle biometric template encryption, though without the DPA protection that SAES provides. - **External secure element**: An I2C or SPI-connected secure element (e.g., ST33 series) can offload key storage and asymmetric operations, compensating for the absent PKA. - **Dual-chip architecture**: If the security certification requirement is hard (e.g., FIDO biometric certification or ISO/IEC 30107 compliance), a two-chip design pairing the STM32N6x7xx with a dedicated security MCU may be the only viable path. The recommendation does not need to resolve this choice — it needs to flag that the choice exists and assign an owner. Write: \"Mitigation for absent hardware crypto is TBD pending security architecture review. Options include software AES in TrustZone secure world, external secure element, or dual-chip design. This item is a prerequisite for security certification sign-off.\"",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "ffc674af-e3cf-43b7-9267-7d402a146147",
+            "snippet": "Boot hardware key for secure AES, stored in backup registers, protected against read and write access; Tamper configuration and backup registers privilege protection; Monotonic counter",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_66/ChunkType.text_ffc674af-e3cf-43b7-9267-7d402a146147_0.png",
+            "page_number": 66,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Document the package selection with the datasheet designation code and I/O count justification.",
+        "explanation": "Building on the package analysis from §1.2.2, your recommendation must record the specific package designation — not just the ball count — so the hardware team can place the correct part number in the BOM and PCB footprint library. For a terminal requiring 110–130+ I/Os to support CSI-2, XSPI, USB, Ethernet, and GPIO, the VFBGA223 (10×10 mm, 0.5 mm pitch, package code B0GK) or VFBGA264 (14×14 mm, 0.8 mm pitch, package code B0GH) are the candidates. Write the justification as: \"Package VFBGA264 selected. This package provides 165 I/Os, sufficient for the full peripheral set. The VFBGA223 provides 114 I/Os and remains a fallback if PCB area is constrained, subject to a detailed pin assignment review confirming all required peripherals can be routed.\" Include the datasheet table reference (Section 6, Table 2 or equivalent) so the reviewer can verify the I/O count independently.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+            "snippet": "Package Name: VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165; VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+            "page_number": 17,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+            "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+            "page_number": 0,
+            "chunk_type": "figure"
+          }
+        ]
+      },
+      {
+        "point": "Close the recommendation with explicit open items and owners.",
+        "explanation": "A recommendation memo that ends with the selection decision alone leaves the team without a clear next step. Close with a short list of open items that must be resolved before the hardware design is locked. For the face recognition terminal, the minimum set is: 1. Security architecture review: confirm the mitigation for absent SAES/CRYP/PKA/MCE and assign a security certification owner. 2. Pin assignment verification: map all required peripheral signals to the selected package's available I/Os using the datasheet Section 6 pin tables, and confirm no conflicts exist. 3. NPU throughput characterization: the datasheet does not provide a per-inference latency specification for the Neural-ART NPU at a given model size. This gap must be closed with ST's Neural-ART development tools or an early silicon evaluation before committing to the device. This structure — decision, tradeoff, mitigation, package, open items — gives your engineering team and any external reviewer a complete picture of where the design stands and what work remains.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+            "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "For camera applications, a parallel and CSI interface together with an integrated hardware ISP is foreseen... The ISP output can be directly fed via a DMA to the NPU.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your engineering manager reads your draft recommendation and says: \"You selected the STM32N6x7xx for the NPU, but I don't see anything about how we handle biometric template encryption. The customer's security spec requires hardware AES with side-channel protection. Is this covered?\" What should your recommendation have included — and what does the correct answer look like?",
+        "reveal": "The recommendation was incomplete. The STM32N6x7xx does not include SAES (the variant with SESIP/PSA Level 3 certified AES and DPA protection) or CRYP, PKA, or MCE. These are available only on the STM32N6x5xx variants, which lack the Neural-ART NPU. A complete recommendation would have: (1) named this gap explicitly — \"SAES, CRYP, PKA, and MCE are absent on the STM32N6x7xx\"; (2) stated that the customer's hardware AES with side-channel protection requirement cannot be met by the selected variant alone; and (3) proposed a mitigation — for example, an external secure element for key storage and asymmetric operations, or a software AES implementation in the TrustZone secure world with the acknowledgment that DPA protection is not available at the software layer. The open item would be assigned to the security architect with a deadline before PCB layout freeze.",
+        "hint": "Think about which features are exclusive to the STM32N6x5xx and what the customer's security spec actually requires."
+      },
+      {
+        "prediction_prompt": "You are reviewing a colleague's variant selection recommendation. They have written: \"We select the STM32N6x5xx for its full crypto engine. Real-time inference will be handled by the Neural-ART NPU.\" What is wrong with this recommendation, and what should it say instead?",
+        "reveal": "The recommendation contains a factual error that would cause a hardware design failure. The STM32N6x5xx does not include the Neural-ART NPU — the NPU is exclusive to the STM32N6x7xx. A recommendation selecting the STM32N6x5xx cannot claim Neural-ART NPU support. The correct recommendation must acknowledge the hard tradeoff: no single STM32N6 variant provides both the Neural-ART NPU and the full crypto engine simultaneously. The correct version would either: (a) select the STM32N6x7xx for the NPU and explicitly address the missing crypto capability with a mitigation strategy, or (b) select the STM32N6x5xx and explicitly state that real-time DNN inference requires an external AI accelerator co-processor, with that co-processor specified and its integration plan documented as an open item.",
+        "hint": "Check which variant actually includes the Neural-ART NPU before accepting any claim about it."
+      }
+    ],
+    "summary": "A complete variant selection recommendation states the chosen device and its primary justification, names the capability gap and its impact on the product requirements, proposes a concrete mitigation with an assigned owner, documents the package designation with I/O count traceability, and closes with explicit open items — giving your team a decision record that survives the next design review.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When writing a variant selection recommendation for a product that requires both on-device DNN inference and hardware-accelerated AES with side-channel protection, the correct approach is to select the STM32N6x7xx for the NPU and treat the absent crypto capability as an ___ that requires a mitigation strategy.",
+      "answer": "open architectural risk",
+      "distractors": [
+        "minor limitation",
+        "software-transparent feature",
+        "future firmware update"
+      ],
+      "explanation": "The STM32N6x7xx lacks SAES, CRYP, PKA, and MCE entirely — these are not degraded features but absent ones. Treating the gap as an open architectural risk ensures it gets a mitigation assigned before the design is locked, rather than being discovered at security certification."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each recommendation section to its purpose in the variant selection document:",
+      "pairs": [
+        {
+          "left": "Variant choice with primary driver",
+          "right": "Makes the decision traceable and prevents the rationale from being buried"
+        },
+        {
+          "left": "Named capability gap",
+          "right": "Ensures the next engineer understands which hardware features are absent"
+        },
+        {
+          "left": "Package designation with I/O count",
+          "right": "Gives the hardware team the exact part identifier for BOM and PCB footprint"
+        },
+        {
+          "left": "Mitigation for missing crypto",
+          "right": "Assigns responsibility for compensating controls before security certification"
+        }
+      ],
+      "explanation": "Each section of a recommendation memo serves a distinct audience and purpose: the variant choice is for decision traceability, the gap statement is for the security architect, the package designation is for the hardware team, and the mitigation section is for whoever owns security certification sign-off."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not provide a per-inference latency specification for the Neural-ART NPU at any given model size or complexity, making it impossible to verify from the datasheet alone whether 600 Gops is sufficient for the target face matching latency requirement. Learners should be directed to ST's Neural-ART development tools or an early silicon evaluation for this data point.",
+    "The datasheet does not confirm whether any future STM32N6 variant will combine both the Neural-ART NPU and the full crypto engine. The NPU/crypto tradeoff appears to be a hard architectural constraint with no documented roadmap resolution.",
+    "No specific security certification pathway (e.g., FIDO biometric certification, ISO/IEC 30107, GDPR biometric data handling requirements) is addressed in the datasheet. Learners writing a recommendation for a certified product will need to source these requirements from external standards documents."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are a firmware engineer at a biometric access control company evaluating the STM32N6 family for a new face recognition terminal. Your product requirements specify: (1) real-time on-device face recognition inference using a deep neural network, (2) encrypted storage of biometric templates using AES and PKA-based asymmetric operations, and (3) camera input via a DCMI/CSI interface. You are reviewing the STM32N6 datasheet feature tables and must choose between the STM32N6x5xx and STM32N6x7xx variants.",
+        "question_text": "Based on the variant feature tables, which statement correctly describes the architectural tradeoff you must account for in your selection recommendation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N6x7xx provides the Neural-ART NPU for real-time inference but lacks the full crypto engine (SAES, CRYP, PKA, MCE), while the STM32N6x5xx provides the full crypto engine but has no Neural-ART NPU.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The STM32N6x5xx provides the Neural-ART NPU for real-time inference but lacks the full crypto engine (SAES, CRYP, PKA, MCE), while the STM32N6x7xx provides the full crypto engine but has no Neural-ART NPU.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Both the STM32N6x5xx and STM32N6x7xx provide the Neural-ART NPU, but only the STM32N6x5xx includes the full crypto engine (SAES, CRYP, PKA, MCE) as an optional add-on.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N6x7xx variant includes the Neural-ART NPU required for real-time neural network inference, but it does not include the full hardware crypto engine (SAES, CRYP, PKA, MCE). The STM32N6x5xx is the inverse: it provides the full crypto suite but no Neural-ART NPU. This is the core architectural tradeoff your recommendation must address.",
+        "incorrect": "Review the STM32N6 datasheet feature tables carefully. The Neural-ART NPU is exclusive to the STM32N6x7xx variant, while the full crypto engine (SAES, CRYP, PKA, MCE) is exclusive to the STM32N6x5xx variant — neither variant provides both simultaneously. This tradeoff is the central decision point for your product selection."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are writing a variant selection recommendation memo for your engineering team. Your face recognition terminal must satisfy three hard requirements: (R1) run a convolutional neural network for face matching at 30 fps without CPU offload, (R2) store and retrieve encrypted biometric templates using hardware-accelerated AES and PKA, and (R3) interface with a MIPI CSI-2 camera module. You have confirmed that both STM32N6x5xx and STM32N6x7xx support the camera interface. However, no single variant satisfies both R1 and R2 simultaneously.",
+        "question_text": "Given that your product cannot compromise on real-time neural inference (R1) and you must address the missing crypto capability in your architecture, which variant should you select and what must your recommendation explicitly state?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Select the STM32N6x5xx for its full crypto engine, and state that R1 will be met by offloading inference to a discrete AI accelerator co-processor on the board.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Select the STM32N6x7xx for its Neural-ART NPU to satisfy R1, and explicitly state that hardware crypto (SAES, CRYP, PKA, MCE) is absent and must be mitigated through an alternative security architecture.",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Select the STM32N6x7xx for its Neural-ART NPU to satisfy R1, and state that R2 is automatically satisfied because the STM32N6x7xx includes a software crypto library bundled with the SDK.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. Since R1 (real-time neural inference) is a hard requirement that cannot be met without the Neural-ART NPU, the STM32N6x7xx is the correct selection. However, a valid recommendation must explicitly acknowledge that the STM32N6x7xx lacks the hardware crypto engine (SAES, CRYP, PKA, MCE) present in the STM32N6x5xx, and must propose how the security gap will be addressed — this is the architectural tradeoff that must be stated.",
+        "incorrect": "The STM32N6x7xx is the only variant with the Neural-ART NPU needed for R1. However, your recommendation cannot assume the crypto gap is resolved by a software library (the datasheet confirms the hardware crypto engine is absent in the x7xx variant) or by an external co-processor without explicitly stating that tradeoff. A sound recommendation names the missing capability and proposes a mitigation strategy."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    }
+  ]
+}

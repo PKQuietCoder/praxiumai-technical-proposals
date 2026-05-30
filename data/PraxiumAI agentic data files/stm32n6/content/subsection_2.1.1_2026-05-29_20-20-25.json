@@ -1,0 +1,354 @@
+{
+  "subsection_id": "2.1.1",
+  "subsection_title": "Characterize the Cortex-M55 Core",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Identify the Cortex-M55 core's clock frequency, vector processing capability, and FPU characteristics on the STM32N6",
+    "Select the correct on-chip memory region (ITCM, DTCM, ICACHE, DCACHE, or AXISRAM) for a given pipeline role based on access latency and capacity constraints"
+  ],
+  "content": {
+    "hook_sentence": "A 3 MB camera frame buffer placed in the wrong memory region can stall your entire inference pipeline — not because the bus is slow, but because the region is simply too small to hold the data.",
+    "introduction": "The Cortex-M55 is the CPU at the center of every STM32N6 device, and its memory subsystem directly determines whether your face recognition pipeline meets real-time latency requirements. Before you allocate frame buffers, model weights, and ISP output regions, you need a precise picture of what the core offers: its clock ceiling, its vector processing extension, its floating-point capability, and — critically — the size and latency characteristics of each on-chip memory type. Getting these wrong at the architecture stage costs you a PCB spin.",
+    "key_points": [
+      {
+        "point": "The Cortex-M55 runs up to 800 MHz in overdrive mode, giving you the headroom to run control-plane firmware alongside the NPU inference workload.",
+        "explanation": "Both the STM32N6x5xx and STM32N6x7xx devices are based on the Cortex-M55, operating at up to 800 MHz. The datasheet distinguishes two voltage-scaling operating points: VOS low caps the CPU at 600 MHz, while VOS high (overdrive) raises the ceiling to 800 MHz. For a face recognition terminal where the CPU manages the camera pipeline, access control I/O, and security tasks concurrently with NPU inference, you will almost certainly need overdrive mode. The CoreMark score of 3616 (4.52 CoreMark/MHz) gives you a benchmark anchor when estimating whether the CPU can keep up with peripheral servicing at your target frame rate.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "f812019b-eb64-427e-b95d-b1c4be83c2ea",
+            "snippet": "The STM32N6x5xx and STM32N6x7xx devices are based on the high-performance Arm Cortex-M55, operating at a frequency up to 800 MHz.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f812019b-eb64-427e-b95d-b1c4be83c2ea_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e8841dce-49ec-4313-baa6-4f6ba27cde36",
+            "snippet": "Arm 32-bit Cortex-M55, 3616 CoreMark, frequency up to 800 MHz, 32-Kbyte ICACHE, 32-Kbyte DCACHE, CoreMark score 4.52",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_e8841dce-49ec-4313-baa6-4f6ba27cde36_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "454d5691-dfb4-47f9-8ff8-4957968feeb4",
+            "snippet": "Clock frequency of Cortex-CM55 in overdrive (VOS high): 0 to 800 MHz; Clock frequency of Cortex-CM55 (VOS low): 0 to 600 MHz",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_138/ChunkType.table_454d5691-dfb4-47f9-8ff8-4957968feeb4_0.png",
+            "page_number": 138,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Helium (MVE) vector processing and a full FPU make the Cortex-M55 capable of energy-efficient DSP and floating-point math — relevant for any preprocessing you run on the CPU before handing data to the NPU.",
+        "explanation": "The Cortex-M55 includes Arm's M-Profile Vector Extension (MVE), marketed as Helium technology. MVE adds SIMD-style vector operations to the Cortex-M instruction set, enabling efficient digital signal processing workloads such as image normalization, color space conversion, or histogram equalization that you might run on the CPU as part of ISP preprocessing. The FPU supports half, single, and double precision (IEEE 754 compliant) in both vector and scalar modes. Half-precision support is particularly relevant for neural network inference preprocessing, where FP16 activations are common. When you are deciding which preprocessing steps to offload to the NPU versus handle on the CPU, the presence of Helium and FP16 support means the CPU is a credible option for lightweight transforms — but you should still profile, because the NPU's 600 Gops throughput will dominate for anything resembling a convolution.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+            "snippet": "The Cortex-M55 core features the Arm Helium vector processing technology. On top of standard microcontroller tasks, this core enables energy-efficient digital signal processing.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_4e815e6f-d56e-4459-8a1d-dabe39fe7da4_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e8841dce-49ec-4313-baa6-4f6ba27cde36",
+            "snippet": "Arm MVE (M-Profile vector extension), Helium technology, TrustZone MPU, NVIC. Half, single and double precision floating point unit (FPU) supports vector and scalar half-, single-, and double-precision floating-point datatypes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_e8841dce-49ec-4313-baa6-4f6ba27cde36_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The 64-Kbyte instruction TCM and 128-Kbyte data TCM are the only on-chip memories that guarantee zero wait-state access — place your time-critical ISRs and real-time control loops here, not in cache-backed SRAM.",
+        "explanation": "The Cortex-M55 on the STM32N6 includes two tightly coupled memory (TCM) regions: a 64-Kbyte instruction TCM (ITCM) and a 128-Kbyte data TCM (DTCM), both with ECC. TCM is directly coupled to the CPU pipeline, meaning the core fetches instructions and reads data from TCM with zero wait states — no cache miss penalty, no AXI bus arbitration delay. This is the correct home for interrupt service routines that must respond within a bounded latency window and for the tightest real-time control loops in your access control firmware. A common mistake is placing these routines in AXISRAM and relying on the ICACHE to absorb the latency. Cache hits are fast, but a cold miss or a cache eviction under interrupt pressure can violate your worst-case execution time budget. TCM eliminates that uncertainty entirely. The 64 KB ITCM capacity is a real constraint: a full DNN inference engine will not fit, but your ISRs and scheduler code will.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+            "snippet": "The Cortex-M55 includes a 32-Kbyte ICACHE, a 32-Kbyte DCACHE, as well as 128-Kbyte data TCM RAM and 64-Kbyte instruction TCM RAM with ECC for critical real-time routines.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_4e815e6f-d56e-4459-8a1d-dabe39fe7da4_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+            "snippet": "128-Kbyte data TCM RAM with ECC for critical real-time data, and 64-Kbyte of instruction TCM RAM with ECC for critical real-time routines (TCMs case not extended)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The 32-Kbyte ICACHE and 32-Kbyte DCACHE accelerate accesses to AXISRAM and external memory, but they are not a substitute for TCM when deterministic latency is required.",
+        "explanation": "The Cortex-M55 includes a 32-Kbyte instruction cache (ICACHE) and a 32-Kbyte data cache (DCACHE). These caches sit between the CPU and the AXI interconnect, reducing average access latency for code and data stored in AXISRAM or XSPI-mapped external memory. For the face recognition pipeline, the ICACHE is useful for inference engine library code that is too large for ITCM — the cache will keep hot instruction lines close to the CPU. The DCACHE similarly benefits frequently accessed data structures in AXISRAM. However, cache behavior is probabilistic: a miss sends the CPU to the AXI bus, which runs at up to 400 MHz (half the CPU overdrive frequency), introducing a latency penalty. For frame buffers and model weights, this is acceptable. For ISRs and hard real-time loops, it is not. Use the caches to extend effective performance for bulk data, and reserve TCM for latency-critical code paths.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "e8841dce-49ec-4313-baa6-4f6ba27cde36",
+            "snippet": "Arm 32-bit Cortex-M55, 3616 CoreMark, frequency up to 800 MHz, 32-Kbyte ICACHE, 32-Kbyte DCACHE",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_e8841dce-49ec-4313-baa6-4f6ba27cde36_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+            "snippet": "The Cortex-M55 includes a 32-Kbyte ICACHE, a 32-Kbyte DCACHE, as well as 128-Kbyte data TCM RAM and 64-Kbyte instruction TCM RAM with ECC for critical real-time routines.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_4e815e6f-d56e-4459-8a1d-dabe39fe7da4_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "454d5691-dfb4-47f9-8ff8-4957968feeb4",
+            "snippet": "Clock frequency of AXI CPU bus: 0 to 400 MHz",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_138/ChunkType.table_454d5691-dfb4-47f9-8ff8-4957968feeb4_0.png",
+            "page_number": 138,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The total on-chip SRAM is 4.2 MB — enough for frame buffers at lower resolutions, but insufficient for an 8 MB DNN model weight file, which must live in XSPI-mapped external memory.",
+        "explanation": "The STM32N6 provides 4.2 MB of contiguous on-chip SRAM distributed across AXISRAM1 through AXISRAM6 and other regions. This is a meaningful amount for an MCU, but you need to size it against your actual pipeline requirements. A 1080p YUV frame at roughly 3 MB already consumes most of the available SRAM if you need double-buffering. A typical face recognition DNN model (MobileNet-class or larger) can easily reach 8 MB of weights — far exceeding total on-chip capacity. The correct strategy for model weights is to store them in XSPI-mapped external memory using memory-mapped mode, where the NPU accesses them as if they were internal memory. On-chip SRAM is then reserved for active frame buffers, intermediate activations, and working data that the CPU and NPU exchange at high frequency. Understanding this capacity ceiling at the architecture stage prevents the painful discovery during firmware integration that your weight file simply does not fit.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+            "snippet": "4.2 Mbytes of SRAM",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "85ce10cd-f710-47ae-8072-4fee389d57c5",
+            "snippet": "Arm Cortex-M55-based MCU, with ST Neural-ART Accelerator, H264 encoder, Neo-Chrom 2.5D GPU, 4.2 Mbytes contiguous SRAM",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_85ce10cd-f710-47ae-8072-4fee389d57c5_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your colleague proposes placing the door-lock ISR and the watchdog refresh routine in AXISRAM2 with the ICACHE enabled, arguing that the cache hit rate will be near 100% for such small, frequently called routines. You are reviewing this proposal before the design review. What is the flaw in this reasoning, and where should these routines actually live?",
+        "reveal": "The flaw is that 'near 100%' is not 100%, and for a hard real-time ISR, even a single cache miss at the wrong moment can violate your worst-case execution time. If the ICACHE evicts the ISR lines under pressure from another hot code path — say, the inference engine library running in the background — the next ISR entry will take an AXI bus fetch penalty. The AXI CPU bus runs at up to 400 MHz while the CPU runs at 800 MHz in overdrive, so a cache miss costs multiple CPU cycles of stall. The correct placement is the 64-Kbyte instruction TCM (ITCM), which provides zero wait-state access with ECC and no cache eviction risk. The ISR and watchdog code are small enough to fit comfortably in 64 KB alongside the scheduler.",
+        "hint": "Think about what 'worst-case' means for a real-time system, and whether a probabilistic guarantee is the same as a deterministic one."
+      },
+      {
+        "prediction_prompt": "You are sizing the memory layout for a face recognition terminal that captures 1080p frames at 30 fps. The DNN model weights are 6 MB. You have 4.2 MB of on-chip SRAM and an XSPI interface connected to 64 MB of external HyperRAM. A colleague suggests double-buffering the 1080p YUV frame (approximately 3 MB per frame) in AXISRAM and also loading the model weights into AXISRAM before each inference pass. Will this fit, and what is the correct allocation strategy?",
+        "reveal": "It will not fit. Double-buffering a 3 MB frame requires 6 MB of SRAM — already exceeding the 4.2 MB total on-chip capacity before the model weights are even considered. Adding 6 MB of weights makes the shortfall severe. The correct strategy is to store the model weights in XSPI-mapped external memory using memory-mapped mode, where the NPU accesses them directly without a CPU-managed copy step. For the frame buffers, you can use a single active buffer in AXISRAM (3 MB) and accept that double-buffering must use XSPI-mapped HyperRAM for the second buffer, or reduce the frame resolution to fit both buffers on-chip. The 4.2 MB SRAM ceiling is a hard architectural constraint that must be resolved at the memory layout stage, not during firmware integration.",
+        "hint": "Add up the numbers before evaluating the strategy — capacity constraints are binary."
+      }
+    ],
+    "summary": "The Cortex-M55 gives you an 800 MHz vector-capable CPU with a clear memory hierarchy: place time-critical ISRs and real-time loops in ITCM for zero wait-state execution, use AXISRAM with cache backing for frame buffers and working data, and push model weights to XSPI-mapped external memory when they exceed the 4.2 MB on-chip SRAM ceiling.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When a firmware routine must execute with deterministic, zero wait-state latency regardless of cache state, the correct memory region to place it in is ___.",
+      "answer": "instruction TCM (ITCM)",
+      "distractors": [
+        "ICACHE",
+        "AXISRAM",
+        "DCACHE"
+      ],
+      "explanation": "TCM is directly coupled to the CPU pipeline and provides zero wait-state access with ECC. Unlike cache-backed SRAM, TCM has no eviction risk, making it the only region that guarantees deterministic latency for ISRs and real-time control loops."
+    },
+    {
+      "after_key_point": 4,
+      "type": "matching",
+      "stem": "Match each pipeline data type to the correct memory region for the STM32N6 face recognition terminal:",
+      "pairs": [
+        {
+          "left": "Time-critical interrupt service routines",
+          "right": "64-Kbyte instruction TCM (ITCM)"
+        },
+        {
+          "left": "Active camera frame buffer (multi-MB)",
+          "right": "AXISRAM or XSPI-mapped external memory"
+        },
+        {
+          "left": "DNN model weights exceeding on-chip SRAM capacity",
+          "right": "XSPI-mapped external memory (memory-mapped mode)"
+        },
+        {
+          "left": "Frequently accessed working data for CPU processing",
+          "right": "128-Kbyte data TCM (DTCM) or AXISRAM with DCACHE"
+        }
+      ],
+      "explanation": "Each memory region has a distinct latency and capacity profile. TCM guarantees zero wait-state access for critical code and data; AXISRAM with cache backing suits bulk working data; XSPI-mapped external memory is the only option for assets that exceed the 4.2 MB on-chip SRAM ceiling."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the exact wait-state count for AXISRAM accesses at 800 MHz without cache, making it impossible to quantify the cache-miss penalty in CPU cycles from the datasheet alone.",
+    "The datasheet does not describe the maximum sustained bandwidth between the Cortex-M55 and AXISRAM over the AXI interconnect, which would be needed to verify that the CPU can service the ISP pipeline at 30 fps without stalling.",
+    "No datasheet information is available on the ITCM FLEX region's size or configuration, which appears in the power supply scheme diagram but is not described in the functional overview chunks provided."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are planning the memory layout for the STM32N6-based face recognition terminal. The inference engine requires that the interrupt service routines and the tightest real-time control loops execute with zero wait-state latency. You are reviewing the Cortex-M55 memory resources available on the STM32N6.",
+        "question_text": "Where should you place the time-critical interrupt service routines and real-time control loop code to guarantee zero wait-state execution on the Cortex-M55?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "In AXISRAM1, using the AXI cache to reduce access latency to an acceptable level for real-time routines",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "In the 64-Kbyte instruction TCM RAM, which provides zero wait-state access with ECC for critical real-time routines",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "In the 32-Kbyte ICACHE, which caches frequently executed instructions and eliminates fetch latency for hot code paths",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 datasheet (Section 3.1) specifies a 64-Kbyte instruction TCM RAM with ECC explicitly for critical real-time routines. TCM RAM is directly coupled to the Cortex-M55 core and operates with zero wait states, making it the correct placement for ISRs and tight control loops.",
+        "incorrect": "AXISRAM relies on the AXI interconnect and cache, which introduces variable latency — unsuitable for hard real-time guarantees. The ICACHE is a hardware-managed cache, not a directly addressable memory region you can place code into. The 64-Kbyte instruction TCM RAM is the correct choice: it is directly coupled to the core, zero wait-state, and designed specifically for critical real-time routines per the datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+          "snippet": "The Cortex-M55 includes a 32-Kbyte ICACHE, a 32-Kbyte DCACHE, as well as 128-Kbyte data TCM RAM and 64-Kbyte instruction TCM RAM with ECC for critical real-time routines.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_4e815e6f-d56e-4459-8a1d-dabe39fe7da4_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+          "snippet": "128-Kbyte data TCM RAM with ECC for critical real-time data, and 64-Kbyte of instruction TCM RAM with ECC for critical real-time routines (TCMs case not extended)",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O5",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are allocating memory regions for the face recognition pipeline on the STM32N6. The DNN model weight file is 8 MB and must be accessible by the Neural-ART NPU during inference. The on-chip SRAM totals 4.2 MB across AXISRAM1–6 and other regions. You are deciding where to store the model weights.",
+        "question_text": "Given that the model weights exceed total on-chip SRAM capacity, which memory strategy should you use to make the weights accessible to the NPU during inference?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Compress the weights to fit within AXISRAM and decompress them into DTCM at runtime before each inference pass",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Store the weights in XSPI-mapped external memory using memory-mapped mode, so the NPU accesses them as if they were internal memory",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Split the weights across AXISRAM1–6 and BKPSRAM, using DMA transfers to stage each layer before the NPU processes it",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 XSPI interface supports memory-mapped mode, in which external memory is seen by the system as if it were internal memory, supporting both read and write operations. This allows the NPU to stream model weights directly from external flash or HyperRAM without CPU-managed staging.",
+        "incorrect": "Runtime decompression into DTCM adds CPU overhead and DTCM (128 KB data) is far too small for an 8 MB weight file. Splitting across AXISRAM regions still cannot accommodate 8 MB within the 4.2 MB total on-chip SRAM, and layer-by-layer DMA staging introduces latency and CPU involvement. The correct approach is XSPI memory-mapped mode, which transparently exposes external memory to the NPU as addressable memory space."
+      },
+      "references": [
+        {
+          "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+          "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+          "page_number": 42,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+          "snippet": "XSPI 8-bit configuration with cypher engine",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O5",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the memory allocation table for the STM32N6 face recognition terminal. A colleague proposes storing the active camera frame buffer — a 1080p YUV frame at roughly 3 MB — in the 128-Kbyte data TCM RAM to minimize latency for the ISP preprocessing step. You need to evaluate this proposal before the design review.",
+        "question_text": "What is the most significant problem with placing the active frame buffer in the 128-Kbyte data TCM RAM, and what is the correct allocation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TCM RAM lacks ECC protection, making it unsuitable for frame data; AXISRAM with ECC should be used instead",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "A 3 MB frame buffer far exceeds the 128-Kbyte DTCM capacity; AXISRAM or XSPI-mapped HyperRAM is the correct location for active frame buffers",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "TCM RAM is instruction-only and cannot hold data; the frame buffer must be placed in AXISRAM to be accessible by the DMA controllers",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The data TCM RAM is only 128 Kbytes, which is far too small to hold a 3 MB frame buffer. DTCM is reserved for small, latency-critical data structures. Active frame buffers should be allocated to AXISRAM (4.2 MB total on-chip) or to XSPI-mapped external HyperRAM for larger resolutions.",
+        "incorrect": "TCM RAM does include ECC protection per the datasheet, so the ECC claim is incorrect. The data TCM RAM (DTCM) is a data memory, not instruction-only — that is the role of ITCM. The actual disqualifying factor is purely capacity: 128 Kbytes cannot hold a ~3 MB frame buffer. AXISRAM or XSPI-mapped HyperRAM is the appropriate destination for frame buffers."
+      },
+      "references": [
+        {
+          "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+          "snippet": "The Cortex-M55 includes a 32-Kbyte ICACHE, a 32-Kbyte DCACHE, as well as 128-Kbyte data TCM RAM and 64-Kbyte instruction TCM RAM with ECC for critical real-time routines.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_4e815e6f-d56e-4459-8a1d-dabe39fe7da4_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "4cb5d89c-1d8a-435a-800b-da938ea3bbfe",
+          "snippet": "AHBSRAM1/2, AXISRAM1 to 6, BKPSRAM, FLEXRAM, and VENCRAM, with the following features: Error code correction (ECC): Single-error detection and correction with interrupt generation",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_4cb5d89c-1d8a-435a-800b-da938ea3bbfe_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+          "snippet": "128-Kbyte data TCM RAM with ECC for critical real-time data, and 64-Kbyte of instruction TCM RAM with ECC for critical real-time routines",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    }
+  ]
+}

@@ -1,0 +1,460 @@
+{
+  "subsection_id": "1.1.2",
+  "subsection_title": "Read the Feature/Peripheral Count Tables",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Navigate the STM32N6 feature/peripheral count tables (Tables 2–5) to extract variant-specific capability data",
+    "Identify which rows in the tables confirm the NPU/crypto architectural split across x5xx and x7xx variants",
+    "Apply the peripheral count footnote rule to avoid over-counting available interfaces before checking alternate function tables",
+    "Use the package rows at the bottom of each table to match I/O count to PCB requirements"
+  ],
+  "content": {
+    "hook_sentence": "Two STM32N6 variants can share identical SRAM, timer counts, and every communication peripheral — yet be completely wrong for your product depending on a single row in the feature table.",
+    "introduction": "The feature/peripheral count tables (Tables 2–5 in the STM32N6 datasheet) are your primary decision tool for variant selection. Each table covers one device family across all seven orderable part numbers, and the rows you care most about — the Crypto and Accelerator rows — are buried near the bottom. Knowing exactly where to look and how to interpret the footnotes saves you from a costly late-stage redesign.",
+    "key_points": [
+      {
+        "point": "Four tables cover the four STM32N6 families; each table spans all package options for that family.",
+        "explanation": "Tables 2–5 map directly to the four device families: STM32N645xx (Table 2), STM32N647xx (Table 3), STM32N655xx (Table 4), and STM32N657xx (Table 5). Each table lists seven orderable part numbers as columns, with features and peripherals as rows. When you open the datasheet to evaluate a variant, go straight to the table for that family — every column in that table is a real, orderable device, and the rows tell you exactly what hardware is present. The part number suffix encodes the package: X = VFBGA264, L = VFBGA223, B = VFBGA198, I = VFBGA178, A = VFBGA169, Z = VFBGA142.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "86351966-d441-4185-8306-42eaca825f61",
+            "snippet": "Table 2. STM32N645xx features and peripheral counts — STM32 N645X0H3Q, STM32 N645L0H3Q, STM32 N645B0H3Q, STM32 N64510H3Q, STM32 N645A0H3Q, STM32 N645A0H3QG, STM32 N645Z0H3Q",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_14/ChunkType.table_86351966-d441-4185-8306-42eaca825f61_0.png",
+            "page_number": 14,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "1bc4a6bb-3e00-4951-bcd1-d65c9dda52f8",
+            "snippet": "Table 3. STM32N647xx features and peripheral counts — STM32 N647X0H3Q, STM32 N647L0H3Q, STM32 N647B0H3Q, STM32 N64710H3Q, STM32 N647A0H3Q, STM32 N647A0H3QG, STM32 N647Z0H3Q",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_16/ChunkType.table_1bc4a6bb-3e00-4951-bcd1-d65c9dda52f8_0.png",
+            "page_number": 16,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "c7f70de2-1bb6-468c-b402-2230b64dc8e1",
+            "snippet": "Table 4. STM32N655xx features and peripheral counts — STM32 N655X0H3Q, STM32 N655L0H3Q, STM32 N655B0H3Q, STM32 N655I0H3Q, STM32 N655A0H3Q, STM32 N655A0H3QG, STM32 N655Z0H3Q",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_18/ChunkType.table_c7f70de2-1bb6-468c-b402-2230b64dc8e1_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "8e7ea6f3-6e51-47ea-b7cc-b5ec0dc856d2",
+            "snippet": "Table 5. STM32N657xx features and peripheral counts — STM32 N657X0H3Q, STM32 N657L0H3Q, STM32 N657B0H3Q, STM32 N65710H3Q, STM32 N657A0H3Q, STM32 N657A0H3QG, STM32 N657Z0H3Q",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_20/ChunkType.table_8e7ea6f3-6e51-47ea-b7cc-b5ec0dc856d2_0.png",
+            "page_number": 20,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The Crypto and Accelerator rows are the two rows that confirm the NPU/crypto split — read them first for any variant evaluation.",
+        "explanation": "Building on the x5xx/x7xx architectural split from §1.1.1, the tables make this concrete with two specific row groups. In the 'Crypto' row group, look for SAES, CRYPT, PKA, and MCE1.4. In the 'Accelerator' row group, look for Neural-ART. For the x7xx families (Tables 3 and 5 continued pages), Neural-ART shows 'Yes' and all four crypto rows show 'No'. For the x5xx families (Tables 2 and 4 continued pages), the crypto rows all show 'Yes' and Neural-ART shows 'No'. This Yes/No pattern is consistent across every column in each table — no package option within a family changes this. The split is architectural, not package-dependent.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+            "snippet": "Crypto: SAES: No; CRYPT: No; PKA: No; MCE1.4: No — Accelerator: Neural-ART: Yes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+            "page_number": 17,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "56c07493-a723-4fa7-a615-e42dfaf538f5",
+            "snippet": "Crypto: SAES: No; CRYPT: No; PKA: No; MCE1.4: No — Accelerator: Neural-ART: No",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_15/ChunkType.table_56c07493-a723-4fa7-a615-e42dfaf538f5_0.png",
+            "page_number": 15,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+            "snippet": "Crypto: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes — Accelerator: Neural-ART: No",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "af61be9e-f48f-4912-ba15-db738930e0d7",
+            "snippet": "Crypto: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes — Accelerator: Neural-ART: Yes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_21/ChunkType.table_af61be9e-f48f-4912-ba15-db738930e0d7_0.png",
+            "page_number": 21,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Most communication peripheral counts are identical across all four families — the tables confirm the variants share the same interface set.",
+        "explanation": "When you scan the communication interfaces rows across Tables 2–5, the counts are the same for a given package column regardless of whether you are looking at an x5xx or x7xx device. For example, the VFBGA264 column (suffix X) shows 6 SPI, 4 I2C, 2 I3C, 5 USART, 5 UART, 1 LPUART, 2 SAI, 3 FDCAN, 2 OTG HS, UCPD, 2 SDMMC, DCMIPP, SPDIFRX, CSI, PSSI, and LTDC across all four families. The SRAM is also identical: 4.2 Mbytes system SRAM and 8 Kbytes backup SRAM in every variant. This means a colleague who argues the variants are 'functionally equivalent' based on shared peripherals is partially correct — but misses the decisive difference in the Crypto and Accelerator rows.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "86351966-d441-4185-8306-42eaca825f61",
+            "snippet": "SRAM System: 4.2 Mbytes; Backup: 8 Kbytes — SPI: 6 — I2C: 4 — I3C: 2 — USART: 5 — UART: 5 — LPUART: 1",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_14/ChunkType.table_86351966-d441-4185-8306-42eaca825f61_0.png",
+            "page_number": 14,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "1bc4a6bb-3e00-4951-bcd1-d65c9dda52f8",
+            "snippet": "SRAM System: 4.2 Mbytes; Backup: 8 Kbytes — SPI: 6 — I2C: 4 — I3C: 2 — USART: 5 — UART: 5 — LPUART: 1",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_16/ChunkType.table_1bc4a6bb-3e00-4951-bcd1-d65c9dda52f8_0.png",
+            "page_number": 16,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "c7f70de2-1bb6-468c-b402-2230b64dc8e1",
+            "snippet": "SRAM System: 4.2 Mbytes; Backup: 8 Kbytes — SPI: 6 — I2C: 4 — I3C: 2 — USART: 5 — UART: 5 — LPUART: 1",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_18/ChunkType.table_c7f70de2-1bb6-468c-b402-2230b64dc8e1_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Peripheral counts in the tables are reference numbers only — verify actual pin availability in the alternate functions table before committing to a package.",
+        "explanation": "Every feature/peripheral count table carries footnote 1: 'The peripheral count is given only for reference. The pin availability must be verified according to tables in Section 4.3: Alternate functions.' This is a critical workflow step. A table might show 6 SPI instances for a given device, but on a smaller package, some of those SPI instances may not have their pins routed to accessible balls. If you size your PCB around the peripheral count alone and skip the alternate functions check, you may discover mid-layout that the SPI instance you planned to use for your XSPI-connected flash has no available pins on the chosen package. Always treat the count as an upper bound, then confirm in Section 4.3.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "d065437e-0b30-4772-b649-f1e9490b1136",
+            "snippet": "The peripheral count is given only for reference. The pin availability must be verified according to tables in Section 4.3: Alternate functions.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_15/ChunkType.text_d065437e-0b30-4772-b649-f1e9490b1136_0.png",
+            "page_number": 15,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "3e889492-fcf5-492b-944b-884dd869df59",
+            "snippet": "The peripheral count is given only for reference. The pin availability must be verified according to tables in Section 4.3: Alternate functions.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.text_3e889492-fcf5-492b-944b-884dd869df59_0.png",
+            "page_number": 19,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "8276704d-a637-4f05-9b31-44b9d51fd154",
+            "snippet": "The peripheral count is given only for reference. The pin availability must be verified according to tables in Section 4.3: Alternate functions.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.text_8276704d-a637-4f05-9b31-44b9d51fd154_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The package rows at the bottom of each table give you I/O count, physical size, and ball pitch — use them to match your PCB constraints before ordering samples.",
+        "explanation": "The last three rows of every feature table list Package Name, Size, and Pitch, followed by a 'Number of I/Os' row. For all four families, the package options and I/O counts are identical: VFBGA264 (14×14 mm, 0.8 mm pitch) gives 165 I/Os; VFBGA223 (10×10 mm, 0.5 mm pitch) gives 144; VFBGA198 (10×10 mm, 0.65 mm pitch) gives 126; VFBGA178 (12×12 mm, 0.8 mm pitch) gives 106; VFBGA169 (6×6 mm, 0.4 mm pitch) gives 90; VFBGA142 (8×8 mm, 0.5 mm pitch) gives 75. For a face recognition terminal with a CSI-2 camera, two XSPI devices, USB, Ethernet, and GPIO for door control, you need to tally the minimum pin count for each interface and compare against these numbers. The VFBGA169 at 6×6 mm is the physically smallest option but provides only 90 I/Os — tight for a full peripheral set. The VFBGA264 at 165 I/Os gives the most headroom but requires a 14×14 mm footprint.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "56c07493-a723-4fa7-a615-e42dfaf538f5",
+            "snippet": "Package Name: VFBGA264 — Size: 14 x 14 mm — Pitch: 0.8 mm — Number of I/Os: 165; VFBGA223 — 10 x 10 mm — 0.5 mm — 144; VFBGA198 — 10 x 10 mm — 0.65 mm — 126; VFBGA178 — 12 x 12 mm — 0.8 mm — 106; VFBGA169 — 6 x 6 mm — 0.4 mm — 90; VFBGA142 — 8 x 8 mm — 0.5 mm — 75",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_15/ChunkType.table_56c07493-a723-4fa7-a615-e42dfaf538f5_0.png",
+            "page_number": 15,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+            "snippet": "Package Name: VFBGA264 — Size: 14 x 14 mm — Pitch: 0.8 mm — Number of I/Os: 165; VFBGA142 — 8 x 8 mm — 0.5 mm — 75",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+            "page_number": 17,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+            "snippet": "Package Name: VFBGA264 — Size: 14 x 14 mm — Pitch: 0.8 mm — Number of I/Os: 165; VFBGA142 — 8 x 8 mm — 0.5 mm — 75",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "You are evaluating the STM32N647xx for a face recognition terminal. Your product manager says: 'The STM32N645xx has the same SRAM, the same SPI count, and the same timer set — just pick whichever is cheaper.' You open Tables 2 and 3 side by side. What do the tables actually show, and how do you respond?",
+        "reveal": "Scanning the shared rows first, you confirm the claim is accurate for most peripherals: both families show 4.2 Mbytes system SRAM, 6 SPI, 4 I2C, 2 I3C, 5 USART, 5 UART, 1 LPUART, 3 FDCAN, and 2 OTG HS for the VFBGA264 column. The timer counts also match. But when you reach the Crypto and Accelerator rows, the tables diverge completely. Table 3 (STM32N647xx) shows Neural-ART: Yes, SAES: No, CRYPT: No, PKA: No, MCE1.4: No. Table 2 (STM32N645xx) shows Neural-ART: No, SAES: No, CRYPT: No, PKA: No, MCE1.4: No. Neither variant gives you both capabilities. Your response: the variants are not interchangeable for this application — the choice depends entirely on whether the product prioritizes DNN inference (x7xx) or hardware crypto (x5xx). Picking on price alone ignores the architectural constraint that defines the product's capability.",
+        "hint": "Focus on the rows that differ, not the rows that match."
+      },
+      {
+        "prediction_prompt": "You have selected the STM32N657xx for your terminal because it provides both Neural-ART and the full crypto suite. Your PCB requires a CSI-2 camera interface, two XSPI external memory devices, USB OTG HS, Ethernet (via RMII), and 20 GPIO lines. You look at the package rows in Table 5. Which package do you select, and what is your reasoning?",
+        "reveal": "You tally the minimum pin requirements: CSI-2 needs at least 6 pins (2 data lanes + clock lane + control), two XSPI devices need roughly 20–26 pins depending on bus width, USB OTG HS needs 2 pins (D+/D-) plus VBUS, Ethernet RMII needs 9 pins, and 20 GPIO lines add 20 more. Even a conservative estimate puts you above 75 I/Os (VFBGA142) and likely above 90 (VFBGA169). The VFBGA178 at 106 I/Os might be marginal depending on exact alternate function routing. The safe choice is VFBGA264 at 165 I/Os, which gives you 14×14 mm at 0.8 mm pitch — manageable for a standard 4-layer PCB and enough headroom to accommodate the full peripheral set plus debug headers. You note in your design document that pin availability must still be verified in Section 4.3 before finalizing the layout.",
+        "hint": "Add up the minimum pin count for each interface, then compare against the I/O column in the package rows."
+      }
+    ],
+    "summary": "Tables 2–5 give you a structured, per-variant view of every feature and peripheral count — but the two rows that matter most for your face recognition terminal are Crypto and Accelerator, and the package rows at the bottom tell you whether your chosen variant fits your PCB. Always treat peripheral counts as reference numbers and verify actual pin availability in Section 4.3 before committing to a package.",
+    "figures": [
+      {
+        "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+        "after_key_point": 4,
+        "caption": "All six VFBGA package options available for STM32N6 variants, showing physical dimensions and ball pitch. Use these dimensions alongside the I/O count rows in Tables 2–5 to confirm PCB compatibility before ordering samples.",
+        "alt_text": "Diagram showing a VFBGA ball grid array package icon on the left, with six package variants listed on the right: VFBGA142 (8x8 mm, 0.5 mm pitch), VFBGA169 (6x6 mm, 0.4 mm pitch), VFBGA178 (12x12 mm, 0.8 mm pitch), VFBGA198 (10x10 mm, 0.65 mm pitch), VFBGA223 (10x10 mm, 0.5 mm pitch), and VFBGA264 (14x14 mm, 0.8 mm pitch).",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each STM32N6 family to the correct description of its Crypto and Accelerator rows in the feature tables:",
+      "pairs": [
+        {
+          "left": "STM32N645xx / STM32N655xx (x5xx)",
+          "right": "Neural-ART: No; SAES, CRYPT, PKA, MCE1.4: Yes"
+        },
+        {
+          "left": "STM32N647xx / STM32N657xx (x7xx)",
+          "right": "Neural-ART: Yes; SAES, CRYPT, PKA, MCE1.4: No"
+        },
+        {
+          "left": "Any variant, any package column",
+          "right": "The Crypto/Accelerator split does not change with package selection"
+        }
+      ],
+      "explanation": "The NPU/crypto split is an architectural property of the variant family, not the package. Every column within a given family table shows the same Yes/No pattern for these rows."
+    },
+    {
+      "after_key_point": 3,
+      "type": "fill_blank",
+      "stem": "When you see that a device has 6 SPI instances listed in the feature table, the correct next step before finalizing your PCB layout is to verify ___ in Section 4.3.",
+      "answer": "pin availability",
+      "distractors": [
+        "clock frequency limits",
+        "DMA channel assignments",
+        "power consumption figures"
+      ],
+      "explanation": "The peripheral count is a reference number only. Actual usability depends on whether the required pins are routed to accessible balls on the chosen package, which is confirmed only in the alternate functions table."
+    }
+  ],
+  "content_gaps": [
+    "The document chunks do not include the STM32N657xx table rows for the Crypto section in the main table body (Table 5 first page) — the crypto Yes/No data for STM32N657xx is confirmed only in the 'continued' table on page 21. Learners should be directed to the continued table pages when reading the datasheet.",
+    "The alternate functions tables (Section 4.3, Tables 19–20) are not included in the provided chunks, so the lesson cannot demonstrate the pin availability verification step with a concrete example."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are evaluating STM32N6 variants for a face recognition access control terminal. Your product requires real-time DNN inference for face matching and hardware-accelerated AES encryption for storing biometric templates in external flash. You open the STM32N6 datasheet and compare Tables 2–5.",
+        "question_text": "Based on the feature/peripheral count tables, which variant family provides the Neural-ART NPU accelerator, and which provides the full hardware crypto engine (SAES, CRYP, PKA, MCE)?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "STM32N6x7xx provides Neural-ART; STM32N6x5xx provides SAES, CRYP, PKA, and MCE",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "STM32N6x5xx provides Neural-ART; STM32N6x7xx provides SAES, CRYP, PKA, and MCE",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "STM32N6x7xx provides both Neural-ART and SAES, CRYP, PKA, and MCE across all package options",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. Tables 3 and 5 confirm that STM32N647xx and STM32N657xx (the x7xx family) list Neural-ART as 'Yes' and all crypto features as 'No'. Tables 2 and 4 confirm that STM32N645xx and STM32N655xx (the x5xx family) list SAES, CRYP, PKA, and MCE1.4 as 'Yes' and Neural-ART as 'No'. These are mutually exclusive feature sets across the two variant families.",
+        "incorrect": "The feature tables show a clear tradeoff: the x7xx variants carry the Neural-ART NPU but omit the hardware crypto engine, while the x5xx variants carry the full crypto suite but omit Neural-ART. Review Tables 2–5 in the STM32N6 datasheet, specifically the Crypto and Accelerator rows."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "af61be9e-f48f-4912-ba15-db738930e0d7",
+          "snippet": "STM32N657xx: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_21/ChunkType.table_af61be9e-f48f-4912-ba15-db738930e0d7_0.png",
+          "page_number": 21,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the hardware selection for a face recognition access control terminal. Your product manager insists the device must support real-time face matching using a DNN model AND must encrypt all biometric templates stored in external flash using hardware-accelerated AES with side-channel attack protection (SESIP/PSA Level 3 certified). You have reviewed the STM32N6 feature tables.",
+        "question_text": "Which STM32N6 variant family satisfies both requirements simultaneously, and what is the correct justification based on the feature tables?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "STM32N6x5xx satisfies both, because it includes SAES with SESIP/PSA Level 3 certification and the Neural-ART NPU for DNN inference",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "No single STM32N6 variant family satisfies both simultaneously, because Neural-ART is exclusive to x7xx variants while SAES, CRYP, PKA, and MCE are exclusive to x5xx variants",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "STM32N6x7xx satisfies both, because it includes Neural-ART for DNN inference and the full SAES, CRYP, PKA, and MCE crypto suite across all package options",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The feature tables reveal a fundamental architectural tradeoff: no single STM32N6 variant family provides both Neural-ART and the full hardware crypto engine. The x7xx variants (STM32N647xx, STM32N657xx) include Neural-ART but list SAES, CRYP, PKA, and MCE as 'No'. The x5xx variants (STM32N645xx, STM32N655xx) include the full crypto suite but list Neural-ART as 'No'. This tradeoff must be explicitly addressed in your hardware architecture — for example, by offloading crypto to a companion secure element or by using the STM32N657xx which uniquely provides both Neural-ART and the full crypto suite.",
+        "incorrect": "Review Tables 2–5 carefully. The x5xx variants do not include Neural-ART, and the x7xx variants (except STM32N657xx) do not include the hardware crypto engine. The STM32N657xx is the only variant that provides both Neural-ART and the full crypto suite (SAES, CRYP, PKA, MCE). This is a critical architectural constraint for a product requiring both AI inference and hardware-backed biometric encryption."
+      },
+      "references": [
+        {
+          "chunk_id": "56c07493-a723-4fa7-a615-e42dfaf538f5",
+          "snippet": "STM32N645xx: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_15/ChunkType.table_56c07493-a723-4fa7-a615-e42dfaf538f5_0.png",
+          "page_number": 15,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "af61be9e-f48f-4912-ba15-db738930e0d7",
+          "snippet": "STM32N657xx: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_21/ChunkType.table_af61be9e-f48f-4912-ba15-db738930e0d7_0.png",
+          "page_number": 21,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You have selected the STM32N657xx variant for your face recognition terminal because it provides both Neural-ART and the full crypto suite. Your PCB design requires simultaneous support for a CSI-2 camera interface, two XSPI external memory devices, USB, Ethernet, and 20 GPIO lines for door lock control and status indicators. You are reviewing the package options in the STM32N6 datasheet feature tables.",
+        "question_text": "Which package should you select to ensure sufficient I/O count for this peripheral set, and what is the I/O count that package provides?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "VFBGA142 (8×8 mm, 0.5 mm pitch), providing 75 I/Os — the smallest package minimizes PCB area",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "VFBGA178 (12×12 mm, 0.8 mm pitch), providing an intermediate I/O count suitable for most peripheral combinations",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "VFBGA264 (14×14 mm, 0.8 mm pitch), providing 165 I/Os — the largest package to accommodate the full peripheral set",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The VFBGA264 provides 165 I/Os, which is the maximum available across STM32N6 packages and the appropriate choice when the peripheral set (CSI-2, dual XSPI, USB, Ethernet, and GPIO) demands a high pin count. The VFBGA142 at 75 I/Os is insufficient for this combination of interfaces. Always verify final pin availability against the alternate function tables in Section 4.3 of the datasheet.",
+        "incorrect": "The VFBGA142 provides only 75 I/Os, which is insufficient for a peripheral set that includes CSI-2, dual XSPI, USB, Ethernet, and 20 GPIO lines. The VFBGA264 at 165 I/Os is the correct choice for maximum I/O availability. Note that the peripheral count in the feature tables is given for reference only — final pin availability must be verified in the alternate function tables (Section 4.3)."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "Package Name: VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165; VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d065437e-0b30-4772-b649-f1e9490b1136",
+          "snippet": "The peripheral count is given only for reference. The pin availability must be verified according to tables in Section 4.3: Alternate functions.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_15/ChunkType.text_d065437e-0b30-4772-b649-f1e9490b1136_0.png",
+          "page_number": 15,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "A colleague reviewing your STM32N6 variant selection argues: 'Just pick the STM32N645xx — it has the same SRAM, the same communication peripherals, and the same timer set as the STM32N647xx, so the two variants are functionally equivalent for our face recognition terminal.' You have the feature tables open in front of you.",
+        "question_text": "How should you respond to your colleague's claim based on what the feature tables actually show?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Agree with the claim — the tables confirm that SRAM, timers, and communication peripherals are identical, making the variants interchangeable for this application",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Partially agree — the variants share most peripherals, but the STM32N647xx adds Neural-ART while the STM32N645xx adds the crypto engine, so the choice depends on which feature the application prioritizes",
+          "is_correct": true,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Disagree entirely — the variants differ in SRAM size, timer count, and communication interfaces, making them unsuitable substitutes regardless of the application",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The feature tables show that STM32N645xx and STM32N647xx share the same SRAM (4.2 Mbytes system, 8 Kbytes backup), the same timer configurations, and the same communication peripheral counts. The critical differentiator is in the Crypto and Accelerator rows: STM32N645xx lists SAES/CRYP/PKA/MCE as 'No' and Neural-ART as 'No', while STM32N647xx lists Neural-ART as 'Yes' and all crypto features as 'No'. For a face recognition terminal requiring DNN inference, the STM32N647xx is the correct choice within the x4x family.",
+        "incorrect": "The feature tables confirm that the two variants share SRAM, timers, and communication peripherals — your colleague is correct on those points. However, the variants are not interchangeable: the STM32N647xx includes Neural-ART (required for DNN inference) while the STM32N645xx does not, and neither variant includes the full crypto engine. Review the Crypto and Accelerator rows in Tables 2 and 3."
+      },
+      "references": [
+        {
+          "chunk_id": "56c07493-a723-4fa7-a615-e42dfaf538f5",
+          "snippet": "STM32N645xx: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_15/ChunkType.table_56c07493-a723-4fa7-a615-e42dfaf538f5_0.png",
+          "page_number": 15,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx: SAES: No; CRYPT: No; PKA: No; MCE1.4: No; Neural-ART: Yes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_2"
+    }
+  ]
+}

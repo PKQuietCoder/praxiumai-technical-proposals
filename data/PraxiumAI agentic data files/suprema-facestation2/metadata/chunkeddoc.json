@@ -1,0 +1,296 @@
+{
+  "project_id": "cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b",
+  "markdown": "<a id='5262d616-a827-4a25-8947-5dc3ab1bb876'></a>\n\nFaceStation 2\nSmart Face Recognition Terminal\n\n<a id='0467afd2-d191-4ede-a009-658fb50331db'></a>\n\n<::A black and silver biometric device with a screen displaying 'Face Station 2' next to a colorful silhouette of a human head. On the right side of the screen, the time '09:15 AM' and date '03/24 FRI' are shown, along with a phone icon, a person icon, a clock icon, and a briefcase icon. Below the screen, two camera lenses are visible. The brand name 'suprema' is printed near the bottom of the device.\n: photo::>\n\n<a id='177399ec-5e96-4998-9544-d0e946fff872'></a>\n\nSuprema FaceStation 2 is the most advanced face recognition terminal providing loads of the world's best features. Powered by Suprema's latest innovation in facial biometrics, FaceStation 2 offers unrivalled matching speed, accuracy and level of security. With Suprema's patented optic engineering, FaceStation 2 achieves up to 25,000 lx of operating illuminance which in turn, brings all-round confi-dence regardless of lighting conditions. Packed in an ergonomically-designed structure, FaceStation 2 provides exceptional performance and usability for diverse access control and time attendance sites, large or small.\n\n<a id='81e547e2-0dd1-4659-b86f-9259d88ff122'></a>\n\n<::logo: Suprema\nSUPREMA\nSECURITY & BIOMETRICS\nThe logo features the company name \"SUPREMA\" in a bold, sans-serif font, with \"SECURITY & BIOMETRICS\" below it, all in white text on a black rectangular background::>\n\n<!-- PAGE BREAK -->\n\n<a id='9441956d-216b-4510-9284-ba5e469ce348'></a>\n\nFaceStation 2\nSmart Face Recognition Terminal\n\n<a id='000a98fd-dafa-4eff-9e1a-3e4093095518'></a>\n\n## Features\n\n### Ultra Performance\n*   Matching Speed: 1:4,000 match/sec\n*   *Group Matching: 1:5,000 match/sec\n*   User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)\n\n<a id='127ac179-a85d-4ceb-9d41-ba3e443baafe'></a>\n\nHighest Operating Illuminance\n* Operating illuminance from 0 lx to 25,000 lx\n* Highest operating illuminance available\n* Covers complete darkness to all indoor lighting conditions\n\n<a id='f7bf27be-f36c-4d8d-b947-42076d0cab8b'></a>\n\nEnhanced Security\n- Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs\n- Enhanced security by Android 5.0 Lollipop\n- High quality Image log\n\n<a id='688aa197-361a-41a2-af2c-4ba2a4019ff2'></a>\n\n<::visual content::>\n\nMulti RFID Card Reading\n*   LF(125kHz), HF(13.56MHz) dual-band\n*   Reads all card types that HID multiCLASS supports (EM/HID Prox/MIFARE/ICLASS/DESFire/FeliCa/NFC)\n\n<a id='7eaa95c8-1c2a-4f8b-a12d-169de89bea4d'></a>\n\nErgonomics & User Convenience\n\n*   Extended height range: 145cm – 210cm\n*   Tilt-type bracket for wheelchaired persons & children\n*   Android 5.0 Lollipop based intuitive GUI\n*   Improved face enrolment procedure\n\n<a id='5d33614c-70a7-45a2-ae2b-044ddd77c2e2'></a>\n\nSpecifications\n<table id=\"1-1\">\n<tr><td id=\"1-2\">Category</td><td id=\"1-3\">Features</td><td id=\"1-4\">FS2-D</td><td id=\"1-5\">FS2-AWB</td></tr>\n<tr><td id=\"1-6\" rowspan=\"3\">Credential</td><td id=\"1-7\">Biometric</td><td id=\"1-8\" colspan=\"2\">Face</td></tr>\n<tr><td id=\"1-9\">RF Options</td><td id=\"1-a\">125kHz EM &amp; 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC</td><td id=\"1-b\">125kHz EM, HID Prox &amp; 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC &amp; 2.4GHz BLE</td></tr>\n<tr><td id=\"1-c\">RF Read Range*</td><td id=\"1-d\" colspan=\"2\">MIFARE/DESFire/iCLASS: 50 mm\nEM/HID Prox/FeliCa: 30 mm, BLE: 50 mm</td></tr>\n<tr><td id=\"1-e\" rowspan=\"12\">General</td><td id=\"1-f\">CPU</td><td id=\"1-g\" colspan=\"2\">1.4 GHz Quad Core</td></tr>\n<tr><td id=\"1-h\">Memory</td><td id=\"1-i\" colspan=\"2\">8GB Flash + 1GB RAM</td></tr>\n<tr><td id=\"1-j\">LCD type</td><td id=\"1-k\" colspan=\"2\">4&quot; color TFT LCD</td></tr>\n<tr><td id=\"1-l\">LCD resolution</td><td id=\"1-m\" colspan=\"2\">800 x 480 pixels</td></tr>\n<tr><td id=\"1-n\">IR LED</td><td id=\"1-o\" colspan=\"2\">140 ea</td></tr>\n<tr><td id=\"1-p\">Sound</td><td id=\"1-q\" colspan=\"2\">24 bit Voice DSP (echo cancellation)</td></tr>\n<tr><td id=\"1-r\">Operating temperature</td><td id=\"1-s\" colspan=\"2\">-20°C ~ 50°C</td></tr>\n<tr><td id=\"1-t\">Operating humidity</td><td id=\"1-u\" colspan=\"2\">0% ~ 80%, non-condensing</td></tr>\n<tr><td id=\"1-v\">Dimensions (W x H x D)</td><td id=\"1-w\" colspan=\"2\">141 x 164 x 125</td></tr>\n<tr><td id=\"1-x\">Weight</td><td id=\"1-y\" colspan=\"2\">Device: 548g, Bracket: 74g (incl. washer and bolt)</td></tr>\n<tr><td id=\"1-z\">Certificates</td><td id=\"1-A\" colspan=\"2\">CE, FCC, KC, RoHS, REACH, WEEE, BT SIG</td></tr>\n<tr><td id=\"1-B\">Power</td><td id=\"1-C\" colspan=\"2\">DC 24V 2.5 A</td></tr>\n<tr><td id=\"1-D\" rowspan=\"2\">Face</td><td id=\"1-E\">Image dimension</td><td id=\"1-F\" colspan=\"2\">720 x 480 pixels</td></tr>\n<tr><td id=\"1-G\">Live Face Detection</td><td id=\"1-H\" colspan=\"2\">Supported</td></tr>\n<tr><td id=\"1-I\" rowspan=\"2\">Capacity</td><td id=\"1-J\">Max. User</td><td id=\"1-K\" colspan=\"2\">30,000 (1:1), 4,000(1:N)</td></tr>\n<tr><td id=\"1-L\">Max. Log</td><td id=\"1-M\" colspan=\"2\">5,000,000 (text), 50,000 (image)</td></tr>\n<tr><td id=\"1-N\" rowspan=\"9\">Interfaces</td><td id=\"1-O\">Wi-Fi</td><td id=\"1-P\" colspan=\"2\">IEEE 802.11 b/g (FS2-AWB only)</td></tr>\n<tr><td id=\"1-Q\">Ethernet</td><td id=\"1-R\" colspan=\"2\">Supported (10/100/1000 Mbps, auto MDI/MDI-X)</td></tr>\n<tr><td id=\"1-S\">RS-485</td><td id=\"1-T\" colspan=\"2\">1ch Host or Slave (Selectable)</td></tr>\n<tr><td id=\"1-U\">Wiegand</td><td id=\"1-V\" colspan=\"2\">1ch In and 1ch Out</td></tr>\n<tr><td id=\"1-W\">TTL input</td><td id=\"1-X\" colspan=\"2\">2 Inputs</td></tr>\n<tr><td id=\"1-Y\">Relay</td><td id=\"1-Z\" colspan=\"2\">1 Relay</td></tr>\n<tr><td id=\"1-10\">USB</td><td id=\"1-11\" colspan=\"2\">USB 2.0 (Host)</td></tr>\n<tr><td id=\"1-12\">Tamper</td><td id=\"1-13\" colspan=\"2\">Supported</td></tr>\n<tr><td id=\"1-14\">Video Phone</td><td id=\"1-15\" colspan=\"2\">SIP-based VoIP (Video + Voice)</td></tr>\n</table>\n* DESFire EV2 cards are supported by having backward compatibility of DESFire EV1 cards. CSN and smart card functions are compatible with FaceStation 2.\n* RF read range will vary depending on the installation environment.\n\n<a id='4b911e80-3a91-4b73-bb45-8ae2d5c77b85'></a>\n\n<::System Configurations\n\nLegend:\n- Input: red line\n- RS-485: blue line\n- Relay: orange line\n\nDiagram showing various system configurations connected to a central BioStar 2 Server.\n\nTop Section:\n- DE-620 (Smartcard Reader/Writer) and BioMini Plus 2 (Fingerprint Enrollment Device) are connected via USB to a Web Browser (BioStar 2 Client).\n\nMain Connectivity:\n- The Web Browser (BioStar 2 Client) and the BioStar 2 Server are connected via TCP/IP.\n\nStandalone-Secure Configuration:\n- A FaceStation 2 device is connected to a Secure I/O 2 module.\n- The Secure I/O 2 module is connected to a door lock and an exit button.\n- Connections from FaceStation 2 to Secure I/O 2 use RS-485 (blue) and Input (red).\n- Connections from Secure I/O 2 to door lock and exit button use Relay (orange) and Input (red).\n\nStandalone Configuration:\n- A FaceStation 2 device is connected directly to a door lock and an exit button.\n- Connections use Relay (orange) and Input (red).\n\nRemote Access:\n- BioStar 2 Server is connected to the Internet via WAN.\n- The Internet is connected to BioStar 2 Mobile and a Web Browser (BioStar 2 Client) via WAN.\n\nDistributed Access Control Systems:\n- Multiple FaceStation 2 devices are shown.\n- One FaceStation 2 is connected to a Reader, a door lock, and an exit button. Connections use Input (red), RS-485 (blue), and Relay (orange).\n- Another FaceStation 2 is connected to a door lock and an exit button. Connections use Input (red) and RS-485 (blue).\n\nAll FaceStation 2 devices are connected to the central TCP/IP network line.\n: flowchart::>\n\n<a id='22307862-6407-47a7-95e1-c8cbb313ba9a'></a>\n\n<::Logo for Suprema Security & Biometrics:\nsuprema\nSECURITY & BIOMETRICS\n: figure::>\n\n<a id='a7d735c7-b2d7-43c6-a17f-9313ffa3d490'></a>\n\nSuprema Inc.\n\n<a id='fbfcb4c0-0f43-4f76-aceb-6c6ab3683879'></a>\n\n17F Parkview Tower, 248, Jeongjail-ro, Bundang-gu, Seongnam-si, Gyeonggi-do, 13554, Republic of Korea\nT +82 31 783 4502\nE sales_sys@supremainc.com\nwww.supremainc.com\n\n<a id='3f74479d-b5f2-4940-8e84-f3d0a7856d3e'></a>\n\nFor more information about Suprema's global offices, visit the webpage below by scanning the QR code.\nhttps://www.supremainc.com/en/about/contact-us.asp\n\n<a id='bd1774e3-4c25-4a41-86d1-ba320c324d71'></a>\n\n&#169;2021 Suprema Inc. Suprema and identifying product names and numbers herein are registered trade marks of Suprema Inc. All non-Suprema brands and product names are trademarks or registered trademarks of their respective companies. Product appearance, build status and/or specifications are subject to change without notice. [SUPREMA-AHL-FS2-EN-REV10]",
+  "chunks": [
+    {
+      "text": "<a id='5262d616-a827-4a25-8947-5dc3ab1bb876'></a>\n\nFaceStation 2\nSmart Face Recognition Terminal",
+      "grounding": [
+        {
+          "page": 0,
+          "box": {
+            "l": 0.28530073165893555,
+            "t": 0.1512036919593811,
+            "r": 0.7208737134933472,
+            "b": 0.2312961220741272
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_0/ChunkType.text_5262d616-a827-4a25-8947-5dc3ab1bb876_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "5262d616-a827-4a25-8947-5dc3ab1bb876"
+    },
+    {
+      "text": "<a id='0467afd2-d191-4ede-a009-658fb50331db'></a>\n\n<::A black and silver biometric device with a screen displaying 'Face Station 2' next to a colorful silhouette of a human head. On the right side of the screen, the time '09:15 AM' and date '03/24 FRI' are shown, along with a phone icon, a person icon, a clock icon, and a briefcase icon. Below the screen, two camera lenses are visible. The brand name 'suprema' is printed near the bottom of the device.\n: photo::>",
+      "grounding": [
+        {
+          "page": 0,
+          "box": {
+            "l": 0.28026527166366577,
+            "t": 0.2987843155860901,
+            "r": 0.7438645958900452,
+            "b": 0.6894389390945435
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png"
+        }
+      ],
+      "chunk_type": "figure",
+      "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db"
+    },
+    {
+      "text": "<a id='177399ec-5e96-4998-9544-d0e946fff872'></a>\n\nSuprema FaceStation 2 is the most advanced face recognition terminal providing loads of the world's best features. Powered by Suprema's latest innovation in facial biometrics, FaceStation 2 offers unrivalled matching speed, accuracy and level of security. With Suprema's patented optic engineering, FaceStation 2 achieves up to 25,000 lx of operating illuminance which in turn, brings all-round confi-dence regardless of lighting conditions. Packed in an ergonomically-designed structure, FaceStation 2 provides exceptional performance and usability for diverse access control and time attendance sites, large or small.",
+      "grounding": [
+        {
+          "page": 0,
+          "box": {
+            "l": 0.11450415849685669,
+            "t": 0.7504481077194214,
+            "r": 0.8867682814598083,
+            "b": 0.8804714679718018
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_0/ChunkType.text_177399ec-5e96-4998-9544-d0e946fff872_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "177399ec-5e96-4998-9544-d0e946fff872"
+    },
+    {
+      "text": "<a id='81e547e2-0dd1-4659-b86f-9259d88ff122'></a>\n\n<::logo: Suprema\nSUPREMA\nSECURITY & BIOMETRICS\nThe logo features the company name \"SUPREMA\" in a bold, sans-serif font, with \"SECURITY & BIOMETRICS\" below it, all in white text on a black rectangular background::>",
+      "grounding": [
+        {
+          "page": 0,
+          "box": {
+            "l": 0.3950338065624237,
+            "t": 0.9009509682655334,
+            "r": 0.6032503843307495,
+            "b": 0.9454360604286194
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_0/ChunkType.logo_81e547e2-0dd1-4659-b86f-9259d88ff122_0.png"
+        }
+      ],
+      "chunk_type": "figure",
+      "chunk_id": "81e547e2-0dd1-4659-b86f-9259d88ff122"
+    },
+    {
+      "text": "<a id='9441956d-216b-4510-9284-ba5e469ce348'></a>\n\nFaceStation 2\nSmart Face Recognition Terminal",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.6754336953163147,
+            "t": 0.043836481869220734,
+            "r": 0.9206094145774841,
+            "b": 0.08164770156145096
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_9441956d-216b-4510-9284-ba5e469ce348_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "9441956d-216b-4510-9284-ba5e469ce348"
+    },
+    {
+      "text": "<a id='000a98fd-dafa-4eff-9e1a-3e4093095518'></a>\n\n## Features\n\n### Ultra Performance\n*   Matching Speed: 1:4,000 match/sec\n*   *Group Matching: 1:5,000 match/sec\n*   User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.07807363569736481,
+            "t": 0.09034951776266098,
+            "r": 0.4471481442451477,
+            "b": 0.16846710443496704
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518"
+    },
+    {
+      "text": "<a id='127ac179-a85d-4ceb-9d41-ba3e443baafe'></a>\n\nHighest Operating Illuminance\n* Operating illuminance from 0 lx to 25,000 lx\n* Highest operating illuminance available\n* Covers complete darkness to all indoor lighting conditions",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.07882878184318542,
+            "t": 0.1791541576385498,
+            "r": 0.4454319179058075,
+            "b": 0.23037713766098022
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe"
+    },
+    {
+      "text": "<a id='f7bf27be-f36c-4d8d-b947-42076d0cab8b'></a>\n\nEnhanced Security\n- Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs\n- Enhanced security by Android 5.0 Lollipop\n- High quality Image log",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.08108125627040863,
+            "t": 0.24080508947372437,
+            "r": 0.4290105700492859,
+            "b": 0.3039817810058594
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b"
+    },
+    {
+      "text": "<a id='688aa197-361a-41a2-af2c-4ba2a4019ff2'></a>\n\n<::visual content::>\n\nMulti RFID Card Reading\n*   LF(125kHz), HF(13.56MHz) dual-band\n*   Reads all card types that HID multiCLASS supports (EM/HID Prox/MIFARE/ICLASS/DESFire/FeliCa/NFC)",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.07998277246952057,
+            "t": 0.31634631752967834,
+            "r": 0.4090847373008728,
+            "b": 0.3681228458881378
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_688aa197-361a-41a2-af2c-4ba2a4019ff2_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "688aa197-361a-41a2-af2c-4ba2a4019ff2"
+    },
+    {
+      "text": "<a id='7eaa95c8-1c2a-4f8b-a12d-169de89bea4d'></a>\n\nErgonomics & User Convenience\n\n*   Extended height range: 145cm – 210cm\n*   Tilt-type bracket for wheelchaired persons & children\n*   Android 5.0 Lollipop based intuitive GUI\n*   Improved face enrolment procedure",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.07963177561759949,
+            "t": 0.38098403811454773,
+            "r": 0.4174046516418457,
+            "b": 0.4435705840587616
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d"
+    },
+    {
+      "text": "<a id='5d33614c-70a7-45a2-ae2b-044ddd77c2e2'></a>\n\nSpecifications\n<table id=\"1-1\">\n<tr><td id=\"1-2\">Category</td><td id=\"1-3\">Features</td><td id=\"1-4\">FS2-D</td><td id=\"1-5\">FS2-AWB</td></tr>\n<tr><td id=\"1-6\" rowspan=\"3\">Credential</td><td id=\"1-7\">Biometric</td><td id=\"1-8\" colspan=\"2\">Face</td></tr>\n<tr><td id=\"1-9\">RF Options</td><td id=\"1-a\">125kHz EM &amp; 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC</td><td id=\"1-b\">125kHz EM, HID Prox &amp; 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC &amp; 2.4GHz BLE</td></tr>\n<tr><td id=\"1-c\">RF Read Range*</td><td id=\"1-d\" colspan=\"2\">MIFARE/DESFire/iCLASS: 50 mm\nEM/HID Prox/FeliCa: 30 mm, BLE: 50 mm</td></tr>\n<tr><td id=\"1-e\" rowspan=\"12\">General</td><td id=\"1-f\">CPU</td><td id=\"1-g\" colspan=\"2\">1.4 GHz Quad Core</td></tr>\n<tr><td id=\"1-h\">Memory</td><td id=\"1-i\" colspan=\"2\">8GB Flash + 1GB RAM</td></tr>\n<tr><td id=\"1-j\">LCD type</td><td id=\"1-k\" colspan=\"2\">4&quot; color TFT LCD</td></tr>\n<tr><td id=\"1-l\">LCD resolution</td><td id=\"1-m\" colspan=\"2\">800 x 480 pixels</td></tr>\n<tr><td id=\"1-n\">IR LED</td><td id=\"1-o\" colspan=\"2\">140 ea</td></tr>\n<tr><td id=\"1-p\">Sound</td><td id=\"1-q\" colspan=\"2\">24 bit Voice DSP (echo cancellation)</td></tr>\n<tr><td id=\"1-r\">Operating temperature</td><td id=\"1-s\" colspan=\"2\">-20°C ~ 50°C</td></tr>\n<tr><td id=\"1-t\">Operating humidity</td><td id=\"1-u\" colspan=\"2\">0% ~ 80%, non-condensing</td></tr>\n<tr><td id=\"1-v\">Dimensions (W x H x D)</td><td id=\"1-w\" colspan=\"2\">141 x 164 x 125</td></tr>\n<tr><td id=\"1-x\">Weight</td><td id=\"1-y\" colspan=\"2\">Device: 548g, Bracket: 74g (incl. washer and bolt)</td></tr>\n<tr><td id=\"1-z\">Certificates</td><td id=\"1-A\" colspan=\"2\">CE, FCC, KC, RoHS, REACH, WEEE, BT SIG</td></tr>\n<tr><td id=\"1-B\">Power</td><td id=\"1-C\" colspan=\"2\">DC 24V 2.5 A</td></tr>\n<tr><td id=\"1-D\" rowspan=\"2\">Face</td><td id=\"1-E\">Image dimension</td><td id=\"1-F\" colspan=\"2\">720 x 480 pixels</td></tr>\n<tr><td id=\"1-G\">Live Face Detection</td><td id=\"1-H\" colspan=\"2\">Supported</td></tr>\n<tr><td id=\"1-I\" rowspan=\"2\">Capacity</td><td id=\"1-J\">Max. User</td><td id=\"1-K\" colspan=\"2\">30,000 (1:1), 4,000(1:N)</td></tr>\n<tr><td id=\"1-L\">Max. Log</td><td id=\"1-M\" colspan=\"2\">5,000,000 (text), 50,000 (image)</td></tr>\n<tr><td id=\"1-N\" rowspan=\"9\">Interfaces</td><td id=\"1-O\">Wi-Fi</td><td id=\"1-P\" colspan=\"2\">IEEE 802.11 b/g (FS2-AWB only)</td></tr>\n<tr><td id=\"1-Q\">Ethernet</td><td id=\"1-R\" colspan=\"2\">Supported (10/100/1000 Mbps, auto MDI/MDI-X)</td></tr>\n<tr><td id=\"1-S\">RS-485</td><td id=\"1-T\" colspan=\"2\">1ch Host or Slave (Selectable)</td></tr>\n<tr><td id=\"1-U\">Wiegand</td><td id=\"1-V\" colspan=\"2\">1ch In and 1ch Out</td></tr>\n<tr><td id=\"1-W\">TTL input</td><td id=\"1-X\" colspan=\"2\">2 Inputs</td></tr>\n<tr><td id=\"1-Y\">Relay</td><td id=\"1-Z\" colspan=\"2\">1 Relay</td></tr>\n<tr><td id=\"1-10\">USB</td><td id=\"1-11\" colspan=\"2\">USB 2.0 (Host)</td></tr>\n<tr><td id=\"1-12\">Tamper</td><td id=\"1-13\" colspan=\"2\">Supported</td></tr>\n<tr><td id=\"1-14\">Video Phone</td><td id=\"1-15\" colspan=\"2\">SIP-based VoIP (Video + Voice)</td></tr>\n</table>\n* DESFire EV2 cards are supported by having backward compatibility of DESFire EV1 cards. CSN and smart card functions are compatible with FaceStation 2.\n* RF read range will vary depending on the installation environment.",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.4697866439819336,
+            "t": 0.09107543528079987,
+            "r": 0.9184786081314087,
+            "b": 0.47057217359542847
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png"
+        }
+      ],
+      "chunk_type": "table",
+      "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2"
+    },
+    {
+      "text": "<a id='4b911e80-3a91-4b73-bb45-8ae2d5c77b85'></a>\n\n<::System Configurations\n\nLegend:\n- Input: red line\n- RS-485: blue line\n- Relay: orange line\n\nDiagram showing various system configurations connected to a central BioStar 2 Server.\n\nTop Section:\n- DE-620 (Smartcard Reader/Writer) and BioMini Plus 2 (Fingerprint Enrollment Device) are connected via USB to a Web Browser (BioStar 2 Client).\n\nMain Connectivity:\n- The Web Browser (BioStar 2 Client) and the BioStar 2 Server are connected via TCP/IP.\n\nStandalone-Secure Configuration:\n- A FaceStation 2 device is connected to a Secure I/O 2 module.\n- The Secure I/O 2 module is connected to a door lock and an exit button.\n- Connections from FaceStation 2 to Secure I/O 2 use RS-485 (blue) and Input (red).\n- Connections from Secure I/O 2 to door lock and exit button use Relay (orange) and Input (red).\n\nStandalone Configuration:\n- A FaceStation 2 device is connected directly to a door lock and an exit button.\n- Connections use Relay (orange) and Input (red).\n\nRemote Access:\n- BioStar 2 Server is connected to the Internet via WAN.\n- The Internet is connected to BioStar 2 Mobile and a Web Browser (BioStar 2 Client) via WAN.\n\nDistributed Access Control Systems:\n- Multiple FaceStation 2 devices are shown.\n- One FaceStation 2 is connected to a Reader, a door lock, and an exit button. Connections use Input (red), RS-485 (blue), and Relay (orange).\n- Another FaceStation 2 is connected to a door lock and an exit button. Connections use Input (red) and RS-485 (blue).\n\nAll FaceStation 2 devices are connected to the central TCP/IP network line.\n: flowchart::>",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.07918712496757507,
+            "t": 0.4833666682243347,
+            "r": 0.9193381071090698,
+            "b": 0.8433817028999329
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png"
+        }
+      ],
+      "chunk_type": "figure",
+      "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85"
+    },
+    {
+      "text": "<a id='22307862-6407-47a7-95e1-c8cbb313ba9a'></a>\n\n<::Logo for Suprema Security & Biometrics:\nsuprema\nSECURITY & BIOMETRICS\n: figure::>",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.08211579918861389,
+            "t": 0.8636086583137512,
+            "r": 0.2497578263282776,
+            "b": 0.9426153302192688
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.figure_22307862-6407-47a7-95e1-c8cbb313ba9a_0.png"
+        }
+      ],
+      "chunk_type": "figure",
+      "chunk_id": "22307862-6407-47a7-95e1-c8cbb313ba9a"
+    },
+    {
+      "text": "<a id='a7d735c7-b2d7-43c6-a17f-9313ffa3d490'></a>\n\nSuprema Inc.",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.2564808428287506,
+            "t": 0.8654897809028625,
+            "r": 0.3760429918766022,
+            "b": 0.8814457058906555
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_a7d735c7-b2d7-43c6-a17f-9313ffa3d490_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "a7d735c7-b2d7-43c6-a17f-9313ffa3d490"
+    },
+    {
+      "text": "<a id='fbfcb4c0-0f43-4f76-aceb-6c6ab3683879'></a>\n\n17F Parkview Tower, 248, Jeongjail-ro, Bundang-gu, Seongnam-si, Gyeonggi-do, 13554, Republic of Korea\nT +82 31 783 4502\nE sales_sys@supremainc.com\nwww.supremainc.com",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.25645777583122253,
+            "t": 0.8844960331916809,
+            "r": 0.8614317178726196,
+            "b": 0.9090937972068787
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_fbfcb4c0-0f43-4f76-aceb-6c6ab3683879_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "fbfcb4c0-0f43-4f76-aceb-6c6ab3683879"
+    },
+    {
+      "text": "<a id='3f74479d-b5f2-4940-8e84-f3d0a7856d3e'></a>\n\nFor more information about Suprema's global offices, visit the webpage below by scanning the QR code.\nhttps://www.supremainc.com/en/about/contact-us.asp",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.25616365671157837,
+            "t": 0.9110450148582458,
+            "r": 0.7229120135307312,
+            "b": 0.9415754675865173
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.scan_code_3f74479d-b5f2-4940-8e84-f3d0a7856d3e_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "3f74479d-b5f2-4940-8e84-f3d0a7856d3e"
+    },
+    {
+      "text": "<a id='bd1774e3-4c25-4a41-86d1-ba320c324d71'></a>\n\n&#169;2021 Suprema Inc. Suprema and identifying product names and numbers herein are registered trade marks of Suprema Inc. All non-Suprema brands and product names are trademarks or registered trademarks of their respective companies. Product appearance, build status and/or specifications are subject to change without notice. [SUPREMA-AHL-FS2-EN-REV10]",
+      "grounding": [
+        {
+          "page": 1,
+          "box": {
+            "l": 0.08167064189910889,
+            "t": 0.9461018443107605,
+            "r": 0.9182218313217163,
+            "b": 0.9638168215751648
+          },
+          "image_url": "/courses/../../../../../tmp/course_cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b_parse_pb22pi4v/grounding/page_1/ChunkType.text_bd1774e3-4c25-4a41-86d1-ba320c324d71_0.png"
+        }
+      ],
+      "chunk_type": "text",
+      "chunk_id": "bd1774e3-4c25-4a41-86d1-ba320c324d71"
+    }
+  ],
+  "total_pages": 2
+}

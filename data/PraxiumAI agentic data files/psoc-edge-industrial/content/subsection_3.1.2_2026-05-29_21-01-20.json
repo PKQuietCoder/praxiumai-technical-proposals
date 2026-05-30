@@ -1,0 +1,388 @@
+{
+  "subsection_id": "3.1.2",
+  "subsection_title": "Analyze NNLite capabilities",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Describe NNLite's architecture, supported NN kernels, and clock frequency limits across system power modes",
+    "Explain why NNLite's low-power domain placement makes it the correct accelerator for always-ON inference workloads",
+    "Distinguish NNLite from the Ethos-U55 based on workload complexity, power domain, and compute architecture"
+  ],
+  "content": {
+    "hook_sentence": "Routing a lightweight presence detection model to the Ethos-U55 instead of NNLite keeps the entire high-performance domain powered on continuously — a design choice that can eliminate the power savings your terminal's always-ON architecture depends on.",
+    "introduction": "The PSOC Edge E8 gives you two ML accelerators, and choosing the wrong one for a given inference stage has direct consequences for your power budget. NNLite is the accelerator paired with the Cortex-M33 in the low-power domain, and understanding its specific capabilities — and its deliberate constraints — tells you exactly which workloads belong there versus on the Ethos-U55.",
+    "key_points": [
+      {
+        "point": "NNLite is a low-power domain coprocessor optimized for low to moderate complexity ML models running continuously.",
+        "explanation": "NNLite works in conjunction with the Cortex-M33 CPU and runs at the same clock frequency as the M33. Its design target is always-ON inference: workloads like wake word detection (WWD) and human activity recognition (HAR) that must run continuously at the lowest possible power. Because NNLite resides in the low-power domain, it stays active even when the high-performance domain (containing the Cortex-M55 and Ethos-U55) is powered down. For your face recognition terminal, this makes NNLite the natural home for the presence detection stage that monitors for approaching users between recognition events.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+            "snippet": "It is an ACTIVE state peripheral that accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR).",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+            "snippet": "The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+            "snippet": "A neural network (NNLite) coprocessor with the Cortex-M33 CPU, running at the same clock frequency as the M33.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_9a63d279-e06e-4bb1-b60b-64c37a335521_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "NNLite's clock frequency is capped at 160 MHz in HP mode and 80 MHz in LP mode — far below the Ethos-U55's 320 MHz ceiling.",
+        "explanation": "NNLite's operating frequency tracks the Cortex-M33: up to 160 MHz when the system is in High Performance (HP) mode, and up to 80 MHz in Low Power (LP) mode. The electrical spec table confirms a maximum of 200 MHz for HP mode and 80 MHz for LP mode. This is a deliberate trade-off: lower clock ceilings reduce dynamic power consumption, which is exactly what you need for a stage that runs continuously. When you compare this to the Ethos-U55's 320 MHz ceiling with 128 MACs/cycle, the frequency gap makes clear that NNLite is not designed to compete on raw throughput — it is designed to sustain inference at minimal energy cost. For workloads that fit within NNLite's compute envelope, this is an advantage, not a limitation.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "b1e6ab63-5cf5-4e8d-b387-6968a9a65faf",
+            "snippet": "System power mode | M55/U55 | M33/NNLite — High Performance (HP): 320 MHz | 160 MHz — Low Power (LP): 140 MHz | 80 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.table_b1e6ab63-5cf5-4e8d-b387-6968a9a65faf_0.png",
+            "page_number": 23,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "65c6a913-0818-47db-859c-b429640741b9",
+            "snippet": "NNLite operating frequency in system HP mode: max 200 MHz. NNLite operating frequency in system LP mode: max 80 MHz.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_121/ChunkType.table_65c6a913-0818-47db-859c-b429640741b9_0.png",
+            "page_number": 121,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+            "snippet": "Arm Cortex-M33 CPU, running at up to 160 MHz... A neural network (NNLite) coprocessor with the Cortex-M33 CPU, running at the same clock frequency as the M33.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_9a63d279-e06e-4bb1-b60b-64c37a335521_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "NNLite's compute engine is a 4-way integer SIMD MAC unit with autonomous input/output streamers.",
+        "explanation": "The core of NNLite is a configurable 4-way integer SIMD MAC unit that executes vector dot products, vector products, and vector additions — the fundamental operations in neural network inference. The MAC unit supports up to 4 multiplications/additions per clock cycle. Input streamers autonomously fetch biases, weights, and activations from memory without CPU intervention, while the output streamer applies activation functions (ReLU, Sigmoid) and packs results for efficient memory use. This autonomous data handling means the Cortex-M33 does not need to manage data movement during inference, freeing it for other low-power domain tasks like access control I/O or secure key management. The unit also supports sparsity-aware weight compression, which reduces effective memory bandwidth for sparse models.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "18578a48-07d2-4f15-8004-a45660d7dd5e",
+            "snippet": "NNLite is designed to optimize neural network inference by focusing on vector dot product operations, which are executed using a configurable 4-way integer SIMD MAC unit. Data handling is managed by input and output streamers, which autonomously fetch data and write back results.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_18578a48-07d2-4f15-8004-a45660d7dd5e_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "18578a48-07d2-4f15-8004-a45660d7dd5e",
+            "snippet": "The input streamers handle biases, weights, and activations, while the output streamer applies activation functions like ReLU and Sigmoid and packs data for efficient memory use.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_18578a48-07d2-4f15-8004-a45660d7dd5e_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f6ec38ff-f700-4693-b847-ff8956359160",
+            "snippet": "The MAC unit supports up to 4 multiplications/additions per clock cycle and enables high-performance operations with features like sparsity-aware weight compression.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_38/ChunkType.text_f6ec38ff-f700-4693-b847-ff8956359160_0.png",
+            "page_number": 38,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "NNLite supports a broad set of NN kernels and data precisions, including 8-bit, 16-bit, and 32-bit, with zero weight skipping.",
+        "explanation": "Despite its low-power positioning, NNLite covers a wide range of NN layer types: dense (fully connected), 2D convolution, depthwise 2D convolution, pooling (min, max, average), GRU, and LSTM. It also handles pointwise operations (add, subtract, multiply), re-quantization, and rescaling. Activation functions include fused options like ReLU and Leaky ReLU, plus unfused options like Sigmoid, tanh, and Softmax. Supported data precisions span 8-bit, 16-bit, and 32-bit for both activations and weights. Zero weight skipping further improves efficiency by bypassing multiply-accumulate operations where weights are zero — a common property in pruned or sparse models. NNLite is also compatible with TensorFlow Lite for microcontrollers, so models you prepare in the standard TFLite Micro toolchain can target NNLite without a custom framework. This kernel coverage means you can implement a meaningful presence detection or HAR model on NNLite without being forced to simplify the topology.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "998108aa-b60c-419e-9356-51a00fba80e4",
+            "snippet": "NNLite supports various neural network kernels, including dense (fully connected), 2D convolution, depthwise 2D convolution, pooling (min, max, average), GRU, and LSTM. Supported data precisions include 8-bit, 16-bit, and 32-bit for activations and weights, with zero weight skipping for efficient computation.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_998108aa-b60c-419e-9356-51a00fba80e4_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "998108aa-b60c-419e-9356-51a00fba80e4",
+            "snippet": "Activation functions include fused options like ReLU and Leaky ReLU, as well as unfused options like Sigmoid, tanh, and Softmax.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_998108aa-b60c-419e-9356-51a00fba80e4_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f6ec38ff-f700-4693-b847-ff8956359160",
+            "snippet": "The accelerator is compatible with TensorFlow Lite for microcontrollers and other frameworks, ensuring support for common neural network models and quantization techniques.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_38/ChunkType.text_f6ec38ff-f700-4693-b847-ff8956359160_0.png",
+            "page_number": 38,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Assigning a workload to NNLite instead of the Ethos-U55 is a power architecture decision, not just a performance trade-off.",
+        "explanation": "The critical design implication is this: if you route an always-ON inference stage to the Ethos-U55, you force the high-performance domain to remain powered on continuously. That domain includes the Cortex-M55, Ethos-U55, 4-channel HPDMA, and graphics subsystem — all drawing power even when the terminal is idle between recognition events. NNLite's placement in the low-power domain means the high-performance domain can power down completely during idle periods while NNLite continues running presence detection. This is the architectural pattern the PSOC Edge E8 is designed for: NNLite handles the always-ON lightweight stage, and the high-performance domain wakes only when a face is detected and full recognition is needed. A colleague who proposes running all inference on the Ethos-U55 for simplicity is trading away the entire power benefit of the dual-domain architecture.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+            "snippet": "The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+            "snippet": "This product line includes a neural network (NNLite) coprocessor, which works in conjunction with the Cortex-M33 CPU, running at the same clock frequency as the Cortex-M33 CPU.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+            "snippet": "Arm Cortex-M55, running at up to 320 MHz... A machine learning (ML) coprocessor with the Cortex-M55 CPU: the Arm Ethos-U55 CPU... Arm Cortex-M33 CPU, running at up to 160 MHz... A neural network (NNLite) coprocessor with the Cortex-M33 CPU.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_9a63d279-e06e-4bb1-b60b-64c37a335521_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition terminal must monitor for approaching users 24/7. You have two candidate models: Model A is a lightweight human presence detector (HAR-class complexity) that runs continuously. Model B is the full face recognition model that runs only when a person is detected. A colleague suggests running both on the Ethos-U55 to avoid inter-processor coordination. What is the power consequence of that decision, and which accelerator should handle Model A?",
+        "reveal": "Running Model A on the Ethos-U55 keeps the entire high-performance domain — Cortex-M55, Ethos-U55, HPDMA, and graphics subsystem — powered on continuously, even during the long idle periods between user approaches. NNLite is specifically designed for this scenario: it resides in the low-power domain alongside the Cortex-M33, which remains active regardless of what the high-performance domain is doing. Assigning Model A to NNLite allows the high-performance domain to power down between recognition events. Model B (full face recognition) correctly stays on the Ethos-U55, which wakes with the high-performance domain only when Model A signals a detection. The inter-processor coordination overhead is a real cost, but it is far smaller than the continuous power draw of keeping the high-performance domain active.",
+        "hint": "Think about which power domain each accelerator lives in, and what happens to that domain when inference must run continuously."
+      },
+      {
+        "prediction_prompt": "You are selecting a data precision for a depthwise convolution layer in a presence detection model targeting NNLite. Your model was trained with 8-bit quantization. A team member suggests switching to 16-bit activations to improve accuracy. Does NNLite support this, and what additional efficiency feature should you consider for the weight tensors?",
+        "reveal": "NNLite supports 8-bit, 16-bit, and 32-bit precisions for both activations and weights, so switching to 16-bit activations is architecturally valid. However, 16-bit activations increase memory bandwidth and reduce the effective throughput of the 4-way SIMD MAC unit compared to 8-bit. For the weight tensors, you should evaluate zero weight skipping: NNLite bypasses MAC operations where weights are zero, so a pruned or sparse model can recover some of the efficiency lost by moving to wider activations. Depthwise 2D convolution is explicitly listed in NNLite's supported kernel set, so the layer type itself is not a constraint.",
+        "hint": "Check NNLite's supported precision list and its efficiency features for sparse weight tensors."
+      }
+    ],
+    "summary": "NNLite is a 4-way integer SIMD MAC coprocessor in the low-power domain, clocked with the Cortex-M33 at up to 160 MHz in HP mode and 80 MHz in LP mode, supporting a broad kernel set and 8/16/32-bit precision with zero weight skipping. Its defining characteristic for your terminal design is its always-ON availability: assigning lightweight continuous inference stages like presence detection to NNLite lets the high-performance domain power down between recognition events, which is the power architecture the PSOC Edge E8 is built around.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 0,
+        "caption": "The PSOC Edge E8 block diagram shows NNLite placed inside the low-power domain alongside the Cortex-M33, while the Ethos-U55 sits in the high-performance domain with the Cortex-M55. This physical separation is the architectural basis for the always-ON inference pattern.",
+        "alt_text": "Detailed block diagram of the PSOC Edge E8 showing three power domains. The low-power domain contains the Cortex-M33 at 160 MHz, NNLite NPU, 1 MB SRAM, RRAM 512 KB, 2x 16-channel DMA, GPIO, SCBs, I3C, Crypto, Ethernet, CAN FD, and the Lock-Step Secure Enclave. The high-performance domain contains the Cortex-M55 at 320 MHz, Ethos-U55 at 320 MHz, 4-channel HPDMA, graphics subsystem with 2.5D rendering and MIPI DSI/DBI, audio interfaces, SD host controllers, SMIF, and USB. The deep sleep always-on domain contains autonomous analog, LPCOMP, and the deep-sleep SCB. System SRAM SoCMEM of 5120 KB is shown connected to the high-performance domain interconnect.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When the system is in Low Power (LP) mode, NNLite's maximum clock frequency matches the Cortex-M33 ceiling, which means the primary reason to use NNLite for always-ON inference is its ___, not its raw throughput.",
+      "answer": "low-power domain placement",
+      "distractors": [
+        "higher clock frequency",
+        "wider SIMD width",
+        "larger instruction cache"
+      ],
+      "explanation": "NNLite's clock is capped at 80 MHz in LP mode, well below the Ethos-U55's 320 MHz ceiling. The architectural advantage is that NNLite resides in the low-power domain and stays active when the high-performance domain powers down, making domain placement the key benefit for always-ON workloads."
+    },
+    {
+      "after_key_point": 4,
+      "type": "matching",
+      "stem": "Match each inference workload to the accelerator whose documented capabilities and power domain best satisfy its requirements.",
+      "pairs": [
+        {
+          "left": "Continuous presence detection running between recognition events at lowest power",
+          "right": "NNLite — low-power domain, always-ON, optimized for low to moderate complexity models"
+        },
+        {
+          "left": "Full face recognition model requiring high throughput with 8-bit quantized weights",
+          "right": "Ethos-U55 — high-performance domain, 128 MACs/cycle, 320 MHz"
+        },
+        {
+          "left": "Human activity recognition (HAR) model that must not wake the high-performance domain",
+          "right": "NNLite — low-power domain, supports dense, convolution, GRU, and LSTM kernels"
+        }
+      ],
+      "explanation": "NNLite's low-power domain placement and optimization for low to moderate complexity models make it the correct choice for any always-ON stage. The Ethos-U55's 128 MACs/cycle throughput at 320 MHz is reserved for high-complexity workloads that justify waking the high-performance domain."
+    }
+  ],
+  "content_gaps": [
+    "NNLite memory addressing and SRAM allocation: The datasheet does not specify how NNLite accesses the 1 MB LP-domain SRAM or SoCMEM for weight and activation storage. Firmware engineers will need the Architecture Reference Manual to configure DMA channels and memory regions for NNLite inference.",
+    "NNLite driver and PDL API: No initialization code patterns, register-level configuration steps, or ModusToolbox PDL API signatures for NNLite are present in the provided source material. Hands-on configuration requires the PDL documentation as a supplementary source.",
+    "Maximum model size for NNLite: The datasheet does not specify maximum supported parameter counts or activation memory limits for NNLite in the context of presence detection or HAR workloads. Concrete SRAM allocation decisions require SME input on typical model footprints."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are designing firmware for a face recognition terminal based on the PSOC Edge E8. The system must run a lightweight presence detection model continuously in the background to determine when a person approaches the terminal. This stage must operate at the lowest possible power so the terminal can remain always-on without excessive battery drain.",
+        "question_text": "Which accelerator should you assign this presence detection workload to, and why does it best satisfy the stated requirements?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Ethos-U55, because it runs at up to 320 MHz and delivers 128 MACs/cycle, providing the fastest inference for any detection task",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "NNLite, because it resides in the low-power domain and is optimized for low to moderate complexity models such as presence and wake detection in always-ON use cases",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "NNLite, because it supports 8-bit weight compression, which is the primary requirement for reducing memory usage in detection models",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The NNLite coprocessor falls in the low-power domain and is explicitly optimized for low to moderate complexity ML models such as wake word detection and human activity recognition, making it ideal for always-ON use cases at the lowest power. Presence detection maps directly to this profile.",
+        "incorrect": "Review the power domain and use-case descriptions for each accelerator. The Ethos-U55 offers high throughput but operates in the high-performance domain, which is not suited for always-ON low-power operation. Option C identifies a real NNLite feature but misidentifies the primary reason it fits this workload — the deciding factor is its low-power domain placement and optimization for lightweight, continuous inference tasks."
+      },
+      "references": [
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power... optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR).",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+          "snippet": "High Performance (HP) Domain: Arm Cortex-M55 up to 320 MHz / Arm Ethos-U55 NPU up to 320 MHz ... Low Power (LP) Domain: Arm Cortex-M33 up to 160 MHz / NNLite NPU up to 160 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+          "page_number": 2,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are partitioning the ML inference pipeline for a face recognition terminal into two stages. Stage 1 is a full face recognition model that requires high throughput and uses 8-bit quantized weights with compression to fit within memory constraints. Stage 2 is a simple human activity recognition (HAR) model that runs continuously at low power.",
+        "question_text": "Which accelerator assignment correctly matches each stage to the hardware whose documented capabilities best satisfy its requirements?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Stage 1 → NNLite; Stage 2 → Ethos-U55, because NNLite supports 8-bit precision and Ethos-U55 handles activity recognition efficiently",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Stage 1 → Ethos-U55; Stage 2 → Ethos-U55, because the high-performance domain handles both workloads and avoids inter-processor coordination overhead",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Stage 1 → Ethos-U55; Stage 2 → NNLite, because Ethos-U55 provides 128 MACs/cycle with 8-bit weight compression for the high-complexity model, and NNLite is optimized for low-power always-ON inference of lightweight models like HAR",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The Ethos-U55 is documented to support 8-bit weights and weight compression and delivers 128 MACs/cycle, making it the right choice for a high-complexity face recognition model. The NNLite coprocessor is explicitly optimized for low to moderate complexity models such as HAR and operates in the low-power domain, making it ideal for the always-ON Stage 2 workload.",
+        "incorrect": "Each accelerator has a distinct capability profile. Option A reverses the assignment — NNLite does support 8-bit precision, but it is optimized for lightweight models, not full face recognition. Option B ignores power domain constraints: running a continuous low-complexity model on the Ethos-U55 in the HP domain wastes power unnecessarily. Match workload complexity and power requirements to each accelerator's documented strengths."
+      },
+      "references": [
+        {
+          "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+          "snippet": "This product line includes an Arm Ethos-U55 neural net processor... It supports 8-bit weights and weight compression to reduce memory usage. It also performs 128 MACs/clock cycle.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_b7cefb2c-3147-4b25-8a63-f80a20d5af0f_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "This product line includes a neural network (NNLite) coprocessor... accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR)... The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "998108aa-b60c-419e-9356-51a00fba80e4",
+          "snippet": "NNLite supports various neural network kernels, including dense (fully connected), 2D convolution, depthwise 2D convolution, pooling (min, max, average), GRU, and LSTM... Supported data precisions include 8-bit, 16-bit, and 32-bit for activations and weights.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_998108aa-b60c-419e-9356-51a00fba80e4_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a colleague's firmware architecture proposal for the face recognition terminal. They propose running all ML inference — including both the always-ON presence detection stage and the full face recognition stage — exclusively on the Ethos-U55. Their rationale is that the Ethos-U55 has higher MACs/cycle throughput and therefore handles all workloads more efficiently than splitting across two accelerators.",
+        "question_text": "What is the most significant problem with this proposal from a system design perspective?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The Ethos-U55 does not support the NN kernels required for presence detection, so the workload cannot execute on it at all",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Running the always-ON presence detection stage on the Ethos-U55 keeps the high-performance domain active continuously, eliminating the power savings that the low-power NNLite domain is designed to provide for always-ON use cases",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The Ethos-U55 operates at a lower clock frequency than the NNLite in low-power mode, making it slower for lightweight inference tasks",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The core problem is power domain architecture. The NNLite resides in the low-power domain specifically to enable always-ON inference at the lowest power. Consolidating all workloads on the Ethos-U55 in the high-performance domain negates this design advantage and increases continuous power consumption — a critical concern for an always-on access control terminal.",
+        "incorrect": "The issue is not kernel support or clock frequency. The Ethos-U55 is a capable accelerator that could technically run lightweight models. Option C is factually incorrect — the Ethos-U55 runs at up to 320 MHz in HP mode versus NNLite's 160 MHz maximum. The fundamental flaw in the proposal is ignoring power domain design: the NNLite's low-power domain placement is the key architectural reason to offload always-ON workloads to it, not raw throughput."
+      },
+      "references": [
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+          "snippet": "High Performance (HP) Domain: Arm Cortex-M55 up to 320 MHz / Arm Ethos-U55 NPU up to 320 MHz ... Low Power (LP) Domain: Arm Cortex-M33 up to 160 MHz / NNLite NPU up to 160 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+          "page_number": 2,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "b1c22e3a-cc38-483f-88d8-7fa6b8e91a7f",
+          "snippet": "Ethos-U55 NN coprocessor with 128 multiply-accumulate operations (MACs) per cycle; 51.2 billion operations per second",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_b1c22e3a-cc38-483f-88d8-7fa6b8e91a7f_0.png",
+          "page_number": 9,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "subsection_id": "1.2.1",
+  "subsection_title": "Assess deployment environments by lighting condition",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Assess whether a proposed deployment environment falls within FaceStation 2's supported operating illuminance range of 0 to 25,000 lx",
+    "Provide evidence-based suitability rationale to stakeholders using the illuminance specification"
+  ],
+  "content": {
+    "hook_sentence": "A deployment site that looks perfectly lit to the human eye can still fall outside a device's operating range — and the reverse is equally true: complete darkness is not a disqualifier for FaceStation 2.",
+    "introduction": "When a facilities manager, security integrator, or site engineer asks whether FaceStation 2 will work in a specific location, your answer needs to be grounded in a single, precise specification: the device's operating illuminance range. Getting this wrong in either direction — ruling out a viable site or approving one that exceeds the spec — creates downstream problems that land back on you as product owner. This subsection gives you the number, the boundaries, and the reasoning pattern to apply it correctly in any stakeholder conversation.",
+    "key_points": [
+      {
+        "point": "FaceStation 2 operates across a 0 to 25,000 lx illuminance range — from complete darkness to the brightest indoor environments.",
+        "explanation": "The operating illuminance range is the specification that determines whether a physical location is suitable for FaceStation 2 deployment. The lower bound of **0 lx** means the device functions in total darkness (it uses IR-based imaging, not visible light, for face capture). The upper bound of **25,000 lx** represents the highest operating illuminance available in the product category and covers the full spectrum of indoor lighting conditions. When a stakeholder describes a deployment environment, your job is to map their described or measured illuminance value against this range. If the value falls between 0 and 25,000 lx inclusive, the environment is within spec. If it exceeds 25,000 lx, it is outside the supported range and you cannot confirm suitability without qualification.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "177399ec-5e96-4998-9544-d0e946fff872",
+            "snippet": "FaceStation 2 achieves up to 25,000 lx of operating illuminance which in turn, brings all-round confidence regardless of lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.text_177399ec-5e96-4998-9544-d0e946fff872_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "25,000 lx is the ceiling — any environment measured above this value falls outside the supported range, regardless of how it looks visually.",
+        "explanation": "Stakeholders sometimes assume that if a space looks bright but not blinding, it must be within spec. Measured illuminance is what matters, not subjective perception. Direct sunlight at a south-facing outdoor entrance, a glass atrium on a clear day, or a reflective industrial floor under high-bay lighting can all push illuminance above 25,000 lx. When a stakeholder provides a measured peak illuminance that exceeds 25,000 lx, your response must be clear: that environment is outside the device's supported operating range. Do not hedge with phrases like \"it may still work\" — the specification does not support that claim, and making it exposes you to a credibility problem if the deployment fails. Conversely, do not add restrictions that the spec does not impose. The specification does not limit FaceStation 2 to indoor use only — it states the range covers complete darkness to all indoor lighting conditions, with 25,000 lx as the hard upper boundary. A location that happens to be outdoors but measures within range is not automatically disqualified.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "177399ec-5e96-4998-9544-d0e946fff872",
+            "snippet": "FaceStation 2 achieves up to 25,000 lx of operating illuminance which in turn, brings all-round confidence regardless of lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.text_177399ec-5e96-4998-9544-d0e946fff872_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Apply a two-step assessment pattern: get the measured illuminance, then compare it to the 0 to 25,000 lx range.",
+        "explanation": "In practice, stakeholders rarely lead with a lux measurement. They describe the environment in qualitative terms: \"it's a bright lobby,\" \"the dock faces south,\" \"the exhibit hall is dimly lit.\" Your job is to push for a measured value before committing to a suitability answer. The assessment pattern is straightforward: 1. Ask for the peak illuminance measurement at the proposed mounting location (not an average, and not a general description). 2. Compare that value to the 0 to 25,000 lx operating range. 3. State your conclusion with the spec as your explicit rationale: \"At X lx, that environment falls within / exceeds FaceStation 2's supported operating range of 0 to 25,000 lx.\" This pattern keeps your answer defensible. You are not making a judgment call — you are applying a published specification. If the stakeholder does not have a measurement, the honest answer is that suitability cannot be confirmed until one is obtained.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The 0 lx lower bound is a genuine capability, not a theoretical floor — it reflects the device's IR-based imaging design.",
+        "explanation": "A common stakeholder misconception is that face recognition requires visible light. FaceStation 2's IR LED array (140 LEDs per the hardware specification) enables face capture independent of ambient visible light. This is why the operating range starts at 0 lx rather than some minimum threshold. This matters in practice when you are evaluating sites like underground parking garages, server room corridors with motion-activated lighting, or any location where ambient light is unreliable or absent. You can confirm suitability for these environments without caveats, because 0 lx is explicitly within the supported range. Do not conflate this with outdoor direct-sunlight scenarios. The IR imaging capability handles the low end; the 25,000 lx ceiling handles the high end. Both boundaries are hard limits defined by the specification.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "IR LED: 140 ea",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A security integrator is scoping two locations at a museum. Location A is a dimly lit exhibit hall measuring around 150 lx. Location B is a glass-walled atrium lobby where peak illuminance hits 28,000 lx on sunny days. The integrator asks which locations FaceStation 2 can support. Before reading the reveal, decide: which location or locations are within spec, and what is your rationale?",
+        "reveal": "Location A is within spec; Location B is not. FaceStation 2 operates from 0 to 25,000 lx. At 150 lx, Location A falls comfortably within that range — the 0 lx lower bound means even much dimmer environments are supported. Location B's peak of 28,000 lx exceeds the 25,000 lx upper limit, so you cannot confirm suitability for that site. The correct answer to the integrator: FaceStation 2 is suitable for Location A. Location B's peak illuminance exceeds the device's supported operating range of 25,000 lx, so that location is not confirmed as suitable without further mitigation.",
+        "hint": "Focus on the hard upper boundary of the spec, not on whether the location is indoors or outdoors."
+      },
+      {
+        "prediction_prompt": "A facilities manager at a logistics company wants to deploy FaceStation 2 at a loading dock entrance facing south. They have measured peak illuminance at the proposed mounting location at approximately 22,000 lx during peak sunlight hours. They ask whether the device can reliably operate there. What do you tell them?",
+        "reveal": "The deployment is within spec. FaceStation 2's operating illuminance range is 0 to 25,000 lx. At 22,000 lx, the loading dock falls within that range — 3,000 lx below the upper limit. Your answer to the facilities manager: FaceStation 2 is suitable for this environment. The measured peak of 22,000 lx is within the device's supported operating range of 0 to 25,000 lx. The fact that the location is outdoors and receives direct sunlight does not disqualify it; the specification does not restrict deployment to indoor environments, and the measured value is within range.",
+        "hint": "Check the measured value against the spec boundary before considering any other factors."
+      }
+    ],
+    "summary": "When a stakeholder asks whether FaceStation 2 suits a specific environment, get the peak illuminance measurement and compare it to the 0 to 25,000 lx operating range — anything within that range is supported, anything above 25,000 lx is not, and your answer should cite the spec explicitly.",
+    "figures": [
+      {
+        "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db",
+        "after_key_point": 0,
+        "caption": "FaceStation 2's dual-camera array — visible at the bottom of the device — uses IR-based imaging, which is what enables operation across the full 0 to 25,000 lx range.",
+        "alt_text": "Front view of the FaceStation 2 device, a black rectangular terminal with a 4-inch color TFT LCD screen showing the Face Station 2 logo on the left and a time display reading 09:15 AM on the right. Below the screen, two camera lenses are mounted side by side in a horizontal housing. The Suprema brand name is printed near the bottom of the device.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "A stakeholder describes a deployment site with a measured peak illuminance of 27,000 lx. Based on FaceStation 2's operating illuminance specification, this environment is ___ the supported range.",
+      "answer": "outside",
+      "distractors": [
+        "within",
+        "at the boundary of",
+        "conditionally within"
+      ],
+      "explanation": "FaceStation 2's upper operating illuminance limit is 25,000 lx. A measured value of 27,000 lx exceeds that ceiling, placing the environment outside the supported range — no hedging or conditional approval is warranted."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each deployment environment description to the correct suitability assessment based on FaceStation 2's operating illuminance range.",
+      "pairs": [
+        {
+          "left": "Underground parking garage with no ambient lighting (0 lx)",
+          "right": "Within range — 0 lx is the supported lower bound"
+        },
+        {
+          "left": "Bright indoor lobby measured at 18,000 lx",
+          "right": "Within range — 18,000 lx falls below the 25,000 lx ceiling"
+        },
+        {
+          "left": "Glass atrium with peak illuminance of 28,000 lx",
+          "right": "Outside range — 28,000 lx exceeds the 25,000 lx upper limit"
+        }
+      ],
+      "explanation": "The 0 to 25,000 lx range is the only criterion for illuminance suitability. Both the 0 lx lower bound and the 25,000 lx upper bound are hard limits; environments within those boundaries are supported regardless of whether they are indoors or outdoors."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not specify whether the 25,000 lx upper limit applies to direct IR illuminance, ambient visible light, or a combined measurement — SME clarification may be needed for edge cases involving mixed lighting environments.",
+    "The source document does not address whether any installation or shielding measures can extend suitability beyond 25,000 lx — if stakeholders ask about mitigation options for out-of-range sites, supplemental guidance from Suprema would be required."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A facilities manager at a logistics company contacts you about deploying FaceStation 2 at their loading dock entrance. The dock faces south and receives direct sunlight for most of the day, with peak illuminance measurements around 22,000 lx recorded at the proposed mounting location.",
+        "question_text": "The facilities manager asks whether FaceStation 2 can reliably operate in this environment. What should you tell them?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The environment exceeds FaceStation 2's supported range — the device is rated up to 10,000 lx, so direct sunlight at 22,000 lx will cause recognition failures.",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The environment is within FaceStation 2's supported range — the device operates from 0 to 25,000 lx, so 22,000 lx falls within spec and the deployment is suitable.",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The environment may be suitable, but outdoor deployments require additional shielding — FaceStation 2 is rated for indoor lighting conditions only and cannot be confirmed for direct sunlight.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. FaceStation 2 supports an operating illuminance range of 0 to 25,000 lx — the highest available. At 22,000 lx, the loading dock falls within that range, making the deployment suitable. You can confirm suitability with confidence based on the specification.",
+        "incorrect": "FaceStation 2's operating illuminance range is 0 to 25,000 lx, which covers complete darkness through high-illuminance outdoor conditions. At 22,000 lx, the loading dock is within spec. The device is not limited to 10,000 lx, nor is it restricted to indoor-only environments. Review the operating illuminance specification in the FaceStation 2 product documentation."
+      },
+      "references": [
+        {
+          "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+          "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a pre-sales call, a security integrator describes two candidate deployment locations at a museum: Location A is a dimly lit exhibit hall with ambient lighting around 150 lx, and Location B is a glass-walled atrium lobby where illuminance peaks at 28,000 lx on sunny days. The integrator asks which location FaceStation 2 can support.",
+        "question_text": "Based on FaceStation 2's operating illuminance specification, which location or locations are within the device's supported range?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Location A only — FaceStation 2 performs best in low-light conditions and is not rated for illuminance levels above 25,000 lx, which Location B exceeds.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Both locations — FaceStation 2 operates from 0 to 25,000 lx, and 150 lx falls within range, but so does 28,000 lx since outdoor specs are more lenient.",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Location A only — at 150 lx it falls within the 0 to 25,000 lx operating range, while Location B's peak of 28,000 lx exceeds the supported maximum.",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. FaceStation 2's operating illuminance range is 0 to 25,000 lx. Location A at 150 lx is well within range. Location B's peak of 28,000 lx exceeds the 25,000 lx maximum, making it outside the supported range. There is no separate or more lenient outdoor specification — the 25,000 lx limit applies universally.",
+        "incorrect": "FaceStation 2 supports 0 to 25,000 lx — a fixed upper limit with no outdoor exception. Location A (150 lx) is within range. Location B (28,000 lx peak) exceeds the 25,000 lx maximum and cannot be confirmed as suitable. Avoid overstating the device's capabilities beyond what the specification supports. Review the operating illuminance specification in the FaceStation 2 product documentation."
+      },
+      "references": [
+        {
+          "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+          "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "177399ec-5e96-4998-9544-d0e946fff872",
+          "snippet": "FaceStation 2 achieves up to 25,000 lx of operating illuminance which in turn, brings all-round confidence regardless of lighting conditions",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.text_177399ec-5e96-4998-9544-d0e946fff872_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    }
+  ]
+}

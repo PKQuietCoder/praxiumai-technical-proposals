@@ -1,0 +1,299 @@
+{
+  "subsection_id": "0.1.1",
+  "subsection_title": "What You'll Own After This Course",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Describe the job tasks this course prepares you to perform as Hardware Product Owner for FaceStation 2",
+    "Connect FaceStation 2's core capability areas to specific cross-functional stakeholder scenarios you will navigate"
+  ],
+  "content": {
+    "hook_sentence": "Most product owners can recite a spec sheet — but when a security engineer challenges you in a product review meeting, reciting numbers is not enough.",
+    "introduction": "This course is built around the situations you actually face: a sales rep needs a model recommendation before a customer call, an engineering stakeholder questions the OS security story, or leadership asks whether a deployment site is even feasible. By the end, you will own FaceStation 2's specification set deeply enough to resolve those conversations on the spot, without pulling up documentation. Each section maps directly to a capability area you will be expected to defend, explain, or apply in cross-functional discussions.",
+    "key_points": [
+      {
+        "point": "You will be the authoritative internal reference for FaceStation 2 performance capabilities.",
+        "explanation": "Stakeholders across engineering, sales, and leadership will bring you performance questions. After this course, you will apply FaceStation 2's matching speed, group matching speed, and user capacity figures to directly resolve those inquiries — not by reading from a datasheet, but by understanding what the numbers mean in context and how they answer the specific question being asked. The device is positioned as an ultra-performance terminal, and those claims need a product owner who can back them up precisely.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "Matching Speed: 1:4,000 match/sec, Group Matching: 1:5,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "177399ec-5e96-4998-9544-d0e946fff872",
+            "snippet": "FaceStation 2 offers unrivalled matching speed, accuracy and level of security",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.text_177399ec-5e96-4998-9544-d0e946fff872_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "You will assess deployment environments and counter security objections using documented specifications.",
+        "explanation": "Two of the most common stakeholder challenges you will face are environmental suitability questions and security credibility questions. On the environment side, you will be able to evaluate any described lighting condition against FaceStation 2's operating illuminance range and give a clear, evidence-based answer. On the security side, you will counter spoofing concerns by citing the device's three documented security features — live face detection, IR-based image analysis, and the Android 5.0 security layer — and connecting each one to the specific vulnerability a stakeholder raises. This is a critical skill: security objections that go unanswered in a product review can stall deals or erode internal confidence in the product.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "You will select the right model variant and system configuration for any given deployment scenario.",
+        "explanation": "FaceStation 2 ships in two variants — FS2-D and FS2-AWB — with meaningfully different credential and connectivity capabilities. You will map a customer's card type requirements and connectivity needs to the correct model, and justify that selection with specific feature differences. Beyond model selection, you will also match deployment scenarios to the appropriate system configuration: standalone, standalone-secure, or distributed access control. Each configuration uses a distinct set of hardware interfaces, and your ability to cite the relevant interface specifications is what turns a recommendation into a defensible product decision.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+            "snippet": "Standalone-Secure Configuration: A FaceStation 2 device is connected to a Secure I/O 2 module... Standalone Configuration: A FaceStation 2 device is connected directly to a door lock and an exit button... Distributed Access Control Systems: Multiple FaceStation 2 devices are shown",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+            "page_number": 1,
+            "chunk_type": "figure"
+          }
+        ]
+      },
+      {
+        "point": "You will resolve usability and accessibility objections using ergonomic design specifications.",
+        "explanation": "Stakeholders sometimes raise concerns about whether a biometric terminal can realistically serve a diverse user population — wheelchair users, children, or people at the extremes of typical height ranges. You will address those objections directly by citing FaceStation 2's ergonomic design features and connecting each one to the specific population concern raised. This matters because usability objections, if left unaddressed, can become blockers in deployment approvals or procurement decisions. Knowing the specification well enough to respond without overstating what it supports is what separates a credible product owner from one who loses stakeholder trust.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+            "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "177399ec-5e96-4998-9544-d0e946fff872",
+            "snippet": "FaceStation 2 provides exceptional performance and usability for diverse access control and time attendance sites, large or small",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.text_177399ec-5e96-4998-9544-d0e946fff872_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A security engineer says in a product review: 'Face recognition is trivially defeated by holding up a photo or playing a video on a phone. Why would we stake our access control story on this?' You are the product owner. What do you say — and which specific FaceStation 2 features do you cite?",
+        "reveal": "The right response addresses the spoofing concern directly rather than deflecting to general biometric reliability claims. FaceStation 2 includes live face detection powered by IR-based image analysis, which is specifically designed to distinguish a real face from printed images or LCD displays. That directly answers the photo and video attack vectors the engineer raised. You can also note that Android 5.0 Lollipop is cited as a contributor to enhanced security at the OS layer, and that a high-quality image log provides an audit trail of authentication events. Each feature maps to a distinct concern: the IR analysis handles the spoofing vector, the OS layer addresses software-level risk, and the image log supports forensic accountability. Citing all three — and connecting each to the specific concern raised — is what makes the response credible rather than generic.",
+        "hint": "Think about which feature addresses the physical spoofing attack specifically, and which features address the other two layers of the security story."
+      }
+    ],
+    "summary": "After this course, you will apply FaceStation 2's performance, security, credential, configuration, and usability specifications to resolve stakeholder questions and justify product decisions in cross-functional discussions — without reaching for external documentation.",
+    "figures": [
+      {
+        "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db",
+        "after_key_point": 0,
+        "caption": "The FaceStation 2 smart face recognition terminal — the product you will own and represent across engineering, sales, and leadership discussions throughout this course.",
+        "alt_text": "A black and silver biometric terminal with a 4-inch color touchscreen displaying the FaceStation 2 branding alongside a colorful geometric human head silhouette. The right side of the screen shows the time 09:15 AM and date 03/24 FRI, with icons for phone, user, clock, and briefcase functions. Two camera lenses are visible below the screen in a horizontal housing. The Suprema brand name appears near the bottom of the device. An RFID reader symbol is visible at the top.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png",
+        "page_number": 0
+      },
+      {
+        "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+        "after_key_point": 2,
+        "caption": "FaceStation 2 supports three distinct system configurations — standalone, standalone-secure, and distributed — each using a different combination of hardware interfaces. Matching a deployment scenario to the right configuration is one of the core skills this course builds.",
+        "alt_text": "A system configuration flowchart titled 'System Configurations' with a legend showing Input as red lines, RS-485 as blue lines, and Relay as orange lines. The diagram shows a central TCP/IP network line connected to a BioStar 2 Server on the left. Three configuration zones are shown: Standalone-Secure (top center) shows a FaceStation 2 connected via RS-485 and Input lines to a Secure I/O 2 module, which connects via Relay and Input to a door lock and exit button. Standalone (top right) shows a FaceStation 2 connected directly to a door lock and exit button via Relay and Input lines. Distributed Access Control Systems (bottom center) shows multiple FaceStation 2 devices connected to readers, door locks, and exit buttons using combinations of Input, RS-485, and Relay connections. A Remote Access section shows the BioStar 2 Server connecting via WAN to the internet, which connects to BioStar 2 Mobile and a web browser client.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+        "page_number": 1
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each stakeholder challenge to the FaceStation 2 security feature that directly addresses it:",
+      "pairs": [
+        {
+          "left": "Spoofing with a printed photo or LCD screen",
+          "right": "IR-based live face detection"
+        },
+        {
+          "left": "Software-level OS vulnerabilities",
+          "right": "Android 5.0 Lollipop security layer"
+        },
+        {
+          "left": "Need for an authentication audit trail",
+          "right": "High-quality image log"
+        }
+      ],
+      "explanation": "Each of FaceStation 2's three documented security features addresses a distinct attack surface: the IR analysis handles physical spoofing, the OS version addresses software risk, and the image log supports forensic accountability. Mapping them correctly is what makes a stakeholder response credible."
+    },
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When a customer requires HID Prox card support and Wi-Fi connectivity, the correct model variant to recommend is ___.",
+      "answer": "FS2-AWB",
+      "distractors": [
+        "FS2-D",
+        "either model",
+        "neither model"
+      ],
+      "explanation": "HID Prox card support and Wi-Fi are both exclusive to the FS2-AWB variant. The FS2-D does not include HID Prox in its RF options and does not support Wi-Fi, so recommending FS2-D in this scenario would be an error in model-to-feature mapping."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not include real-world stakeholder scenarios or sample objections — SME input is needed to develop the realistic practice scenarios referenced in the examples section.",
+    "The document does not clarify which specifications are most frequently misquoted or misunderstood internally — SME confirmation would help prioritize misconception correction across the course.",
+    "BioStar 2 software integration is referenced in the system configuration diagram but not explained at a conceptual level in the available document chunks — supplemental BioStar 2 documentation would be needed if learners are expected to address integration questions."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a product review meeting, a security engineer raises a concern: 'Face recognition systems are notoriously easy to fool with a photo or a screen showing someone's face. How does FaceStation 2 address that?'",
+        "question_text": "Which response most accurately addresses the security engineer's concern using FaceStation 2's documented capabilities?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 uses encrypted facial templates stored in secure memory, making it impossible to extract or replicate a user's biometric data from the device.",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FaceStation 2 includes live face detection powered by IR-based image analysis, which is specifically designed to distinguish a real face from printed images or LCD displays used in spoofing attempts.",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 requires multi-factor authentication by combining face recognition with an RFID card, so a photo alone cannot grant access without the physical card present.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The specification explicitly states that live face detection uses IR-based image analysis to prevent spoofing by printed images and LCDs — this directly addresses the concern raised. The other options describe capabilities not documented in the FaceStation 2 specification as anti-spoofing features.",
+        "incorrect": "The specification directly addresses photo and screen spoofing through live face detection using IR-based image analysis. Encrypted template storage and mandatory multi-factor authentication are not cited in the specification as the mechanism for countering this specific vulnerability. Avoid making security claims that exceed what the specification supports."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales stakeholder is preparing for a customer meeting with a high-security facility. The customer has flagged three concerns: (1) can the device be fooled by a photo or screen, (2) is the underlying OS hardened against software-level attacks, and (3) is there an audit trail of authentication events? The sales rep asks you to confirm which of FaceStation 2's documented security features maps to each concern.",
+        "question_text": "Which mapping of FaceStation 2 security features to the customer's three concerns is fully supported by the product specification?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Concern 1 → IR-based live face detection; Concern 2 → Android 5.0 Lollipop security layer; Concern 3 → high quality image log",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Concern 1 → Android 5.0 Lollipop security layer; Concern 2 → IR-based live face detection; Concern 3 → high quality image log",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Concern 1 → IR-based live face detection; Concern 2 → high quality image log; Concern 3 → Android 5.0 Lollipop security layer",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The specification maps precisely: IR-based live face detection counters spoofing by photos and LCDs; Android 5.0 Lollipop provides the OS-level security layer; and the high quality image log creates the audit trail of authentication events. Each feature is connected to the right vulnerability.",
+        "incorrect": "Review the specification's Enhanced Security section carefully. IR-based live face detection is the anti-spoofing mechanism (not the OS layer), Android 5.0 Lollipop addresses software-level security (not audit trails), and the high quality image log provides the authentication record. Mismatching these features to concerns could lead to inaccurate claims in a customer-facing discussion."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. An engineering stakeholder challenges you in a product review: 'The Android OS is a consumer platform — it wasn't built for secure access control. Why should we trust it as part of our security story?' You need to respond using only what the FaceStation 2 specification supports.",
+        "question_text": "Which response best addresses the engineering stakeholder's concern without exceeding what the specification supports?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 runs on a custom-hardened fork of Android with proprietary security patches applied by Suprema, making it significantly more secure than standard Android deployments.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The Android OS concern is mitigated entirely by the hardware layer — the IR-based live face detection operates independently of the OS, so Android vulnerabilities cannot affect authentication outcomes.",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 cites Android 5.0 Lollipop as a specific contributor to enhanced security, meaning the OS version is part of the documented security architecture, not an afterthought.",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The specification explicitly lists Android 5.0 Lollipop as a feature contributing to enhanced security. This is the only defensible claim from the specification — it positions the OS as an intentional security component without overstating its role or making claims the spec does not support.",
+        "incorrect": "Both other options make claims that go beyond what the specification states. The spec does not describe a custom-hardened Android fork or claim that the IR system operates independently of the OS for security purposes. As Product Owner, your responses in stakeholder discussions must stay within what the specification supports."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Enhanced security by Android 5.0 Lollipop",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    }
+  ]
+}

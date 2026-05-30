@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);background:var(--white);color:var(--fg-1);padding:18px 22px;}
+  h4{font:var(--overline);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin:0 0 14px;}
+  .grid{display:flex;gap:18px;align-items:flex-end;}
+  .item{text-align:center;}
+  .box{width:74px;height:74px;background:var(--ocean-50);border:1.5px solid var(--ocean-400);}
+  .item span{display:block;font:var(--caption);color:var(--fg-3);margin-top:8px;}
+</style></head>
+<body>
+  <h4>Corner radii — restrained</h4>
+  <div class="grid">
+    <div class="item"><div class="box" style="border-radius:var(--radius-xs)"></div><span>xs · 2px</span></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-sm)"></div><span>sm · 4px<br>buttons/inputs</span></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-md)"></div><span>md · 6px<br>cards</span></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-lg)"></div><span>lg · 8px</span></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-pill)"></div><span>pill<br>chips/toggles</span></div>
+  </div>
+</body></html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);padding:0;}
+  .wrap{display:flex;height:150px;}
+  .panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+  .light{background:var(--white);}
+  .dark{background:var(--engineering-blue);}
+  .logo{display:inline-flex;align-items:center;font-weight:600;letter-spacing:-0.01em;font-size:34px;line-height:1;}
+  .logo .mark{position:relative;width:0.62em;height:0.62em;margin-right:0.26em;flex:none;}
+  .logo .dot{position:absolute;top:0;left:0;width:0.30em;height:0.30em;border-radius:50%;background:var(--error);}
+  .logo .swoosh{position:absolute;bottom:0;left:0.04em;width:0.58em;height:0.30em;border-bottom:0.13em solid var(--orange);border-right:0.13em solid var(--orange);border-radius:0 0 0.6em 0.6em;transform:rotate(8deg);}
+  .cap{font:var(--caption);}
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="panel light">
+      <span class="logo" style="color:var(--engineering-blue)"><span class="mark"><span class="swoosh"></span><span class="dot"></span></span>Infineon</span>
+      <span class="cap" style="color:var(--fg-3)">On light</span>
+    </div>
+    <div class="panel dark">
+      <span class="logo" style="color:#fff"><span class="mark"><span class="swoosh"></span><span class="dot"></span></span>Infineon</span>
+      <span class="cap" style="color:var(--fg-on-dark-2)">On engineering blue · placeholder</span>
+    </div>
+  </div>
+</body></html>

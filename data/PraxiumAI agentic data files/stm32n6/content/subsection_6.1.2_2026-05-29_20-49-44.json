@@ -1,0 +1,378 @@
+{
+  "subsection_id": "6.1.2",
+  "subsection_title": "Plan external memory with XSPI and MCE",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Select the correct XSPI functional mode (memory-mapped vs. indirect) for each external memory use case in the biometric pipeline",
+    "Define MCE region boundaries and cipher modes to protect enrolled biometric templates stored in XSPI-connected external flash",
+    "Identify the three problems in a flawed memory allocation and produce a corrected layout for the face recognition terminal"
+  ],
+  "content": {
+    "hook_sentence": "Your 8 MB face recognition model fits in external flash — but without the right XSPI mode, every weight fetch goes through a software driver instead of appearing as a direct memory address, adding CPU overhead on every inference pass.",
+    "introduction": "Building on the memory region roles established in §6.1.1, this section focuses on the two external memory mechanisms you will configure in firmware: the XSPI interface and the MCE encryption engine. Getting these right determines whether your model weights are accessible without CPU intervention and whether your biometric templates survive a physical flash extraction attack. Both decisions hinge on choices you make at design time, not at runtime.",
+    "key_points": [
+      {
+        "point": "Use XSPI memory-mapped mode to expose external flash as a direct CPU address range — no driver calls needed during inference.",
+        "explanation": "The XSPI interface supports three functional modes: indirect, automatic status-polling, and memory-mapped. In **memory-mapped mode**, the external device appears in the CPU address space exactly like internal SRAM. The NPU or CPU can read model weights using ordinary load instructions, with no explicit DMA setup or register-level command sequencing per access. This is the correct mode for storing inference model weights that exceed on-chip SRAM capacity — the 4.2 MB on-chip SRAM cannot hold an 8 MB model, so XSPI-mapped external flash is the only viable location. The XSPI peripheral supports a wide range of external memory types in this mode: serial PSRAM, serial NAND, serial NOR flash, HyperRAM, and HyperFlash. It also supports SDR and DTR transfer rates, single through octal bus widths, and dual-memory configuration for 16-bit parallel access. For model weight reads, which are sequential and read-only, memory-mapped mode with a NOR flash or HyperFlash device gives you the simplest firmware path.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+            "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+            "page_number": 42,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+            "snippet": "The XSPI supports most external serial memories such as serial PSRAMS, serial NAND and serial NOR flash memories, HyperRAM and HyperFlash memories",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+            "page_number": 42,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+            "snippet": "SDR (single-data rate) and DTR (double-transfer rate) support... Support for single, dual, quad, and octal communication",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+            "page_number": 42,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "90e14d53-ab98-49d6-8f16-70aba1d78a33",
+            "snippet": "XSPI supporting serial PSRAM, NAND, NOR, HyperRAM/ HyperFlash frame formats... 2 ports: XSPIM 8- and 16-bit configuration up to 200 MHz",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_90e14d53-ab98-49d6-8f16-70aba1d78a33_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The XSPI I/O manager (XSPIM) arbitrates up to three XSPI controllers across two physical ports — plan your pin assignment before committing to a PCB layout.",
+        "explanation": "The XSPIM sits between the three XSPI controller instances (XSPI1, XSPI2, XSPI3) and the two physical high-speed ports (Port 1 and Port 2). It contains a static mux, a dynamic mux with an arbiter, and a full I/O matrix. Port 1 exposes up to 16 data lines (`XSPIM_P1_IO[15:0]`), two chip selects, differential clock, and two data strobe signals — suitable for a 16-bit wide HyperFlash or dual-octal configuration. Port 2 exposes 8 data lines (`XSPIM_P2_IO[7:0]`) with one data strobe. For the biometric terminal, a practical split is: Port 1 for the large external NOR/HyperFlash holding model weights (benefiting from the wider bus), and Port 2 for a smaller NOR flash holding encrypted biometric templates. The XSPIM arbiter handles contention when both controllers request the bus simultaneously, so you do not need to serialize accesses in firmware — but you should account for arbitration latency in your worst-case inference timing budget.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "eee17b8f-abd1-498d-ad51-dd4a295a9637",
+            "snippet": "The XSPI I/O manager is a low level interface, enabling efficient XSPI pin assignment with a full I/O matrix (before alternate function map), and multiplex of single/dual/quad/octal/16-bit SPI interfaces over the same bus.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_43/ChunkType.text_eee17b8f-abd1-498d-ad51-dd4a295a9637_0.png",
+            "page_number": 43,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "eee17b8f-abd1-498d-ad51-dd4a295a9637",
+            "snippet": "Supports up to two single/dual/quad/octal/16-bit SPI interfaces... Supports up to two ports for pin assignment... Manages up to three XSPIs",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_43/ChunkType.text_eee17b8f-abd1-498d-ad51-dd4a295a9637_0.png",
+            "page_number": 43,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+            "snippet": "XSPI 16-bit configuration with cypher engine (only on STM32N657X0H3Q, STM32N657L0H3Q, and STM32N657B0H3Q)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "MCE defines up to four encrypted regions within the XSPI address space — configure a region over your biometric template storage to get hardware inline encryption with no CPU overhead.",
+        "explanation": "Building on the MCE role introduced in §6.1.1, the key firmware decision here is **how to configure MCE regions**. The MCE supports up to four regions (regions 1–4) with 4 KB address granularity. Each region can be independently set to one of four modes: bypass (no encryption), stream cipher, block cipher, or fast block cipher. Region 0 is a default pass-through that grants access to any address not covered by regions 1–4. For biometric templates, you should assign a dedicated MCE region covering the flash address range where templates are stored, and select either AES-128 or AES-256 block cipher mode. The MCE then automatically encrypts every write and decrypts every read on the system bus — the CPU and any DMA master see plaintext, while the data on the physical flash bus is always ciphertext. An attacker who desolders the flash chip reads only encrypted bytes. The supported block ciphers are AES-128, AES-256, and Noekeon (12-round version), selected at boot. The stream cipher mode is CTR-compliant per NIST SP800-38A. The block cipher mode with AES is ECB-compatible per NIST FIPS 197. A leakage-resilient mode is also included as a defense against side-channel attacks. Critical constraint: MCE is available **only on STM32N6x5xx variants** (STM32N655xx and STM32N657xx). If you are evaluating the STM32N6x7xx NPU variant, MCE is absent and you must implement software encryption before writing templates to flash — a fundamentally different and more CPU-intensive approach.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized. This function is available only on STM32N655xx and STM32N657xx devices.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes... Start and end of regions defined with 4-Kbytes granularity",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Supported block ciphers: AES-128, AES-256 or Noekeon (12 round version), selected at boot... Stream mode with AES cipher is compliant with CTR mode specified in NIST SP800-38A",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Includes a leakage resilient mode of operation as defense against side channel attacks (SCA).",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Placing ISR code in AXISRAM and frame buffer data in ITCM are both wrong — each allocation violates the capacity and latency constraints of those regions.",
+        "explanation": "A common mistake when first mapping the STM32N6 memory space is swapping the roles of ITCM and AXISRAM. The ITCM is 64 KB of instruction-fetch-optimized RAM with zero-wait-state access directly coupled to the Cortex-M55 core. It is sized for time-critical routines — interrupt service handlers, the camera capture ISR, and the tightest real-time loops. It is not sized for frame buffers. A single raw frame from a VGA camera (640×480, RGB888) is approximately 900 KB — more than 14 times the entire ITCM capacity. Frame buffers belong in AXISRAM, which provides 4.2 MB of contiguous SRAM accessible by both the CPU and HPDMA concurrently. Placing ISR code in AXISRAM instead of ITCM means every instruction fetch goes through the AXI interconnect, adding latency and making interrupt response time non-deterministic. The third allocation error in the assessment scenario is storing biometric templates in unencrypted XSPI-mapped flash. Without an active MCE region covering that address range, the templates are stored as plaintext on the physical flash device and are fully readable by anyone with a flash programmer. Enabling MCE on that region costs nothing in firmware complexity — the encryption is transparent to all bus masters — but it closes the physical extraction attack vector entirely.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+            "snippet": "64-Kbyte of instruction TCM RAM with ECC for critical real-time routines",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "90e14d53-ab98-49d6-8f16-70aba1d78a33",
+            "snippet": "4.2-Mbyte contiguous SRAM... 128-Kbyte TCM (tightly-coupled memory) RAM with ECC for critical real-time data + 64-Kbyte instruction TCM RAM with ECC for critical real-time routines",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_90e14d53-ab98-49d6-8f16-70aba1d78a33_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition model weights are 8 MB. On-chip SRAM totals 4.2 MB. A colleague suggests streaming the weights from external flash into AXISRAM in chunks using HPDMA, cycling through the full model during each inference pass. What is the problem with this approach, and what should you do instead?",
+        "reveal": "The chunked-streaming approach forces the CPU or HPDMA to manage explicit transfer scheduling between every inference layer that needs weights outside the currently loaded chunk. This adds software complexity, introduces transfer latency between layers, and wastes AXISRAM capacity that should be reserved for active frame buffers. The correct approach is to configure XSPI in memory-mapped mode, which maps the external flash directly into the CPU address space. The NPU and CPU can then read weights using ordinary memory addresses — no DMA setup, no chunking logic, no AXISRAM consumed by model data. The XSPI peripheral handles the serial protocol transparently.",
+        "hint": "Think about which XSPI mode eliminates the need for explicit data movement entirely."
+      },
+      {
+        "prediction_prompt": "You are configuring MCE for the biometric template storage region. The templates are stored in a 512 KB block of external NOR flash starting at address 0x70080000. You want AES-256 encryption. What is the minimum number of MCE regions you need to configure, and what granularity constraint applies to your start and end addresses?",
+        "reveal": "You need exactly one MCE region (any of regions 1–4) covering the 512 KB block from 0x70080000 to 0x700FFFFF. The MCE enforces 4 KB address granularity, so both the start and end addresses must be aligned to 4 KB boundaries. 0x70080000 is already 4 KB-aligned (it is a multiple of 0x1000), and 0x700FFFFF ends at a 4 KB boundary. You select AES-256 block cipher mode for that region. Region 0 remains as the default bypass, covering all other XSPI addresses including the model weight flash — those weights do not need encryption because they are not sensitive biometric data.",
+        "hint": "The MCE region granularity is stated explicitly in the datasheet feature list."
+      }
+    ],
+    "summary": "Map model weights to XSPI memory-mapped mode so the NPU reads them as internal memory, place ISR code in ITCM and frame buffers in AXISRAM to respect capacity and latency constraints, and configure an MCE region over your biometric template flash address range to get hardware inline AES encryption — remembering that MCE is only available on STM32N6x5xx variants.",
+    "figures": [
+      {
+        "chunk_id": "fa935e6e-07f6-43ba-ad2d-d0ebb4e74eb5",
+        "after_key_point": 1,
+        "caption": "The XSPIM block diagram shows how XSPI1, XSPI2, and XSPI3 share two physical ports through a static mux, arbiter, dynamic mux, and I/O matrix. Port 1 supports up to 16 data lines for wide-bus configurations; Port 2 supports 8 data lines — plan your model-weight flash on Port 1 and template flash on Port 2 to maximize bandwidth separation.",
+        "alt_text": "Block diagram of the XSPI I/O manager. On the left, three XSPI controller blocks (XSPI1, XSPI2, XSPI3) each connect to the manager via bus signals, REQ, and ACK lines. Inside the manager, an AHB interface and control register sit at the top. Below them, static muxing and an arbiter feed into dynamic muxing, which connects to an I/O matrix with Port 1 and Port 2 outputs. Port 1 connects to a PHY block exposing XSPIM_P1_CLK, XSPIM_P1_NCLK, XSPIM_P1_DQS0 and DQS1, XSPIM_P1_NCS1 and NCS2, and XSPIM_P1_IO[15:0]. Port 2 connects to a second PHY block exposing XSPIM_P2_CLK, XSPIM_P2_NCLK, XSPIM_P2_DQS0, XSPIM_P2_NCS1 and NCS2, and XSPIM_P2_IO[7:0]. Both PHY blocks are labeled as part of the high-speed interface on the right side.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_43/ChunkType.figure_fa935e6e-07f6-43ba-ad2d-d0ebb4e74eb5_0.png",
+        "page_number": 43
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "To allow the NPU to read 8 MB model weights from external flash without CPU intervention or DMA setup, you should configure the XSPI interface in ___ mode.",
+      "answer": "memory-mapped",
+      "distractors": [
+        "indirect",
+        "automatic status-polling",
+        "DMA burst"
+      ],
+      "explanation": "Memory-mapped mode exposes the external device as a CPU address range, so any bus master can read it with ordinary load instructions. Indirect mode requires explicit register-level command sequencing per transfer, which adds CPU overhead on every weight access."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each biometric terminal memory allocation decision to the correct justification:",
+      "pairs": [
+        {
+          "left": "Store camera ISR code in ITCM",
+          "right": "Zero-wait-state instruction fetch, deterministic interrupt latency"
+        },
+        {
+          "left": "Store active frame buffers in AXISRAM",
+          "right": "4.2 MB capacity supports full-frame data; concurrent CPU and HPDMA access"
+        },
+        {
+          "left": "Enable an MCE region over biometric template flash",
+          "right": "Hardware inline AES encryption prevents plaintext extraction from the physical flash chip"
+        },
+        {
+          "left": "Store model weights in XSPI memory-mapped flash",
+          "right": "On-chip SRAM capacity is insufficient; memory-mapped mode avoids explicit DMA transfers"
+        }
+      ],
+      "explanation": "Each allocation matches the specific capacity, latency, or security property of the target memory region. Swapping any pair — such as putting ISR code in AXISRAM or frame buffers in ITCM — violates either the capacity limit or the latency guarantee of that region."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the exact register sequence or HAL API calls required to configure an MCE region in firmware (key binding, region enable sequence, cipher mode selection registers) — this would require the STM32N6 reference manual or STM32Cube HAL documentation.",
+    "The datasheet does not specify the maximum XSPI clock frequency achievable in memory-mapped mode with a specific NOR flash device, which is needed to calculate worst-case model weight read latency for inference timing budgets.",
+    "No guidance is provided on how to provision or rotate the AES key bound to the MCE engine — key management procedures would need to be sourced from the STM32N6 security application notes."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are finalizing the memory layout for the STM32N6-based face recognition terminal. The inference model weights are approximately 8 MB and must be loaded at runtime by the NPU. You need to decide where to store these weights in the memory map.",
+        "question_text": "Given that the on-chip SRAM totals 4.2 MB and the model weights exceed that capacity, where should you map the inference model weights to allow the NPU to access them efficiently?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Store the weights in AXISRAM and use HPDMA to stream them to the NPU in chunks, cycling through the full model during inference",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Store the weights in XSPI-mapped external flash using memory-mapped mode, allowing the NPU to access them as if they were internal memory",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Store the weights in the 128 KB data TCM RAM and reload sections from external storage between inference passes",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The XSPI interface supports memory-mapped mode, in which external flash is seen by the system as internal memory, supporting both read and write operations. This allows the NPU to access large model weights stored in external flash without requiring explicit DMA transfers or manual chunking.",
+        "incorrect": "AXISRAM (4.2 MB total) cannot hold an 8 MB model, and chunked DMA streaming introduces latency and CPU overhead. The 128 KB TCM is far too small for model weights and is better reserved for time-critical code and real-time data. The correct approach is to use XSPI memory-mapped mode, which presents external flash as addressable memory to the system bus."
+      },
+      "references": [
+        {
+          "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+          "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+          "page_number": 42,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "90e14d53-ab98-49d6-8f16-70aba1d78a33",
+          "snippet": "4.2-Mbyte contiguous SRAM... XSPI supporting serial PSRAM, NAND, NOR, HyperRAM / HyperFlash frame formats",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_90e14d53-ab98-49d6-8f16-70aba1d78a33_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O4",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are specifying the security architecture for the face recognition terminal. Enrolled biometric templates (face embeddings) are stored in external NOR flash connected via XSPI. You need to ensure these templates are protected against physical extraction of the flash chip.",
+        "question_text": "Which STM32N6 security feature is specifically designed to protect data stored in XSPI-connected external flash against physical extraction, and what is the constraint you must account for when selecting your device variant?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TrustZone isolates the XSPI address space into a secure world, preventing extraction; this feature is available on all STM32N6 variants",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "SAES encrypts biometric templates before they are written to external flash by the CPU; this feature is available only on STM32N6x5xx variants",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "MCE performs inline encryption of writes and decryption of reads on the system bus to XSPI regions; this feature is available only on STM32N6x5xx variants",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. MCE (Memory Cipher Engine) operates inline on the system bus, automatically encrypting data as it is written to defined XSPI address regions and decrypting it on reads. This means the data on the physical flash chip is always encrypted, protecting against extraction. MCE is available only on STM32N655xx and STM32N657xx (STM32N6x5xx) devices.",
+        "incorrect": "TrustZone provides software-level isolation between secure and non-secure domains but does not encrypt data on the physical flash bus — a chip extracted from the board would still contain plaintext data. SAES can encrypt data in software before writing, but MCE is the purpose-built inline encryption engine for the XSPI bus, operating transparently without CPU involvement on every transaction. Both MCE and SAES are restricted to STM32N6x5xx variants, which is a critical architectural constraint."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O5",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a colleague's proposed memory allocation for the STM32N6 face recognition terminal. Their proposal places the real-time ISR (interrupt service routine) code for the camera capture pipeline in AXISRAM1, active frame buffer data in the 64 KB instruction TCM (ITCM), and biometric templates in unencrypted XSPI-mapped flash.",
+        "question_text": "You identify three problems with this allocation. Which option correctly describes all three issues?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "ISR code should be in ITCM for lowest latency; frame buffers are too large for the 64 KB ITCM and belong in AXISRAM or DTCM; biometric templates in external flash require MCE encryption for data-at-rest protection",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "ISR code should be in DTCM for lowest latency; frame buffers belong in XSPI-mapped memory for capacity; biometric templates should be encrypted using TrustZone isolation rather than MCE",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "ISR code should be in AXISRAM for cache coherency; frame buffers belong in DTCM for ECC protection; biometric templates require SAES software encryption before being written to XSPI flash",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The 64 KB ITCM is designated for critical real-time routines (instruction code), not data — placing frame buffer data there is both functionally incorrect and capacity-limited. ISR code belongs in ITCM for zero-wait-state execution. Active frame buffers, which can be hundreds of KB, belong in DTCM or AXISRAM. Biometric templates stored in external flash must be protected by MCE inline encryption to prevent extraction from the physical device.",
+        "incorrect": "DTCM (data TCM) is for data, not instruction code — ISR code belongs in ITCM. Frame buffers in XSPI-mapped memory would introduce latency unsuitable for active pipeline buffers. TrustZone provides domain isolation but does not encrypt data on the physical flash bus. SAES can encrypt data in software, but MCE provides transparent inline encryption without CPU overhead on every XSPI transaction, which is the appropriate mechanism for protecting stored biometric templates."
+      },
+      "references": [
+        {
+          "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+          "snippet": "128-Kbyte data TCM RAM with ECC for critical real-time data, and 64-Kbyte of instruction TCM RAM with ECC for critical real-time routines",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+          "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+          "page_number": 42,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    }
+  ]
+}

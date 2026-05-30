@@ -1,0 +1,345 @@
+{
+  "subsection_id": "4.1.2",
+  "subsection_title": "Configure TrustZone SPE/NSPE Partitioning",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Specify which firmware components belong in the SPE versus the NSPE on the Cortex-M33",
+    "Explain how the Cortex-M55 accesses secure services via PSA API calls across the TrustZone boundary",
+    "Distinguish between what TrustZone SPE isolation provides on its own versus what the EPC4 secure enclave adds on top"
+  ],
+  "content": {
+    "hook_sentence": "Your face recognition application running on the Cortex-M55 has no SPE of its own — yet it can still invoke hardware-backed cryptographic services as if it did.",
+    "introduction": "Knowing which EPC variant to order (covered in the previous section) is only half the decision. You also need to correctly partition your firmware so that each component runs in the right processing environment. Getting this wrong — for example, placing TF-M in the NSPE or issuing PSA API calls from the wrong context — will break your security architecture at runtime, not at compile time, making it one of the harder bugs to diagnose during bring-up.",
+    "key_points": [
+      {
+        "point": "TF-M lives in the SPE; your application code lives in the NSPE.",
+        "explanation": "The Cortex-M33 is the only CPU on the PSOC Edge E8 with TrustZone, so it hosts both environments. Infineon provides Trusted Firmware-M (TF-M) as the secure firmware that runs inside the **SPE**. Your face recognition application logic — the code you write — runs in the **NSPE** on the Cortex-M33. The boundary between SPE and NSPE is enforced in hardware by TrustZone; NSPE code cannot directly read or write SPE memory regions. When your NSPE application needs a secure service (for example, generating a cryptographic key or requesting an attestation token), it does not cross the boundary directly. Instead, it calls through the **PSA API**, which acts as the defined, hardware-enforced gateway into the SPE.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "704af7e7-7ea5-4c50-8d88-f51770035c2d",
+            "snippet": "Arm® TrustZone enabled core with two processing environments: secure (SPE) and non-secure (NSPE)... Infineon-provided Trusted firmware-M (TF-M) implemented in SPE — its services are leveraged by Cortex®-M33 NSPE",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_704af7e7-7ea5-4c50-8d88-f51770035c2d_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "704af7e7-7ea5-4c50-8d88-f51770035c2d",
+            "snippet": "fully enabled to use hardware accelerated crypto operations",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_704af7e7-7ea5-4c50-8d88-f51770035c2d_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The Cortex-M55 is always NSPE — it reaches secure services via IPC calls to TF-M.",
+        "explanation": "The Cortex-M55 is a high-performance application core that operates entirely in the NSPE. It has no TrustZone of its own. Despite this, it can still consume PSA-compliant cryptographic and key management services: it issues **PSA API calls** that travel via the IPC block to the Cortex-M33's SPE, where TF-M handles the request. For your access control terminal, this means the face recognition inference pipeline running on the Cortex-M55 can request, for example, a signature verification or a secure storage read without ever having direct access to the keys or the secure memory region that holds them. The IPC mechanism enforces the isolation boundary between the two CPUs.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "66c54d6b-d17a-48f2-9a25-b946d0c8cac8",
+            "snippet": "This is an application core operating in NSPE. Applications run by this CPU can request TF-M services using PSA API calls",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_66c54d6b-d17a-48f2-9a25-b946d0c8cac8_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "704af7e7-7ea5-4c50-8d88-f51770035c2d",
+            "snippet": "its services are leveraged by Cortex®-M33 NSPE and Cortex®-M55, fully enabled to use hardware accelerated crypto operations",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_704af7e7-7ea5-4c50-8d88-f51770035c2d_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "TrustZone SPE isolation alone does not replicate EPC4's secure enclave — they are complementary layers, not alternatives.",
+        "explanation": "A common mistake during architecture review is assuming that placing custom secure code inside the Cortex-M33 SPE on an EPC2 part is equivalent to EPC4's secure enclave. It is not. TrustZone SPE isolation is a software-configurable boundary enforced by the Cortex-M33's IDAU, SAU, and Infineon's MPU/MPC/PPC protection units. It prevents NSPE code from accessing SPE memory, but the SPE itself runs on the same physical CPU core. The EPC4 secure enclave is a **separate, dedicated hardware block** running in lockstep (2x CPU replication, 2x crypto replication) with its own local ROM, its own crypto block with side-channel attack (SCA) and differential power analysis (DPA) protection, and its own fault-injection resistance. These properties cannot be replicated in software inside the SPE. When you use an EPC4 part, the secure enclave communicates with the Cortex-M33 SPE via IPC calls, providing runtime services (key management, attestation, secure storage) that are backed by that hardware isolation. On an EPC2 part, those runtime services are simply not available — no amount of SPE configuration changes that.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "465f2974-a0c4-45e4-93af-6ab3d3e7e5ee",
+            "snippet": "Protection units are hardware blocks that implement schemes to protect memory, peripherals and shared resources from bus masters, preventing unauthorized code from accessing those resources... Implementation Defined Attribution Unit (IDAU), Secure Attribution Unit (SAU) and Memory Protection Unit (MPU) are part of Arm® TrustZone technology; in addition Infineon provides proprietary protection units such as MPCs and PPCs.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_465f2974-a0c4-45e4-93af-6ab3d3e7e5ee_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2abd62b1-4b9c-4b30-8e29-20ff0a98a4e4",
+            "snippet": "Supports lockstep architecture with two islands of replication for CPU (2x) and crypto (2x), for protection against fault attacks and semi-invasive attacks inside the CPU",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_2abd62b1-4b9c-4b30-8e29-20ff0a98a4e4_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2abd62b1-4b9c-4b30-8e29-20ff0a98a4e4",
+            "snippet": "Provides local crypto block for secure cryptographic operations, including SCA and DPA protected crypto",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_2abd62b1-4b9c-4b30-8e29-20ff0a98a4e4_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f",
+            "snippet": "For EPC 4 part numbers only (see Ordering information): secure enclave runtime services provide access to PSA compliant cryptographic services, key management, attestation, and secure storage services.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f_0.png",
+            "page_number": 20,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Protection context (PC) registers give you fine-grained control over which bus master can access which memory or peripheral.",
+        "explanation": "Beyond the SPE/NSPE boundary, Infineon's proprietary protection units let you configure **protection contexts (PCs)** — a pseudo-state assigned to each bus master via hardware registers. The protection units evaluate each memory or peripheral access against the requesting master's PC, checking attributes including address range, read/write permission, privilege level, and secure/non-secure state. In practice, this means you can lock a specific SRAM region or peripheral so that only the Cortex-M33 can access it, not the Cortex-M55 — or vice versa. For your access control terminal, you would use PCs to ensure that, for example, the GPIO lines controlling the door latch relay are only accessible from the Cortex-M33 SPE context, preventing a compromised NSPE application from triggering an unlock directly.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "fce029b0-6b46-461d-9577-c90e6830fae7",
+            "snippet": "Protection context (PC) is a pseudo state of a bus master, controlled with a set of hardware registers that configure each bus master with certain attributes, which the protection units use to determine access.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_fce029b0-6b46-461d-9577-c90e6830fae7_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fce029b0-6b46-461d-9577-c90e6830fae7",
+            "snippet": "PCs can be set up to isolate a memory region or peripheral such that it is accessible by a single CPU, and not accessible by the other CPU.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_fce029b0-6b46-461d-9577-c90e6830fae7_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "465f2974-a0c4-45e4-93af-6ab3d3e7e5ee",
+            "snippet": "The protection units support memory and peripheral access attributes including address range, read/write, code/data, privilege level, secured/non-secured, as well as protection context.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_465f2974-a0c4-45e4-93af-6ab3d3e7e5ee_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your colleague proposes this firmware architecture for the access control terminal: 'We'll save cost by using an EPC2 part. We'll write our own key storage and attestation routines inside the Cortex-M33 SPE using TrustZone isolation — that should give us equivalent security to EPC4.' You're reviewing this proposal. What is the most significant flaw you should flag?",
+        "reveal": "The proposal conflates TrustZone SPE isolation with the EPC4 secure enclave's hardware guarantees — they are not equivalent. TrustZone SPE on EPC2 prevents NSPE code from reading SPE memory, but the SPE still runs on the same Cortex-M33 core with no lockstep replication and no hardware SCA/DPA protection on the crypto block. The EPC4 secure enclave uses a separate dedicated hardware block with 2x CPU lockstep, 2x crypto replication, fault-injection resistance, and SCA/DPA-protected cryptography. Custom SPE code on EPC2 cannot replicate these physical hardware properties, so it cannot achieve PSA Level 3 certification regardless of how carefully it is written. The correct fix is to select an EPC4 part number — this is a silicon-level decision, not a firmware one.",
+        "hint": "Focus on what the secure enclave's lockstep hardware architecture provides that software running inside the SPE cannot."
+      },
+      {
+        "prediction_prompt": "You are assigning firmware components to processing environments for your EPC4-based terminal. You have: (A) the main face recognition application, (B) TF-M, (C) PSA API calls to request key derivation, and (D) the secure enclave runtime services. Where does each component run?",
+        "reveal": "Component (A) — face recognition application — runs in the NSPE on the Cortex-M33 (or on the Cortex-M55, which is always NSPE). Component (B) — TF-M — runs in the SPE on the Cortex-M33; this is where Infineon places it as pre-tested secure firmware. Component (C) — PSA API calls — are issued from the NSPE (either Cortex-M33 NSPE or Cortex-M55 NSPE) and cross the TrustZone boundary to reach TF-M in the SPE. Component (D) — secure enclave runtime services — run inside the dedicated secure enclave hardware block and are accessed by the Cortex-M33 SPE via IPC calls. The secure enclave is not part of the Cortex-M33 SPE; it is a separate hardware entity that the SPE calls into.",
+        "hint": "Trace the call path: NSPE application → PSA API → SPE (TF-M) → IPC → secure enclave."
+      }
+    ],
+    "summary": "Partition your firmware by placing TF-M in the Cortex-M33 SPE and all application code — including Cortex-M55 workloads — in the NSPE, using PSA API calls and IPC to cross the boundary. Remember that TrustZone SPE isolation and the EPC4 secure enclave are complementary layers: SPE isolation protects the boundary in software, while the secure enclave provides the hardware-isolated runtime services that PSA Level 3 requires.",
+    "figures": [
+      {
+        "chunk_id": "b6663f6a-b096-4d20-870c-eb9a1bfa339c",
+        "after_key_point": 1,
+        "caption": "Security architecture of the PSOC Edge E8 showing the three distinct zones: the EPC4-only secure enclave (left, 2x lockstep), the Cortex-M33 with TrustZone dividing SPE (Secure Firmware, Extended Boot) from NSPE (Application Software + PSA API), and the Cortex-M55 operating entirely in NSPE. IPC call arrows show how each zone communicates across boundaries.",
+        "alt_text": "Block diagram with three panels. Left panel labeled 'Secure Enclave (2x lock step)' contains three gray boxes: Secure Enclave Run-Time Services (footnoted as EPC4 only), Basic Run-Time Services, and Boot. Arrows labeled IPC calls connect these to the center panel. Center panel labeled 'Arm Cortex-M33 with TrustZone' is split horizontally: upper half is Non-Secure NSPE containing a light blue Application Software box with PSA API underneath; lower half is Secure SPE containing a teal Secure Firmware box and a dark teal Extended Boot box, plus a Cryptographic accelerator (CRYPTO) block at the bottom. Right panel labeled 'Arm Cortex-M55' shows a single Non-Secure NSPE section with a light blue Application software box containing a PSA API label, with IPC call arrows pointing left to the center panel's Secure Firmware. Legend shows: light blue = user application in NSPE, teal = user application in SPE, dark teal = user installable pre-tested firmware, gray = integrated firmware.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.figure_b6663f6a-b096-4d20-870c-eb9a1bfa339c_0.png",
+        "page_number": 22
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When the Cortex-M55 needs a cryptographic service, it issues a PSA API call that is routed via ___ to TF-M running in the Cortex-M33 SPE.",
+      "answer": "IPC",
+      "distractors": [
+        "DMA",
+        "direct memory access to the SPE",
+        "the secure enclave"
+      ],
+      "explanation": "The Cortex-M55 has no TrustZone and operates entirely in the NSPE. It reaches TF-M in the Cortex-M33 SPE through the IPC (inter-processor communication) block, not through a direct memory path or the secure enclave."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each security capability to the hardware layer that provides it:",
+      "pairs": [
+        {
+          "left": "Prevents NSPE code from reading SPE memory regions on the Cortex-M33",
+          "right": "TrustZone SPE/NSPE boundary (IDAU, SAU, MPU/MPC/PPC)"
+        },
+        {
+          "left": "Lockstep CPU and crypto replication with SCA/DPA-protected cryptography",
+          "right": "EPC4 secure enclave hardware block"
+        },
+        {
+          "left": "PSA-compliant key management and attestation runtime services",
+          "right": "EPC4 secure enclave runtime services (not available on EPC2)"
+        }
+      ],
+      "explanation": "TrustZone enforces the software-configurable SPE/NSPE boundary on the Cortex-M33. The EPC4 secure enclave is a separate dedicated hardware block that adds lockstep fault resistance and SCA/DPA-protected crypto — properties that cannot be replicated by SPE software alone. Its runtime services (key management, attestation) are only available on EPC4 parts."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not provide step-by-step configuration procedures for setting up TrustZone SAU/IDAU region assignments or MPC/PPC register values. Hands-on partitioning configuration would require the PSOC Edge E8 Architecture Reference Manual and ModusToolbox TF-M integration guide as supplementary sources.",
+    "No specific guidance is provided in the available chunks on how to configure protection context (PC) register values in firmware using the PDL. A practical example of PC assignment would require the PDL API documentation."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are a firmware engineer designing a biometric access control terminal using the PSOC Edge E8. Your security requirements document specifies that the device must achieve PSA Level 3 compliance and include a hardware secure enclave for cryptographic key management and attestation services.",
+        "question_text": "Based on these security requirements, which part number category should you select for your PSOC Edge E8 procurement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "EPC 2, because it supports SESIP/PSA Level 2 and provides TrustZone isolation sufficient for most access control applications",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "EPC 4, because it supports SESIP/PSA Level 3 plus a secure enclave with runtime cryptographic, key management, and attestation services",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Either EPC 2 or EPC 4, because TrustZone SPE/NSPE partitioning is available on both and satisfies PSA Level 3 independently of part number",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. EPC 4 is the only category that supports SESIP/PSA Level 3 plus a secure enclave providing runtime cryptographic services, key management, attestation, and secure storage. EPC 2 only reaches PSA Level 2, which does not satisfy the stated requirement.",
+        "incorrect": "EPC 2 supports only SESIP/PSA Level 2, which falls short of the PSA Level 3 requirement. TrustZone SPE/NSPE partitioning alone does not elevate the security level to PSA Level 3 — the secure enclave runtime services available exclusively on EPC 4 part numbers are required. Review the Security Features section (4.2.1)."
+      },
+      "references": [
+        {
+          "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+          "snippet": "Infineon Edge Protect Category 2 (EPC 2) supporting SESIP/PSA level 2 or Edge Protect Category 4 (EPC 4) supporting SESIP/PSA level 3 + secure enclave, depending on part number",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+          "page_number": 20,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f",
+          "snippet": "For EPC 4 part numbers only (see Ordering information): secure enclave runtime services provide access to PSA compliant cryptographic services, key management, attestation, and secure storage services.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f_0.png",
+          "page_number": 20,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O5",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are partitioning firmware components across the TrustZone SPE and NSPE environments on the PSOC Edge E8's Cortex-M33. Your team has the following components to assign: (1) the main face recognition application logic, (2) Trusted Firmware-M (TF-M), and (3) PSA API calls to request cryptographic operations.",
+        "question_text": "Which assignment correctly maps each component to its required processing environment?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TF-M runs in the SPE; the face recognition application and PSA API calls run in the NSPE",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "TF-M and the face recognition application both run in the SPE; PSA API calls are issued from the secure enclave",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The face recognition application runs in the SPE; TF-M and PSA API calls run in the NSPE",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. TF-M is implemented in the SPE on the Cortex-M33, and its services are consumed by the NSPE — where the application code runs — via PSA API calls. The Cortex-M55 (which also runs in NSPE) can similarly request TF-M services through PSA API calls.",
+        "incorrect": "According to the documented security architecture, TF-M is implemented in the SPE, not the NSPE. Application code — including the face recognition logic — runs in the NSPE and accesses secure services by making PSA API calls to TF-M. Placing application code in the SPE or TF-M in the NSPE would violate the TrustZone partitioning model. Review the Cortex-M33 security architecture description."
+      },
+      "references": [
+        {
+          "chunk_id": "704af7e7-7ea5-4c50-8d88-f51770035c2d",
+          "snippet": "Arm TrustZone enabled core with two processing environments: secure (SPE) and non-secure (NSPE)... Infineon-provided Trusted firmware-M (TF-M) implemented in SPE — its services are leveraged by Cortex-M33 NSPE and Cortex-M55, fully enabled to use hardware accelerated crypto operations",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_704af7e7-7ea5-4c50-8d88-f51770035c2d_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "66c54d6b-d17a-48f2-9a25-b946d0c8cac8",
+          "snippet": "Cortex-M55: This is an application core operating in NSPE. Applications run by this CPU can request TF-M services using PSA API calls",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_66c54d6b-d17a-48f2-9a25-b946d0c8cac8_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O5",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a colleague's firmware architecture proposal for the biometric access control terminal. The proposal states: 'We will use an EPC 2 part to save cost. To compensate for the lower PSA level, we will implement our own custom secure storage and key management routines inside the Cortex-M33 SPE using TrustZone isolation, which should be equivalent to EPC 4's secure enclave services.'",
+        "question_text": "What is the most significant flaw in this proposal that you should raise in your review?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TrustZone SPE isolation on EPC 2 cannot be configured correctly without TF-M, making any custom secure storage implementation non-functional",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "EPC 2 lacks the hardware secure enclave with lockstep architecture and side-channel resistance that EPC 4 provides, so custom SPE code cannot replicate the certified PSA Level 3 security guarantees",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The Cortex-M33 SPE on EPC 2 does not support mbedTLS or hardware crypto acceleration, so cryptographic operations cannot be performed in the secure environment",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. EPC 4's secure enclave is a dedicated lockstep hardware block with side-channel attack mitigation, fault injection protection, and certified PSA Level 3 guarantees. Custom firmware running in the Cortex-M33 SPE on an EPC 2 part cannot replicate these hardware-enforced security properties, regardless of how the software is written.",
+        "incorrect": "TrustZone SPE on EPC 2 does support TF-M and mbedTLS with hardware crypto acceleration — those are not the limiting factors. The critical gap is that EPC 2 lacks the dedicated hardware secure enclave (with lockstep CPU, side-channel resistance, and fault injection protection) that underpins EPC 4's PSA Level 3 certification. Software running in the SPE cannot substitute for these hardware security properties. Review the Security Features section (4.2.1) and the secure enclave description."
+      },
+      "references": [
+        {
+          "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+          "snippet": "Lock-step secure enclave with the following features: Secure boot with hardware-based root of trust (RoT) enabled; Device identifier composition engine (DICE) mechanisms for device attestation; Cryptography services",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+          "page_number": 20,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "2abd62b1-4b9c-4b30-8e29-20ff0a98a4e4",
+          "snippet": "Secure enclave: Provides local crypto block for secure cryptographic operations, including SCA and DPA protected crypto... Supports lockstep architecture with two islands of replication for CPU (2x) and crypto (2x), for protection against fault attacks and semi-invasive attacks inside the CPU",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_2abd62b1-4b9c-4b30-8e29-20ff0a98a4e4_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b1cdf8cf-9cb5-4d7e-9f0f-6c5aad4a7a97",
+          "snippet": "On EPC 4 part numbers only: Secure Enclave runtime services for Arm Platform Security Architecture (PSA) compliant cryptography, key management, secure storage and attestation services",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_8/ChunkType.text_b1cdf8cf-9cb5-4d7e-9f0f-6c5aad4a7a97_0.png",
+          "page_number": 8,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    }
+  ]
+}

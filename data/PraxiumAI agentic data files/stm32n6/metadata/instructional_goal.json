@@ -1,0 +1,95 @@
+{
+  "instructional_goal": "Given the STM32N6 family datasheet and a set of face recognition access control terminal requirements, you will evaluate the STM32N6x5xx and STM32N6x7xx device variants and produce a justified hardware architecture specification that identifies the appropriate variant, maps the camera-ISP-NPU data pipeline, selects security features for biometric data protection, and defines the memory layout needed to support real-time facial recognition inference.",
+  "audience": "Firmware engineers responsible for evaluating and integrating the STM32N6 microcontroller into biometric access control products, specifically those assessing device variant suitability and architecting facial recognition pipelines",
+  "conditions": [
+    "Working from the STM32N6x5xx/STM32N6x7xx production datasheet (DS14791) as the primary reference",
+    "Given a defined product requirement: a face recognition access control terminal requiring real-time inference, camera input, and secure biometric data handling",
+    "Operating in a pre-implementation hardware evaluation and architectural planning context, prior to firmware coding or PCB layout"
+  ],
+  "tools_and_resources": [
+    "STM32N6x5xx/STM32N6x7xx datasheet (DS14791 Rev 9)",
+    "STM32N6 variant feature comparison tables (Tables 2–5)",
+    "Peripheral functional overview sections (NPU, ISP/DCMIPP, SAES, CRYP, MCE, XSPI, SRAM)",
+    "Power and memory architecture diagrams (Figure 16, SRAM configuration section)"
+  ],
+  "boundaries": {
+    "in_scope": [
+      "Comparing STM32N6x5xx (crypto, no NPU) vs STM32N6x7xx (NPU, no crypto) feature sets and selecting the appropriate variant for a face recognition terminal",
+      "Evaluating the Neural-ART NPU subsystem (600 Gops, DNN inference) for real-time facial biometric workloads",
+      "Mapping the camera/ISP pipeline (CSI-2, DCMIPP, ISP pipes, DMA to NPU) for real-time face capture and preprocessing",
+      "Assessing security features (TrustZone, SAES, CRYP, HASH, MCE, PKA) and memory architecture (TCM, AXISRAM, XSPI) for biometric data protection and low-latency inference"
+    ],
+    "out_of_scope": [
+      "Writing or debugging firmware source code for the STM32N6",
+      "PCB schematic or layout design for the STM32N6",
+      "Detailed configuration of communication peripherals unrelated to the biometric pipeline (e.g., CAN, Ethernet, USB)",
+      "Production testing, qualification, or reliability analysis of the STM32N6 device"
+    ]
+  },
+  "assumptions": [
+    "Learners have working knowledge of ARM Cortex-M architecture and general MCU peripheral concepts (timers, DMA, SPI, I2C, GPIO)",
+    "Learners are familiar with embedded camera interfaces (parallel or MIPI CSI-2) and basic image signal processing concepts at a conceptual level",
+    "Learners understand the general concept of neural network inference on embedded hardware but are not yet familiar with the STM32N6 Neural-ART NPU specifically",
+    "Learners have not previously worked with the STM32N6 family and need to build familiarity with its variant differentiation and peripheral architecture from the datasheet",
+    "Learners can read and interpret hardware datasheets, including feature tables, block diagrams, and electrical characteristics sections"
+  ],
+  "evidence": [
+    {
+      "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+      "relevance": "Describes the Neural-ART accelerator (600 Gops, DNN inference, streaming engines, weight decompression) available only on STM32N6x7xx — directly supports NPU evaluation for face recognition"
+    },
+    {
+      "chunk_id": "c3a9263c-af66-4114-859c-6342870aea21",
+      "relevance": "Introduces the NPU (neural processing unit) core as a runtime-reconfigurable neural network inference engine, supporting the goal of evaluating NPU suitability for biometric workloads"
+    },
+    {
+      "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+      "relevance": "Describes the camera/ISP pipeline including CSI interface, DCMIPP, ISP processing pipes, and direct DMA feed to the NPU — core to architecting the camera-to-inference pipeline"
+    },
+    {
+      "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+      "relevance": "Details the camera subsystem dual-path architecture (DCMI and DCMIPP), CSI-2 and parallel interfaces, and pixel rates — essential for camera pipeline architecture decisions"
+    },
+    {
+      "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+      "relevance": "Describes the SAES coprocessor (available only on STM32N6x5xx) with SESIP/PSA Level 3 certification — critical for the variant selection tradeoff between NPU and crypto"
+    },
+    {
+      "chunk_id": "773e666c-102c-43f1-8b41-f8cdac78c359",
+      "relevance": "Describes the CRYP cryptographic processor (AES, available only on STM32N6x5xx) — supports security feature assessment for biometric data protection"
+    },
+    {
+      "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+      "relevance": "Describes the Memory Cipher Engine (MCE) for inline encryption/decryption of external memory — relevant to securing biometric data stored in external flash"
+    },
+    {
+      "chunk_id": "4cb5d89c-1d8a-435a-800b-da938ea3bbfe",
+      "relevance": "Describes SRAM configuration with ECC, hardware/software erase — supports memory architecture planning for the inference pipeline"
+    },
+    {
+      "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+      "relevance": "Describes the Cortex-M55 core with Helium vector processing, TCM RAM sizes, and FPU — foundational for understanding compute resources available for the biometric pipeline"
+    },
+    {
+      "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+      "relevance": "Feature/peripheral count table for STM32N655xx showing crypto (SAES, CRYP, PKA, MCE) present but Neural-ART absent — directly supports variant comparison"
+    },
+    {
+      "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+      "relevance": "Feature/peripheral count table for STM32N647xx showing Neural-ART present but crypto absent — directly supports variant comparison for the core design tradeoff"
+    },
+    {
+      "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+      "relevance": "Describes the XSPI interface supporting external serial memories (NOR flash, HyperRAM) in memory-mapped mode — relevant to external memory architecture for model weights and frame buffers"
+    }
+  ],
+  "confidence": "high",
+  "confidence_rationale": "The datasheet provides comprehensive coverage of all the technical domains the persona needs to evaluate (NPU, ISP/camera, security, memory). The persona's pain points map directly to identifiable sections of the document. The 2-hour duration is realistic for a structured evaluation exercise (not implementation). The goal is performance-oriented, bounded, and tied to a concrete real-world deliverable (architecture specification with variant selection justification).",
+  "questions_for_sme": [
+    "Is there a planned or existing STM32N6x7xx variant that includes both the Neural-ART NPU AND the full crypto engine (SAES, CRYP, PKA, MCE), or is the NPU/crypto tradeoff a permanent architectural constraint of the current product family?",
+    "What is the expected minimum face recognition inference latency requirement for a commercial access control terminal (e.g., <500ms end-to-end), and is 600 Gops sufficient for the target neural network model size and architecture?",
+    "Are there reference designs, application notes, or STM32Cube firmware examples specifically demonstrating the camera-ISP-NPU pipeline on the STM32N6 that learners should be directed to alongside this datasheet?",
+    "For the 2-hour course duration, should the variant selection decision be treated as a case study exercise (learners produce a written recommendation), or is the goal purely conceptual evaluation without a deliverable artifact?",
+    "What security certification requirements (e.g., FIDO, ISO/IEC 30107 for PAD, GDPR biometric data handling) are relevant to the target access control product, and how do they map to the STM32N6 security features covered in this datasheet?"
+  ]
+}

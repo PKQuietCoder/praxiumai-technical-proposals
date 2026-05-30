@@ -1,0 +1,399 @@
+{
+  "subsection_id": "4.1.1",
+  "subsection_title": "Configure the Camera Subsystem Architecture",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Distinguish between the DCMI and DCMIPP interfaces and select the correct one for a high-resolution camera sensor",
+    "Identify the CSI-2 serial interface specifications relevant to a 5 Mpixel at 30 fps rawBayer sensor",
+    "Map the end-to-end camera-to-NPU data path, naming each subsystem stage and the handoff mechanism between them"
+  ],
+  "content": {
+    "hook_sentence": "Routing your camera frames through the CPU before the NPU seems like a safe design choice — but it's the one decision most likely to blow your 500 ms latency budget before inference even starts.",
+    "introduction": "The STM32N6 camera subsystem gives you two distinct interface paths, and choosing the wrong one for your sensor type will either cap your pixel throughput or force unnecessary CPU involvement in the data path. For a face recognition terminal running a 5 Mpixel sensor at 30 fps with rawBayer output, the interface selection and pipeline configuration are the first architectural decisions that determine whether real-time inference is achievable at all.",
+    "key_points": [
+      {
+        "point": "The camera subsystem offers two paths: use DCMIPP for any new high-resolution design, and reserve DCMI only for legacy compatibility or a second sensor.",
+        "explanation": "The STM32N6 camera subsystem is built around a double path. The **DCMI** is a low-resolution path with a low-frequency parallel interface supporting sensors up to 24 Mpixel/s. The **DCMIPP** is the high-resolution path, targeting sensors up to 5 Mpixels at 30 fps via a high-frequency parallel interface or CSI-2 serial interface. ST's guidance is explicit: use the DCMIPP for any new camera sensor connection. The DCMI is recommended only when you need backward compatibility with a former platform that also embeds DCMI, or when you need to input pixels from a second camera sensor simultaneously. In a single-sensor face recognition terminal, the DCMIPP is the correct choice.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+            "snippet": "For the connection of a camera sensor, it is recommended to use the DCMIPP. The DCMI is recommended only in two noticeable cases: to get backward compatibility with former platforms that embed also the DCMI; to input the pixels from a second camera sensor",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_48/ChunkType.text_da473eb1-8279-4b5c-8742-55824cdfa2ad_0.png",
+            "page_number": 48,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+            "snippet": "a low resolution path, with the DCMI and a low-frequency parallel interface, supporting sensors up to 24 Mpixel/s; a high resolution path, with the DCMIPP and a high frequency parallel interface or serial CSI-2 interface (RGB or rawBayer), targeting sensors up to 5 Mpixels at 30 fps",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_48/ChunkType.text_da473eb1-8279-4b5c-8742-55824cdfa2ad_0.png",
+            "page_number": 48,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "For a rawBayer 10-bit sensor at 5 Mpixel/30 fps, the CSI-2 serial interface via DCMIPP is the correct choice — the legacy DCMI parallel interface cannot meet this requirement.",
+        "explanation": "The DCMIPP supports two physical interfaces. The **parallel interface** accepts up to 120 MHz on 16-bit inputs (with I/O ReTime) and handles pixel formats including RGB565, RGB888, YUV422, and rawBayer/Mono 8/10/12/14. The **CSI-2 serial interface** runs at two data lanes at 2.5 Gbps/lane, delivering up to 333 Mpixel/s for rawBayer 10 and up to 200 Mpixel/s for RGB888. For a 5 Mpixel sensor at 30 fps, the required pixel rate is 150 Mpixel/s. The CSI-2 path at 333 Mpixel/s for rawBayer 10 covers this with significant headroom. The legacy DCMI, by contrast, supports only YCbCr 4:2:2, RGB565, and JPEG — it does not support rawBayer formats at all. If your sensor outputs rawBayer (which is typical for sensors feeding an ISP demosaicing pipeline), the DCMI is not a viable option regardless of its bandwidth.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "The CSI-2 serial interface has the following features: Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10; Pixel format: any MIPI CSI2 v1.3 (RGB565, 888, YUV422, rawBayer)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b694010d-0b8e-4ebe-aa39-e6d83d28e9b8",
+            "snippet": "The digital camera is a synchronous parallel interface able to receive a high speed data flow from an external 8-, 10-, 12- or 14-bit CMOS camera module. It supports different data formats: YCbCr4:2:2/RGB565 progressive video and compressed data (JPEG).",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_b694010d-0b8e-4ebe-aa39-e6d83d28e9b8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "The parallel interface has the following features: Input rate: 120 MHz up to 16-bit capability (with I/O ReTime); Pixel format: RGB565, 888, YUV422, RawBayer/Mono 8/10/12/14",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The DCMIPP pixel pipeline includes the ISP with three parallel processing pipes, and the ISP output feeds the NPU directly via DMA — no CPU involvement required.",
+        "explanation": "Building on the ISP-to-NPU DMA path established earlier, the DCMIPP path groups the DCMIPP pixel pipeline block, its parallel interface, and the abutted CSI-2 Host and PHY into a single subsystem. The integrated ISP runs three parallel pipes on the same input stream, executing bad pixel correction, decimation, black-level tuning, exposure control, demosaicing, column conversion, contrast, cropping, downsizing, ROI isolation, gamma correction, YUV conversion, and pixel packing. Critically, the ISP output can be **directly fed via DMA to the NPU**, bypassing the CPU entirely for the frame transfer. This is the hardware-optimized path for real-time inference: the sensor streams rawBayer data over CSI-2, the DCMIPP ISP preprocesses it across three parallel pipes, and the DMA delivers the processed tensor-ready frame to the Neural-ART NPU without any CPU memcopy or reformatting step. Inserting the CPU into this path adds latency and wastes cycles that should be spent on application logic.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "The ISP provides processing of three parallel pipes on the same input stream. Supported algorithms are bad pixel, decimation, black-level tuning, exposure control, demosaicing, column conversion, contrast, cropping, downsizing, ROI isolation, gamma correction, YUV conversion, and pixel packer. The ISP output can be directly fed via a DMA to the NPU.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "The DCMIPP path groups the DCMIPP pixel pipeline block, its included parallel interface, and the abutted CSI-2-Host and PHY.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f6153906-0c8d-46df-931f-f627f2c4513f",
+            "snippet": "ISP (image signal processor) with three parallel pipes on the same input stream: bad pixel, decimation, black level, exposure, de-mosaic, column conversion, contrast, crop, downsize, ROI, gamma, YUV convention, pixel packer",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_f6153906-0c8d-46df-931f-f627f2c4513f_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The CSI-2 Host controller implements the full MIPI CSI-2 v1.3 protocol and interfaces with the system via the MIPI D-PHY, making it the physical layer bridge between your camera sensor and the DCMIPP pipeline.",
+        "explanation": "The CSI-2 Host (CSI) is a separate digital core within the STM32N6 that implements all protocol functions defined in the MIPI CSI-2 specification. It provides the interface between the system and the MIPI D-PHY, enabling communication with any CSI-2 compliant camera sensor. The DCMIPP path includes this CSI-2 Host and PHY as abutted components, so from a firmware configuration perspective, you are configuring the DCMIPP subsystem as a whole. The CSI-2 interface conforms to MIPI CSI-2 v1.3 and MIPI D-PHY v1.2. When you select a camera module for your terminal, verify it is CSI-2 v1.3 compliant to ensure compatibility with this host controller. The two-lane configuration at 2.5 Gbps/lane gives you the bandwidth headroom needed for high-resolution biometric capture.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "ba7ebdd8-9a25-4ed6-b42f-12f849024d1d",
+            "snippet": "The MIPI CSI-2 Host controller is a digital core that implements all protocol functions defined in the MIPI CSI-2 specification. It provides an interface between the system and the MIPI D-PHY, allowing communication with a CSI-2 compliant camera.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_ba7ebdd8-9a25-4ed6-b42f-12f849024d1d_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6707b404-ab77-4ec7-bfb3-339441c577c7",
+            "snippet": "MIPI Alliance Specification for Camera Serial Interface 2 (CSI-2) v1.3 - 29 May 2014; MIPI Alliance Specification for D-PHY v1.2 - 01 August 2014",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_6707b404-ab77-4ec7-bfb3-339441c577c7_0.png",
+            "page_number": 50,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "Standard: MIPI CSI2 v1.3; Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A hardware partner proposes using the DCMI parallel interface for your face recognition terminal's rawBayer 10-bit sensor, citing simpler PCB routing compared to CSI-2. The sensor needs to sustain 5 Mpixel at 30 fps. Before you check the datasheet numbers, what is the most likely problem with this proposal?",
+        "reveal": "Two separate problems make the DCMI proposal unworkable. First, the DCMI does not support rawBayer pixel formats — it only accepts YCbCr 4:2:2, RGB565, and JPEG. A rawBayer 10-bit sensor cannot be connected to the DCMI at all, regardless of bandwidth. Second, even if you could adapt the format, the DCMI's low-resolution path is rated for sensors up to 24 Mpixel/s, while your 5 Mpixel at 30 fps sensor requires 150 Mpixel/s. The CSI-2 interface via DCMIPP, rated at up to 333 Mpixel/s for rawBayer 10, is the only path that satisfies both the format and throughput requirements. The PCB routing simplicity argument does not outweigh a fundamental format incompatibility.",
+        "hint": "Check both the supported pixel formats and the pixel rate ceiling for each interface."
+      },
+      {
+        "prediction_prompt": "A colleague argues that routing each captured frame through the CPU before passing it to the Neural-ART NPU gives the firmware more control over preprocessing — for example, to apply custom exposure adjustments before inference. Based on the STM32N6 camera subsystem architecture, what is the most accurate assessment of this proposal?",
+        "reveal": "The proposal introduces unnecessary CPU overhead and latency. The ISP already handles exposure control as one of its three parallel pipe operations, alongside demosaicing, gamma correction, YUV conversion, cropping, and downsizing. After the ISP processes the frame, the output can be fed directly to the NPU via DMA without any CPU intervention. Inserting the CPU into this path means the CPU must read the ISP output from memory, apply any adjustments, write the result back to memory, and then trigger the DMA — adding at minimum two full memory round-trips per frame. For a 500 ms latency budget, this overhead is unjustifiable when the hardware already provides the preprocessing capability in the ISP pipeline.",
+        "hint": "Consider what operations the ISP's three parallel pipes already perform before the DMA handoff."
+      }
+    ],
+    "summary": "For a face recognition terminal with a rawBayer 10-bit sensor at 5 Mpixel/30 fps, configure the DCMIPP with CSI-2 serial input and let the ISP's three parallel pipes handle all preprocessing before the DMA delivers frames directly to the Neural-ART NPU — the CPU has no role in the frame transfer path.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "A rawBayer 10-bit camera sensor cannot use the DCMI interface because the DCMI only supports ___ pixel formats.",
+      "answer": "YCbCr, RGB565, and JPEG",
+      "distractors": [
+        "rawBayer and YUV422",
+        "RGB888 and rawBayer",
+        "all MIPI CSI-2 v1.3 formats"
+      ],
+      "explanation": "The DCMI supports only YCbCr 4:2:2, RGB565, and JPEG. RawBayer formats require the DCMIPP path with its CSI-2 or high-frequency parallel interface."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each pipeline stage to its role in the camera-to-NPU data path:",
+      "pairs": [
+        {
+          "left": "CSI-2 Host and D-PHY",
+          "right": "Physical layer receiving the serial bitstream from the camera sensor"
+        },
+        {
+          "left": "DCMIPP ISP (three parallel pipes)",
+          "right": "Demosaicing, gamma correction, YUV conversion, and other preprocessing on the raw frame"
+        },
+        {
+          "left": "DMA",
+          "right": "Transferring the processed ISP output to the NPU without CPU intervention"
+        },
+        {
+          "left": "Neural-ART NPU",
+          "right": "Running DNN inference on the preprocessed frame data"
+        }
+      ],
+      "explanation": "Each stage has a distinct hardware role: the CSI-2 Host handles protocol and physical reception, the ISP preprocesses the raw pixel data across three parallel pipes, the DMA moves the result to the NPU, and the NPU executes inference — all without CPU involvement in the frame transfer."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the maximum ISP output resolution or maximum frame buffer size supported by the DCMIPP, which is needed to size AXISRAM allocations for the face capture pipeline.",
+    "No STM32Cube firmware example or application note for configuring the DCMIPP CSI-2 interface and ISP-to-NPU DMA path is referenced in the available document chunks.",
+    "The datasheet does not describe the specific DMA controller (GPDMA vs. HPDMA) used for the ISP-to-NPU transfer, or the configuration registers required to set up this path."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the hardware selection for a face recognition access control terminal. Your product requirements specify real-time DNN inference for face matching and AES-based encryption of stored biometric templates with side-channel attack protection certified to SESIP/PSA Level 3. Your manager asks you to select a single STM32N6 variant that best satisfies both requirements.",
+        "question_text": "After reviewing the STM32N6 datasheet feature tables, what is the most accurate characterization of the tradeoff you must communicate to your manager?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N6x7xx provides the Neural-ART NPU for DNN inference but lacks SAES, CRYP, PKA, and MCE, so a single variant cannot satisfy both the NPU and full hardware crypto requirements simultaneously.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The STM32N6x5xx provides both the Neural-ART NPU and the full crypto engine including SAES and CRYP, making it the correct single-chip solution for a face recognition terminal requiring inference and encryption.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Both STM32N6x5xx and STM32N6x7xx include the Neural-ART NPU, but only the STM32N6x5xx adds SAES with SESIP/PSA Level 3 certification, so the STM32N6x5xx is the preferred variant for this product.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N6x7xx variants include the Neural-ART NPU but do not include SAES, CRYP, PKA, or MCE. The STM32N6x5xx variants include the full crypto engine but lack the NPU. No single variant satisfies both requirements, and this architectural tradeoff must be explicitly communicated when making a variant recommendation.",
+        "incorrect": "Review the STM32N6 feature tables carefully. The Neural-ART NPU is present only on STM32N6x7xx variants, while SAES, CRYP, PKA, and MCE are present only on STM32N6x5xx variants. These features do not coexist in any single variant, which is the critical tradeoff for a product requiring both real-time inference and certified hardware encryption."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are architecting the camera-to-inference pipeline for the face recognition terminal using the STM32N6x7xx. A colleague proposes routing each captured frame through the CPU before passing it to the Neural-ART NPU, arguing this gives the firmware more control over preprocessing. You need to evaluate this proposal against the hardware capabilities described in the STM32N6 datasheet.",
+        "question_text": "Based on the STM32N6 camera subsystem architecture, what is the most accurate assessment of your colleague's proposed CPU-mediated data path?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The proposal is valid because the CPU must reformat ISP output into the tensor layout expected by the NPU before any DMA transfer can be initiated.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The proposal introduces unnecessary CPU overhead because the ISP output can be fed directly to the NPU via DMA, bypassing the CPU entirely for the frame transfer.",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The proposal is necessary because the DCMIPP pixel pipeline does not support direct memory transfers and requires CPU intervention to move data between the ISP and the NPU subsystem.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 datasheet explicitly states that the ISP output can be directly fed via DMA to the NPU, meaning the CPU does not need to intervene in the frame transfer path. Routing frames through the CPU would add latency and consume CPU cycles that could otherwise be used for application logic.",
+        "incorrect": "The STM32N6 datasheet describes a direct ISP-to-NPU path via DMA that does not require CPU involvement in the data transfer. The DCMIPP pixel pipeline feeds the ISP, and the ISP output is handed off to the NPU through DMA. Review Section 3.25 of the datasheet for the camera subsystem architecture."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+          "snippet": "The camera subsystem is built around a double path: a low resolution path, with the DCMI and a low-frequency parallel interface... a high resolution path, with the DCMIPP and a high frequency parallel interface or serial CSI-2 interface (RGB or rawBayer), targeting sensors up to 5 Mpixels at 30 fps",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_48/ChunkType.text_da473eb1-8279-4b5c-8742-55824cdfa2ad_0.png",
+          "page_number": 48,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are specifying the camera interface for the face recognition terminal. The selected camera sensor outputs a rawBayer 10-bit stream and must sustain a pixel rate sufficient for 5 Mpixel at 30 fps. A hardware partner proposes using the legacy DCMI parallel interface instead of the CSI-2 serial interface, citing simpler PCB routing.",
+        "question_text": "Based on the DCMIPP and CSI-2 specifications in the STM32N6 datasheet, which interface should you select for this camera sensor, and why?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Use the DCMI parallel interface, because it supports rawBayer formats and its 80 MHz, 14-bit input capability is sufficient for 5 Mpixel at 30 fps with rawBayer 10-bit data.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Use the CSI-2 serial interface via DCMIPP, because it supports rawBayer pixel formats and provides up to 333 Mpixel/s for rawBayer 10, which comfortably covers the 5 Mpixel at 30 fps requirement.",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Use the CSI-2 serial interface via DCMIPP, because the DCMI does not support rawBayer pixel formats and can only accept YCbCr or JPEG data from camera sensors.",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The DCMIPP CSI-2 interface supports rawBayer pixel formats and delivers up to 333 Mpixel/s for rawBayer 10-bit data across two lanes at 2.5 Gbps/lane, which far exceeds the 150 Mpixel/s needed for 5 Mpixel at 30 fps. The DCMIPP is also the recommended path for high-resolution camera sensors on the STM32N6.",
+        "incorrect": "Review the DCMIPP and DCMI specifications in Section 3.25 of the STM32N6 datasheet. The DCMI supports rawBayer formats but is limited to 24 Mpixel/s on the low-resolution path and is not recommended for high-resolution sensors. The CSI-2 interface via DCMIPP is the correct choice, providing up to 333 Mpixel/s for rawBayer 10-bit and two data lanes at 2.5 Gbps/lane."
+      },
+      "references": [
+        {
+          "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+          "snippet": "The CSI-2 serial interface has the following features: Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+          "page_number": 49,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+          "snippet": "a high resolution path, with the DCMIPP and a high frequency parallel interface or serial CSI-2 interface (RGB or rawBayer), targeting sensors up to 5 Mpixels at 30 fps",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_48/ChunkType.text_da473eb1-8279-4b5c-8742-55824cdfa2ad_0.png",
+          "page_number": 48,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b694010d-0b8e-4ebe-aa39-e6d83d28e9b8",
+          "snippet": "The digital camera is a synchronous parallel interface able to receive a high speed data flow from an external 8-, 10-, 12- or 14-bit CMOS camera module. It supports different data formats: YCbCr4:2:2/RGB565 progressive video and compressed data (JPEG).",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_b694010d-0b8e-4ebe-aa39-e6d83d28e9b8_0.png",
+          "page_number": 49,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are defining the security architecture for the face recognition terminal using the STM32N6x5xx variant. Biometric face templates are stored in XSPI-connected external flash. A security review requires that these templates be protected against extraction even if the external flash chip is physically removed from the PCB. You are mapping STM32N6 security features to specific protection roles.",
+        "question_text": "Which STM32N6 security feature is most appropriate for protecting biometric templates stored in XSPI-connected external flash against physical extraction of the flash device?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TrustZone, configured to place the external flash region in the Secure world so that only trusted firmware can issue read and write commands to the XSPI controller.",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "HASH, applied to each biometric template before storage so that any tampering with the flash contents can be detected by comparing stored and recomputed digest values.",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "MCE, which performs inline encryption on writes and inline decryption on reads over the system bus to the XSPI-connected flash, so data on the physical device is always ciphertext.",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. MCE (Memory Cipher Engine) provides system bus inline encryption for writes and inline decryption for reads to external memory regions, meaning the data stored on the physical XSPI flash device is always encrypted ciphertext. Removing the flash chip yields only encrypted data, directly addressing the physical extraction threat.",
+        "incorrect": "TrustZone controls access privileges but does not encrypt data on the physical flash device — a removed chip still contains plaintext. HASH provides integrity verification but not confidentiality. MCE is the correct feature because it performs inline encryption at the system bus level, ensuring that data written to XSPI-connected flash is always stored as ciphertext. Review Section 3.36 of the STM32N6 datasheet for MCE capabilities."
+      },
+      "references": [
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

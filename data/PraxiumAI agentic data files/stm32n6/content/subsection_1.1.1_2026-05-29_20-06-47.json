@@ -1,0 +1,406 @@
+{
+  "subsection_id": "1.1.1",
+  "subsection_title": "Identify the STM32N6 Variants",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Distinguish between the STM32N6x5xx and STM32N6x7xx variant families by their defining hardware features",
+    "Identify the specific part numbers available within each variant family",
+    "Recognize the architectural tradeoff between Neural-ART NPU availability and full crypto engine availability across variants",
+    "Select the appropriate package designation for a given I/O requirement"
+  ],
+  "content": {
+    "hook_sentence": "The STM32N6 variant you pick on day one locks you into either on-chip AI acceleration or hardware-certified crypto — no single device gives you both.",
+    "introduction": "Before you write a single line of firmware for your face recognition terminal, you need to know which STM32N6 device is on your BOM. The STM32N6 family splits into two variant lines — STM32N6x5xx and STM32N6x7xx — and the difference between them is not a minor peripheral count adjustment. It is a fundamental architectural choice that determines whether your design can run DNN inference on-chip, protect biometric templates with certified hardware crypto, or neither simultaneously. Getting this wrong means a board respin.",
+    "key_points": [
+      {
+        "point": "The STM32N6 family contains four reference groups, each available in six package/pin configurations.",
+        "explanation": "The device summary table organizes the family into four references: - **STM32N645xx** (part numbers: STM32N645A0, B0, I0, L0, X0, Z0) - **STM32N647xx** (part numbers: STM32N647A0, B0, I0, L0, X0, Z0) - **STM32N655xx** (part numbers: STM32N655A0, B0, I0, L0, X0, Z0) - **STM32N657xx** (part numbers: STM32N657A0, B0, I0, L0, X0, Z0) The letter suffix in the part number encodes the package: A, B, I, L, X, and Z each correspond to a specific VFBGA package variant. When you pull a part number from a distributor catalog or BOM, the middle digit — 5 or 7 — tells you immediately which variant line you are dealing with.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "522e6da5-877a-4b34-8678-faeacf8c3d1e",
+            "snippet": "STM32N645xx: STM32N645A0, STM32N645B0, STM32N645I0, STM32N645L0, STM32N645X0, STM32N645Z0; STM32N647xx: STM32N647A0, STM32N647B0, STM32N647I0, STM32N647L0, STM32N647X0, STM32N647Z0; STM32N655xx: STM32N655A0, STM32N655B0, STM32N655I0, STM32N655L0, STM32N655X0, STM32N655Z0; STM32N657xx: STM32N657A0, STM32N657B0, STM32N657I0, STM32N657L0, STM32N657X0, STM32N657Z0",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_1/ChunkType.table_522e6da5-877a-4b34-8678-faeacf8c3d1e_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The x7 variants (STM32N647xx, STM32N657xx) include the Neural-ART NPU; the x5 variants (STM32N645xx, STM32N655xx) do not.",
+        "explanation": "The Neural-ART Accelerator is exclusive to the STM32N6x7xx line. It runs at up to 1 GHz and delivers 600 Gops with 288 MAC/cycle, backed by specialized hardware units for DNN inference, a flexible dedicated stream processing engine, real-time encryption/decryption within the NPU, and on-the-fly weight decompression. For your face recognition terminal, this is the subsystem that runs the face matching model. If your selected part ends in x5 — STM32N645xx or STM32N655xx — the Neural-ART block is absent, and you have no hardware inference acceleration on-chip.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+            "snippet": "Neural processing unit (STM32N6x7 only): ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle; Specialized hardware units for DNN (deep-neural network) inference functions; Flexible dedicated stream processing engine; Real-time encryption/decryption; On-the-fly weight decompression",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "ee771eda-b464-4b71-b017-beabd61999e1",
+            "snippet": "STM32N6x5xx STM32N6x7xx",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_ee771eda-b464-4b71-b017-beabd61999e1_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The x5 variants carry the full hardware crypto engine set (SAES, CRYP, PKA, MCE); the x7 variants do not.",
+        "explanation": "This is the tradeoff that makes STM32N6 variant selection non-trivial for a biometric access control product. The STM32N6x5xx line — STM32N645xx and STM32N655xx — includes the security peripherals required for certified biometric data protection: SAES (side-channel-resistant AES, SESIP/PSA Level 3), CRYP (standard AES crypto processor), PKA (public key accelerator), and MCE (memory cipher engine for inline XSPI encryption). The STM32N6x7xx line, which carries the Neural-ART NPU, does not include these crypto engines. This means a single STM32N6 chip cannot simultaneously provide hardware DNN inference and SESIP/PSA Level 3 certified hardware crypto. Your architecture must account for this constraint from the start.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "85ce10cd-f710-47ae-8072-4fee389d57c5",
+            "snippet": "Arm® Cortex®-M55-based MCU, with ST Neural-ART Accelerator, H264 encoder, Neo-Chrom 2.5D GPU, 4.2 Mbytes contiguous SRAM",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_85ce10cd-f710-47ae-8072-4fee389d57c5_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "ee771eda-b464-4b71-b017-beabd61999e1",
+            "snippet": "STM32N6x5xx STM32N6x7xx",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_ee771eda-b464-4b71-b017-beabd61999e1_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Package choice determines your available I/O count, and the STM32N6 offers six VFBGA options ranging from 75 to 165 I/Os.",
+        "explanation": "All four reference groups share the same six VFBGA package options: - **VFBGA142** — 8×8 mm, 0.5 mm pitch, 75 I/Os - **VFBGA169** — 6×6 mm, 0.4 mm pitch - **VFBGA178** — 12×12 mm, 0.8 mm pitch - **VFBGA198** — 10×10 mm, 0.65 mm pitch - **VFBGA223** — 10×10 mm, 0.5 mm pitch - **VFBGA264** — 14×14 mm, 0.8 mm pitch, 165 I/Os For a face recognition terminal that simultaneously drives a CSI-2 camera interface, two XSPI external memory channels, USB, Ethernet, and GPIO lines for door lock control, the VFBGA264 is the only package that provides the 165 I/Os needed to support that full peripheral set. Choosing a smaller package to save PCB area will force you to multiplex or drop peripherals.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+            "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+            "page_number": 0,
+            "chunk_type": "figure"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your product manager specifies: 'The terminal must run a face matching DNN on-chip AND store biometric templates encrypted with SESIP/PSA Level 3 certified hardware AES — all on a single STM32N6 chip.' You open the STM32N6 datasheet to the device summary table. Can you satisfy both requirements with one device?",
+        "reveal": "No. The Neural-ART NPU is exclusive to the STM32N6x7xx variants (STM32N647xx, STM32N657xx). The SESIP/PSA Level 3 certified SAES engine, along with CRYP, PKA, and MCE, is available only on the STM32N6x5xx variants (STM32N645xx, STM32N655xx). No single STM32N6 device combines both. Your architect's single-chip proposal requires either an architectural compromise — for example, using software AES on the x7 variant, accepting lower security assurance — or a two-chip solution pairing an x7 for inference with a dedicated security element for certified crypto.",
+        "hint": "Look at which digit in the part number — 5 or 7 — controls NPU presence versus crypto engine presence."
+      },
+      {
+        "prediction_prompt": "You have selected the STM32N657Z0 for your face recognition terminal. Your peripheral list includes: CSI-2 camera, two XSPI channels, USB OTG, Ethernet, I2C for a fingerprint sensor, and 12 GPIO lines for access control outputs. You check the package suffix — 'Z' maps to VFBGA264. Is this the right package call, and what would happen if you switched to the VFBGA142 instead?",
+        "reveal": "VFBGA264 is the correct choice. It provides 165 I/Os, which is the maximum available across the STM32N6 package range and the only package likely to accommodate that full peripheral set simultaneously. Switching to VFBGA142 drops you to 75 I/Os — less than half. With CSI-2 alone consuming multiple dedicated pins, plus two XSPI interfaces, USB, and Ethernet, you would run out of I/Os well before assigning the GPIO lines. The VFBGA142 is appropriate for designs with a minimal peripheral set, not a multi-interface biometric terminal.",
+        "hint": "Count the interface types and consider how many pins each high-speed interface typically requires."
+      }
+    ],
+    "summary": "The STM32N6 family splits cleanly into x5 variants (full crypto, no NPU) and x7 variants (Neural-ART NPU, no full crypto) — knowing this tradeoff before you finalize your BOM prevents a costly board respin, and your package choice within either line determines whether you have enough I/Os to wire up the full peripheral set your terminal requires.",
+    "figures": [
+      {
+        "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+        "after_key_point": 3,
+        "caption": "The six VFBGA package options for the STM32N6 family, ranging from the compact VFBGA142 (8×8 mm, 75 I/Os) to the full-featured VFBGA264 (14×14 mm, 165 I/Os). For a face recognition terminal with CSI-2, XSPI, USB, and Ethernet, the VFBGA264 is the only package that provides sufficient I/O headroom.",
+        "alt_text": "Diagram showing a VFBGA package illustration on the left — a square IC component with a grid of solder balls visible on the underside — alongside a list of six package variants on the right: VFBGA142 at 8x8 mm with 0.5 mm pitch, VFBGA169 at 6x6 mm with 0.4 mm pitch, VFBGA178 at 12x12 mm with 0.8 mm pitch, VFBGA198 at 10x10 mm with 0.65 mm pitch, VFBGA223 at 10x10 mm with 0.5 mm pitch, and VFBGA264 at 14x14 mm with 0.8 mm pitch.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When you need on-chip DNN inference acceleration for face matching, you must select a part from the STM32N6___ variant line.",
+      "answer": "x7xx",
+      "distractors": [
+        "x5xx",
+        "x45xx",
+        "x55xx"
+      ],
+      "explanation": "The Neural-ART NPU is exclusive to the STM32N6x7xx variants (STM32N647xx and STM32N657xx). Any x5 part — STM32N645xx or STM32N655xx — omits the NPU entirely."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each design requirement to the STM32N6 variant line that satisfies it:",
+      "pairs": [
+        {
+          "left": "Real-time DNN inference for face matching at 600 Gops",
+          "right": "STM32N6x7xx (e.g., STM32N647xx, STM32N657xx)"
+        },
+        {
+          "left": "SESIP/PSA Level 3 certified hardware AES for biometric template storage",
+          "right": "STM32N6x5xx (e.g., STM32N645xx, STM32N655xx)"
+        },
+        {
+          "left": "Inline memory encryption via MCE for XSPI-connected external flash",
+          "right": "STM32N6x5xx (e.g., STM32N645xx, STM32N655xx)"
+        }
+      ],
+      "explanation": "The Neural-ART NPU is present only on x7 variants, while SAES, CRYP, PKA, and MCE are present only on x5 variants. No single STM32N6 device provides both capability sets."
+    }
+  ],
+  "content_gaps": [
+    "The document chunks do not explicitly list the I/O counts for VFBGA169, VFBGA178, VFBGA198, and VFBGA223 — only VFBGA142 (75 I/Os) and VFBGA264 (165 I/Os) are confirmed from the available references. A complete I/O count table per package would strengthen the package selection guidance.",
+    "The document chunks do not confirm which specific package suffix letters (A, B, I, L, X, Z) map to which VFBGA package designations — this mapping is referenced in the part number structure but not explicitly decoded in the available chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are evaluating the STM32N6 product family for a face recognition access control terminal. Your product requires real-time DNN inference for face matching and hardware-accelerated AES encryption to protect stored biometric templates. You are reviewing the STM32N6 datasheet feature tables to select a variant.",
+        "question_text": "Based on the STM32N6 variant feature tables, which statement correctly describes the architectural tradeoff you must account for in your device selection?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N6x7xx provides the Neural-ART NPU for DNN inference but does not include SAES, CRYP, PKA, or MCE, while the STM32N6x5xx provides those crypto engines but does not include the Neural-ART NPU.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The STM32N6x5xx provides the Neural-ART NPU for DNN inference but does not include SAES, CRYP, PKA, or MCE, while the STM32N6x7xx provides those crypto engines but does not include the Neural-ART NPU.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Both the STM32N6x5xx and STM32N6x7xx provide the Neural-ART NPU and the full crypto engine set, but differ only in package options and I/O count.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N6x7xx variants include the ST Neural-ART Accelerator (600 Gops, up to 1 GHz) but omit SAES, CRYP, PKA, and MCE. The STM32N6x5xx variants include the full crypto engine set but do not include the Neural-ART NPU. This is a hard architectural tradeoff with no single variant combining both.",
+        "incorrect": "The variant designations are the opposite of what option B states, and no single STM32N6 variant combines both the Neural-ART NPU and the full crypto engine set. Review the STM32N6 datasheet feature/peripheral count tables (Tables 2–5): STM32N6x7xx = Neural-ART Yes, Crypto No; STM32N6x5xx = Neural-ART No, Crypto Yes."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+          "snippet": "Neural processing unit (STM32N6x7 only): ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "Your face recognition terminal design requires both on-device DNN inference for face matching and SESIP/PSA Level 3 certified side-channel-resistant AES encryption for biometric template storage. Your hardware architect proposes using a single STM32N6 chip to handle both functions. You are reviewing the STM32N6 datasheet to assess whether this is feasible.",
+        "question_text": "Based on the STM32N6 variant architecture, what is the most accurate assessment of your architect's proposal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The proposal is feasible using the STM32N6x5xx, which provides both the Neural-ART NPU and the SAES engine with SESIP/PSA Level 3 certification on a single device.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The proposal cannot be implemented with a single STM32N6 device, because no variant combines the Neural-ART NPU with the SAES, CRYP, PKA, and MCE crypto engines — the design requires a two-chip solution or an architectural compromise.",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The proposal is feasible using the STM32N6x7xx, which provides both the Neural-ART NPU and the SAES engine with SESIP/PSA Level 3 certification on a single device.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. No STM32N6 variant combines the Neural-ART NPU with the full crypto engine set (SAES, CRYP, PKA, MCE). The STM32N6x7xx has the NPU but lacks SAES/CRYP/PKA/MCE; the STM32N6x5xx has the crypto engines but lacks the NPU. A single-chip solution satisfying both requirements simultaneously does not exist in the current STM32N6 family.",
+        "incorrect": "Neither the STM32N6x5xx nor the STM32N6x7xx combines the Neural-ART NPU with the SAES engine. The STM32N6x5xx has SAES (SESIP/PSA Level 3) but no NPU; the STM32N6x7xx has the NPU but no SAES. Review the STM32N6 datasheet feature tables and the SAES section, which explicitly states SAES is available only on STM32N655xx and STM32N657xx devices."
+      },
+      "references": [
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "d70f1c16-be21-485a-82b1-f202a1386dfc",
+          "snippet": "Neural processing unit (STM32N6x7 only): ST Neural-ART Accelerator, frequency up to 1 GHz, 600 Gops, 288 MAC/cycle",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_d70f1c16-be21-485a-82b1-f202a1386dfc_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are architecting the camera-to-inference pipeline for your face recognition terminal using the STM32N6x7xx. You need to move image data from the camera sensor through preprocessing and into the Neural-ART NPU for face matching with minimal CPU involvement.",
+        "question_text": "Based on the STM32N6 datasheet functional overview, which sequence correctly describes the end-to-end data path from camera input to NPU inference?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "CSI-2 interface captures the raw camera stream → CPU reads frames into AXISRAM → software ISP processes the image → CPU writes preprocessed data to the NPU input buffer.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "CSI-2 interface captures the raw camera stream → DCMIPP pixel pipeline routes data to the hardware ISP → ISP output is fed directly to the Neural-ART NPU via DMA without CPU intervention.",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "CSI-2 interface captures the raw camera stream → HPDMA transfers frames to external XSPI memory → CPU retrieves frames from XSPI and submits them to the Neural-ART NPU input queue.",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 camera pipeline flows from the CSI-2 interface into the DCMIPP pixel pipeline, through the hardware ISP (which provides three parallel processing pipes), and the ISP output is then fed directly to the Neural-ART NPU via DMA — without requiring CPU intervention at the data handoff points.",
+        "incorrect": "The STM32N6 datasheet describes a hardware-accelerated pipeline that bypasses the CPU for data movement. The ISP output feeds the NPU via DMA directly — the CPU is not in the data path between the ISP and NPU. Review the STM32N6 functional overview sections for the camera subsystem (Section 3.25) and the NPU (Section 3.5)."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "For camera applications, a parallel and CSI interface together with an integrated hardware ISP is foreseen... The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+          "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are preparing a technical feasibility report for your face recognition terminal project. A colleague questions whether the Neural-ART NPU's 600 Gops rating is sufficient for real-time face matching and asks you to identify any gaps in the datasheet that would affect your confidence in the throughput estimate.",
+        "question_text": "Which assessment of the Neural-ART NPU's suitability for real-time face matching is most accurate based on the STM32N6 datasheet?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The 600 Gops rating and streaming engine architecture are strong indicators of real-time capability, but the datasheet does not specify per-model inference latency, so empirical benchmarking on the target face recognition model is required before committing to the design.",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The 600 Gops rating directly guarantees real-time face matching performance, and no further benchmarking is needed because the datasheet specifies end-to-end inference latency for biometric workloads.",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The 600 Gops rating is insufficient for real-time face matching, and the streaming engine and weight decompression features do not meaningfully reduce memory bandwidth bottlenecks in biometric inference pipelines.",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The Neural-ART NPU's 600 Gops throughput, dedicated streaming engines, and on-the-fly weight decompression are architecturally relevant to real-time inference. However, the datasheet does not provide a specific per-model inference latency figure for face recognition workloads, which is a gap that requires empirical characterization before finalizing the design.",
+        "incorrect": "The datasheet does not guarantee end-to-end inference latency for specific biometric workloads — Gops is a peak throughput metric, not a per-model latency specification. Equally, the streaming engines and weight decompression features are explicitly designed to minimize memory bandwidth bottlenecks, making option C incorrect. Review the Neural-ART accelerator description in the STM32N6 datasheet Section 3.5."
+      },
+      "references": [
+        {
+          "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+          "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency. Dedicated streaming engines are integrated into it to optimize data flow and minimize internal buffer usage and power. The accelerator supports on-the-fly weight decompression and real-time data encryption and decryption.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_1dd44473-7f14-4ede-8145-34bf31d3e1ee_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    },
+    {
+      "mcq_id": "MCQ5",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You have selected the STM32N6x7xx variant for your face recognition terminal. The terminal requires simultaneous support for a CSI-2 camera interface, two XSPI external memory channels, USB, Ethernet, and multiple GPIO lines for door lock control and status indicators. You are reviewing the STM32N6 package options to confirm your PCB design can be supported.",
+        "question_text": "Based on the STM32N6 datasheet package information, which package should you select to maximize available I/O count for this peripheral set?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "VFBGA142 (8×8 mm, 0.5 mm pitch), which provides 75 I/Os in the smallest available footprint.",
+          "is_correct": false,
+          "id": "MCQ5_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "VFBGA198 (10×10 mm, 0.65 mm pitch), which provides a mid-range I/O count suitable for most peripheral combinations.",
+          "is_correct": false,
+          "id": "MCQ5_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "VFBGA264 (14×14 mm, 0.8 mm pitch), which provides 165 I/Os — the highest I/O count available across the STM32N6 package range.",
+          "is_correct": true,
+          "id": "MCQ5_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The VFBGA264 package provides 165 I/Os, the highest count in the STM32N6 package family, making it the appropriate choice when the peripheral set (CSI-2, dual XSPI, USB, Ethernet, GPIO) demands maximum pin availability. The 14×14 mm body size must be verified against the PCB form factor constraints.",
+        "incorrect": "The VFBGA142 provides only 75 I/Os, which is likely insufficient for the full peripheral set described. The VFBGA198 offers a mid-range count but is not the maximum available. When I/O count is the primary constraint, the VFBGA264 with 165 I/Os is the correct selection. Review the STM32N6 datasheet package information in Section 6 and the feature/peripheral count tables."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "Package Name: VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165; VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+          "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+          "page_number": 0,
+          "chunk_type": "figure"
+        }
+      ],
+      "correct_option_id": "MCQ5_opt_3"
+    }
+  ]
+}

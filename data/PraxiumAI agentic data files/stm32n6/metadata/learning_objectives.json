@@ -1,0 +1,206 @@
+{
+  "key_content": {
+    "topics": [
+      "STM32N6x5xx vs STM32N6x7xx variant differentiation (NPU vs crypto tradeoff)",
+      "Neural-ART NPU subsystem: 600 Gops, DNN inference, streaming engines, weight decompression",
+      "Camera/ISP pipeline: CSI-2, DCMIPP, ISP processing pipes, DMA feed to NPU",
+      "Security features: TrustZone, SAES (SESIP/PSA Level 3), CRYP (AES), HASH, MCE (inline encryption), PKA",
+      "Memory architecture: TCM RAM, AXISRAM, SRAM with ECC, XSPI external memory interface",
+      "Cortex-M55 core with Helium vector processing, FPU, ICACHE/DCACHE",
+      "DMA controllers: GPDMA and HPDMA for peripheral-to-memory and memory-to-memory transfers",
+      "Package options: VFBGA142 through VFBGA264, I/O counts per variant",
+      "Power supply management: voltage scaling, SMPS, low-power modes"
+    ],
+    "skills": [
+      "Comparing STM32N6 variant feature tables to select the appropriate device for a face recognition terminal",
+      "Evaluating Neural-ART NPU throughput and architecture against real-time biometric inference requirements",
+      "Mapping the camera-ISP-DMA-NPU data pipeline for real-time face capture and preprocessing",
+      "Assessing cryptographic and security features (SAES, CRYP, MCE, TrustZone) for biometric data protection",
+      "Planning memory layout (TCM, AXISRAM, XSPI) to support low-latency inference pipelines",
+      "Reading and interpreting hardware datasheet feature tables, functional overview sections, and block diagrams"
+    ]
+  },
+  "goals": [
+    {
+      "id": "G1",
+      "statement": "You will select the appropriate STM32N6 device variant and justify that selection against the hardware requirements of a face recognition access control terminal.",
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features and peripheral counts — Neural-ART: Yes; Crypto (SAES, CRYPT, PKA, MCE1.4): No"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features and peripheral counts — Crypto (SAES, CRYPT, PKA, MCE1.4): Yes; Neural-ART: No"
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "statement": "You will architect the camera-to-inference data pipeline on the STM32N6, mapping the ISP, DMA, and NPU subsystems to support real-time facial recognition.",
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "For camera applications, a parallel and CSI interface together with an integrated hardware ISP is foreseen... The ISP output can be directly fed via a DMA to the NPU."
+        },
+        {
+          "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+          "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency."
+        }
+      ]
+    },
+    {
+      "id": "G3",
+      "statement": "You will specify the security architecture and memory layout for the STM32N6-based biometric terminal, selecting features that protect biometric data at rest and in transit.",
+      "references": [
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3."
+        },
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes"
+        }
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "id": "O1",
+      "goal_id": "G1",
+      "audience": "You (the firmware engineer evaluating STM32N6 for a face recognition access control terminal)",
+      "behavior": "compare the STM32N6x5xx and STM32N6x7xx variant feature tables and produce a written variant selection recommendation that identifies which device satisfies the product's NPU, crypto, and I/O requirements",
+      "condition": "Given the STM32N6 datasheet feature/peripheral count tables (Tables 2–5) and a defined set of face recognition terminal requirements including real-time inference, camera input, and secure biometric data handling",
+      "degree": "correctly identifying which variant provides the Neural-ART NPU (STM32N6x7xx) and which provides the full crypto engine (SAES, CRYP, PKA, MCE — STM32N6x5xx), and explicitly stating the architectural tradeoff in your recommendation",
+      "full_statement": "Given the STM32N6 datasheet feature/peripheral count tables (Tables 2–5) and a defined set of face recognition terminal requirements including real-time inference, camera input, and secure biometric data handling, you will compare the STM32N6x5xx and STM32N6x7xx variant feature tables and produce a written variant selection recommendation that identifies which device satisfies the product's NPU, crypto, and I/O requirements — correctly identifying which variant provides the Neural-ART NPU (STM32N6x7xx) and which provides the full crypto engine (SAES, CRYP, PKA, MCE — STM32N6x5xx), and explicitly stating the architectural tradeoff in your recommendation.",
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No"
+        }
+      ]
+    },
+    {
+      "id": "O2",
+      "goal_id": "G2",
+      "audience": "You (the firmware engineer architecting the biometric pipeline)",
+      "behavior": "map the end-to-end camera-to-inference data path on the STM32N6, identifying the role of each subsystem (CSI-2 interface, DCMIPP pixel pipeline, ISP processing pipes, HPDMA, and Neural-ART NPU) and the data handoff points between them",
+      "condition": "Given the STM32N6 datasheet functional overview sections for the camera subsystem (Section 3.25), DCMIPP (Section 3.25.2), and NPU (Section 3.5), and the description of ISP-to-NPU DMA feed",
+      "degree": "producing a pipeline diagram or written description that correctly names all four subsystem stages, specifies that the ISP output feeds the NPU via DMA without CPU intervention, and identifies the CSI-2 input rate (up to 2.5 Gbps/lane) and ISP pipe count (three parallel pipes)",
+      "full_statement": "Given the STM32N6 datasheet functional overview sections for the camera subsystem, DCMIPP, and NPU, and the description of ISP-to-NPU DMA feed, you will map the end-to-end camera-to-inference data path on the STM32N6, identifying the role of each subsystem (CSI-2 interface, DCMIPP pixel pipeline, ISP processing pipes, HPDMA, and Neural-ART NPU) and the data handoff points between them — producing a pipeline diagram or written description that correctly names all four subsystem stages, specifies that the ISP output feeds the NPU via DMA without CPU intervention, and identifies the CSI-2 input rate (up to 2.5 Gbps/lane) and ISP pipe count (three parallel pipes).",
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP provides processing of three parallel pipes on the same input stream... The ISP output can be directly fed via a DMA to the NPU."
+        },
+        {
+          "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+          "snippet": "The CSI-2 serial interface has the following features: Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10"
+        }
+      ]
+    },
+    {
+      "id": "O3",
+      "goal_id": "G2",
+      "audience": "You (the firmware engineer evaluating NPU throughput)",
+      "behavior": "assess whether the Neural-ART NPU's 600 Gops throughput and architectural features (streaming engines, on-the-fly weight decompression, real-time data encryption/decryption) are sufficient to support the target face recognition workload",
+      "condition": "Given the STM32N6 datasheet description of the Neural-ART accelerator (Section 3.5 and the STM32N6x7xx feature description), the NPU operating frequency (1 GHz maximum), and the product requirement for real-time face matching",
+      "degree": "producing a written assessment that cites the NPU's 600 Gops rating, identifies the streaming engine and weight decompression features as relevant to minimizing memory bandwidth bottlenecks, and flags the absence of a specific latency specification in the datasheet as a gap requiring further characterization",
+      "full_statement": "Given the STM32N6 datasheet description of the Neural-ART accelerator, the NPU operating frequency (1 GHz maximum), and the product requirement for real-time face matching, you will assess whether the Neural-ART NPU's 600 Gops throughput and architectural features (streaming engines, on-the-fly weight decompression, real-time data encryption/decryption) are sufficient to support the target face recognition workload — producing a written assessment that cites the NPU's 600 Gops rating, identifies the streaming engine and weight decompression features as relevant to minimizing memory bandwidth bottlenecks, and flags the absence of a specific latency specification in the datasheet as a gap requiring further characterization.",
+      "references": [
+        {
+          "chunk_id": "1dd44473-7f14-4ede-8145-34bf31d3e1ee",
+          "snippet": "The STM32N6x7xx devices feature an ST Neural-ART accelerator, running at a maximum frequency of 1 GHz, and providing 600 Gops using optimized hardware units for DNN (deep-neural network) inference functions to optimize power efficiency. Dedicated streaming engines are integrated into it to optimize data flow and minimize internal buffer usage and power. The accelerator supports on-the-fly weight decompression and real-time data encryption and decryption."
+        }
+      ]
+    },
+    {
+      "id": "O4",
+      "goal_id": "G3",
+      "audience": "You (the firmware engineer specifying the security architecture)",
+      "behavior": "select and justify the security features from the STM32N6 datasheet that protect biometric data at rest (in external flash) and in transit (between camera, NPU, and storage), assigning each feature to a specific protection role in the access control terminal",
+      "condition": "Given the STM32N6 datasheet descriptions of TrustZone (Section 3.1), SAES (Section 3.33), CRYP (Section 3.34), HASH (Section 3.35), MCE (Section 3.36), and PKA (Section 3.37), and the constraint that SAES/CRYP/MCE/PKA are available only on STM32N6x5xx variants",
+      "degree": "producing a security feature mapping table that correctly assigns MCE to inline encryption of external memory (XSPI-connected flash), SAES/CRYP to biometric template encryption, HASH to data integrity verification, and TrustZone to isolation of the secure biometric processing domain — and explicitly noting that these features are absent on the STM32N6x7xx (NPU) variant",
+      "full_statement": "Given the STM32N6 datasheet descriptions of TrustZone, SAES, CRYP, HASH, MCE, and PKA, and the constraint that SAES/CRYP/MCE/PKA are available only on STM32N6x5xx variants, you will select and justify the security features that protect biometric data at rest and in transit — producing a security feature mapping table that correctly assigns MCE to inline encryption of external memory (XSPI-connected flash), SAES/CRYP to biometric template encryption, HASH to data integrity verification, and TrustZone to isolation of the secure biometric processing domain, and explicitly noting that these features are absent on the STM32N6x7xx (NPU) variant.",
+      "references": [
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3."
+        },
+        {
+          "chunk_id": "773e666c-102c-43f1-8b41-f8cdac78c359",
+          "snippet": "The cryptographic processor (CRYP) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. This function is available only on STM32N655xx and STM32N657xx devices."
+        }
+      ]
+    },
+    {
+      "id": "O5",
+      "goal_id": "G3",
+      "audience": "You (the firmware engineer defining the memory layout)",
+      "behavior": "define the memory layout for the STM32N6-based face recognition terminal, allocating TCM RAM, AXISRAM, and XSPI-mapped external memory to specific pipeline roles (inference model weights, frame buffers, biometric templates, and real-time processing code)",
+      "condition": "Given the STM32N6 datasheet descriptions of SRAM configuration (Section 3.2), the Cortex-M55 TCM RAM sizes (128 Kbyte data TCM, 64 Kbyte instruction TCM), AXISRAM1–6, and the XSPI interface supporting memory-mapped external flash and HyperRAM (Section 3.17)",
+      "degree": "producing a memory allocation table that places time-critical inference code in ITCM, active frame buffer data in DTCM or AXISRAM, model weights in XSPI-mapped external memory (leveraging memory-mapped mode), and biometric templates in MCE-encrypted XSPI regions — with each allocation citing the relevant datasheet section as justification",
+      "full_statement": "Given the STM32N6 datasheet descriptions of SRAM configuration, the Cortex-M55 TCM RAM sizes (128 Kbyte data TCM, 64 Kbyte instruction TCM), AXISRAM1–6, and the XSPI interface supporting memory-mapped external flash and HyperRAM, you will define the memory layout for the STM32N6-based face recognition terminal, allocating TCM RAM, AXISRAM, and XSPI-mapped external memory to specific pipeline roles — producing a memory allocation table that places time-critical inference code in ITCM, active frame buffer data in DTCM or AXISRAM, model weights in XSPI-mapped external memory (leveraging memory-mapped mode), and biometric templates in MCE-encrypted XSPI regions, with each allocation citing the relevant datasheet section as justification.",
+      "references": [
+        {
+          "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+          "snippet": "The Cortex-M55 includes a 32-Kbyte ICACHE, a 32-Kbyte DCACHE, as well as 128-Kbyte data TCM RAM and 64-Kbyte instruction TCM RAM with ECC for critical real-time routines."
+        },
+        {
+          "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+          "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations."
+        },
+        {
+          "chunk_id": "4cb5d89c-1d8a-435a-800b-da938ea3bbfe",
+          "snippet": "AHBSRAM1/2, AXISRAM1 to 6, BKPSRAM, FLEXRAM, and VENCRAM, with the following features: Error code correction (ECC): Single-error detection and correction with interrupt generation"
+        }
+      ]
+    },
+    {
+      "id": "O6",
+      "goal_id": "G1",
+      "audience": "You (the firmware engineer finalizing the hardware architecture specification)",
+      "behavior": "evaluate the package options for the selected STM32N6 variant and verify that the chosen package provides sufficient I/O count and physical dimensions for the face recognition terminal PCB design",
+      "condition": "Given the STM32N6 datasheet package information (Section 6) and the feature/peripheral count tables showing I/O counts per package (VFBGA142: 75 I/Os through VFBGA264: 165 I/Os), and the terminal's peripheral requirements (CSI-2 camera, XSPI external memory, USB, Ethernet, GPIO for access control outputs)",
+      "degree": "selecting a package that provides at least the minimum I/O count required by the peripheral set, confirming the package size is compatible with the target PCB form factor, and documenting the selected package designation (e.g., VFBGA264 for maximum I/O) with the datasheet table reference",
+      "full_statement": "Given the STM32N6 datasheet package information and the feature/peripheral count tables showing I/O counts per package (VFBGA142: 75 I/Os through VFBGA264: 165 I/Os), and the terminal's peripheral requirements (CSI-2 camera, XSPI external memory, USB, Ethernet, GPIO for access control outputs), you will evaluate the package options for the selected STM32N6 variant and verify that the chosen package provides sufficient I/O count and physical dimensions for the face recognition terminal PCB design — selecting a package that provides at least the minimum I/O count required by the peripheral set, confirming the package size is compatible with the target PCB form factor, and documenting the selected package designation with the datasheet table reference.",
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "Package Name: VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165; VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75"
+        },
+        {
+          "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+          "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm"
+        }
+      ]
+    }
+  ],
+  "gaps_identified": [
+    "The datasheet does not provide a specific end-to-end inference latency specification for the Neural-ART NPU (e.g., milliseconds per face recognition inference at a given model size), making it impossible to verify from the datasheet alone whether 600 Gops is sufficient for a target latency requirement such as <500ms.",
+    "The datasheet does not describe whether any STM32N6 variant combines both the Neural-ART NPU and the full crypto engine (SAES, CRYP, PKA, MCE) — the NPU/crypto tradeoff appears to be a hard architectural constraint, but no roadmap or future variant information is provided.",
+    "The datasheet does not reference specific neural network model architectures (e.g., MobileNet, ResNet) or face recognition algorithms that have been validated on the Neural-ART NPU, leaving learners unable to assess model compatibility from the datasheet alone.",
+    "No application note, reference design, or STM32Cube firmware example for the camera-ISP-NPU pipeline is referenced within the datasheet chunks provided, which would be needed to supplement the architectural planning exercise.",
+    "The datasheet does not specify the maximum frame buffer size supported by the DCMIPP or the maximum resolution of the ISP output, which is needed to size AXISRAM allocations for the face capture pipeline.",
+    "Security certification requirements relevant to biometric access control (e.g., FIDO, ISO/IEC 30107 for Presentation Attack Detection, GDPR biometric data handling) are not addressed in the datasheet and would need to be sourced from external standards documents."
+  ],
+  "contradictions": [],
+  "_reflection": {
+    "enabled": true,
+    "initial_score": 8.87,
+    "final_score": 8.87,
+    "refinement_applied": false,
+    "critique_summary": "These are high-quality, well-constructed learning objectives that demonstrate strong ABCD discipline throughout. All six objectives specify a clearly identified audience (firmware engineer in a face recognition terminal context), use observable and measurable action verbs (compare, map, assess, select, define, evaluate), provide specific and realistic conditions grounded in named datasheet sections, and include measurable degree criteria tied to concrete deliverables (tables, diagrams, written assessments). Alignment to source references is excellent across all objectives. The primary improvement opportunities are: (1) a count mismatch in O2's degree ('four' vs. five subsystems listed in the behavior); (2) an underspecified PCB form factor constraint in O6's degree that makes one criterion unverifiable; (3) an undefined 'real-time' requirement in O3's condition that weakens the sufficiency assessment task; (4) a potential architectural concern in O5 about placing full inference model code in a 64 KB ITCM; and (5) a consistent opportunity across all objectives to elevate degree criteria from factual correctness toward engineering judgment quality. The objectives are job-task focused throughout, requiring learners to produce professional engineering deliverables (recommendations, diagrams, mapping tables, allocation tables) rather than demonstrate passive knowledge recall. These objectives are suitable for deployment with minor targeted revisions.",
+    "iterations": 1,
+    "critique_failed": false,
+    "refinement_failed": false
+  }
+}

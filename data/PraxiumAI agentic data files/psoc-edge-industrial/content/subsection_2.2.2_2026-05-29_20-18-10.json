@@ -1,0 +1,387 @@
+{
+  "subsection_id": "2.2.2",
+  "subsection_title": "Build a Clock Configuration Table",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Construct a clock configuration table specifying DPLL_LP0 output frequency, clk_hf divider settings, and power mode for each operating state of the face recognition terminal",
+    "Apply documented HP/LP mode frequency limits for CLK_HF[0], CLK_HF[1], and CLK_HF[2] to validate or reject a given clock configuration",
+    "Determine the correct clk_hf divider value to deliver a target CPU frequency from a given DPLL output"
+  ],
+  "content": {
+    "hook_sentence": "A single wrong divider value in your clock table can silently push SoCMEM 80 MHz past its HP-mode ceiling — and the chip will not tell you.",
+    "introduction": "When you bring up the face recognition terminal, you will configure the clock tree differently for each operating state: full-speed active recognition, CM33-only idle monitoring, and deep sleep. Getting this right means translating documented frequency limits into a concrete table of DPLL output frequencies and `clk_hf` divider settings before you write a single line of PDL code. The table becomes your specification — every firmware clock call maps back to a row in it.",
+    "key_points": [
+      {
+        "point": "The base configuration routes DPLL_LP0 to all active clk_hf dividers, with DPLL_HP0 disabled unless you specifically need it.",
+        "explanation": "The datasheet base configuration for System Active operation sets DPLL_LP0 as the source for `clk_hf[0]`, `clk_hf[1]`, `clk_hf[2]`, and `clk_hf[3]`, with DPLL_HP0 disabled. DPLL_LP1 is also disabled in the base case. This means a single DPLL_LP0 output frequency feeds all root clock dividers simultaneously. Your table must therefore choose a DPLL_LP0 frequency that, after integer division, satisfies every subsystem's target frequency at once. For the active face recognition state in System HP mode, the highest target is 320 MHz for the CM55 via `clk_hf[1]`, which sets the DPLL_LP0 output. All other `clk_hf` outputs are then derived by dividing that 320 MHz source.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+            "snippet": "DPLL_HP0 state: Disabled — Not used for specification conditions. DPLL_LP0 state: Enabled — DPLL active. clk_hf[0,1,2,3] divider source: DPLL_LP0 — Root clock dividers source set to DPLL_LP0 output.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+            "page_number": 66,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+            "snippet": "DPLL_LP0 frequency: Greater of CM33 or CM55 condition frequency — DPLL output frequency is lowest to meet CPU frequency(s) in specification CM33 and CM55 columns.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+            "page_number": 66,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Each clk_hf output has a hard maximum frequency per power mode — exceeding it is a specification violation, not just a performance risk.",
+        "explanation": "Table 20 in the datasheet defines the maximum output frequency for every root clock divider in HP and LP modes. For your terminal's three most critical paths: `CLK_HF[0]` (SYSCPUSS, CM33) is limited to 160 MHz in HP mode and 80 MHz in LP mode; `CLK_HF[1]` (APPCPUSS, CM55) is limited to 320 MHz in HP mode and 140 MHz in LP mode; `CLK_HF[2]` (SoCMEM) is limited to 240 MHz in HP mode and 110 MHz in LP mode. When you fill in your table, every cell in the 'frequency delivered' column must be at or below the limit for the row's power mode. A configuration that sets `clk_hf[1]` to 320 MHz while the system is in LP mode violates the 140 MHz LP ceiling regardless of how the divider is set.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+            "snippet": "CLK_HF[0] – SYSCPUSS, CM33: Max HP 160 MHz, Max LP 80 MHz. CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55: Max HP 320 MHz, Max LP 140 MHz. CLK_HF[2] – SoCMEM: Max HP 240 MHz, Max LP 110 MHz.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+            "page_number": 78,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+            "snippet": "CLK_HF[3] – SMIF[0]: Max HP 320 MHz, Max LP 200 MHz. CLK_HF[5] – SDHC[0], Ethernet: Max HP 166 MHz, Max LP 104 MHz.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+            "page_number": 78,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The divider relationship is straightforward: delivered frequency equals DPLL output divided by the integer divider value.",
+        "explanation": "The datasheet states that when a `clk_hf` divider is set to 1, the output frequency equals the input (DPLL output passes through unchanged). A divider of 2 halves the frequency, a divider of 3 reduces it to one-third, and so on. This gives you the formula you need to fill in every row of your table: set DPLL_LP0 to the highest frequency any subsystem needs, then choose the minimum integer divider for each `clk_hf` that keeps the delivered frequency at or below that subsystem's documented limit. For example, with DPLL_LP0 at 320 MHz in HP mode: `clk_hf[1]` divider = 1 delivers 320 MHz to CM55 (at the HP limit); `clk_hf[0]` divider = 2 delivers 160 MHz to CM33 (at the HP limit); `clk_hf[2]` divider = 2 delivers 160 MHz to SoCMEM (within the 240 MHz HP limit). A divider of 1 for `clk_hf[2]` would deliver 320 MHz, which exceeds the 240 MHz SoCMEM HP ceiling.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+            "snippet": "clk_hf[1,2,3] divider: 1 — Clk_hf output frequency = input.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+            "page_number": 66,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "fd182785-d166-47e2-a7eb-4242f2f0d83f",
+            "snippet": "clk_hf[0] divider: 2 — SYSCPUSS CM33 clock frequency 1/2 of source.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_fd182785-d166-47e2-a7eb-4242f2f0d83f_0.png",
+            "page_number": 67,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "When PD1 is off (CM55 domain powered down), clk_hf[1] and clk_hf[2] must be disabled and clk_hf[0] divider drops to 1.",
+        "explanation": "The idle monitoring state of your terminal — CM33 active, CM55 domain off — maps directly to the documented PD0 On / PD1 Off configuration. In this state, `clk_hf[1]` (APPCPUSS CM55 root clock) and `clk_hf[2]` (SoCMEM root clock) are disabled. All APP_MMIO peripheral clocks are also disabled. The `clk_hf[0]` divider changes from 2 to 1, so CM33 receives the full DPLL_LP0 output frequency directly. This is a critical row in your table: if you leave `clk_hf[1]` enabled with PD1 off, you are clocking a powered-down domain, which wastes power and can cause undefined behavior. Your table must explicitly record the divider = 1 and the disabled states for `clk_hf[1]` and `clk_hf[2]` in the idle monitoring row.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "909f2b51-2d8b-4b15-810f-c00ac316870d",
+            "snippet": "PD1: Off — High power domain not powered. clk_hf[0] divider: 1 — SYSCPUSS CM33 clock frequency same as source. clk_hf[1] state: Disabled — APPCPUSS CM55 root clock gated. clk_hf[2] state: Disabled — SoCMEM root clock gated.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_909f2b51-2d8b-4b15-810f-c00ac316870d_0.png",
+            "page_number": 67,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "909f2b51-2d8b-4b15-810f-c00ac316870d",
+            "snippet": "APP_MMIO0 (PERI1_GR0_SL_CTL): All disabled — Disable clocks for all individual APPCPUSS CM55 resources. APP_MMIO2 (PERI1_GR2_SL_CTL): All disabled — Disable clocks for U55 and SoCMEM.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_909f2b51-2d8b-4b15-810f-c00ac316870d_0.png",
+            "page_number": 67,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The completed table has one row per operating state, with columns for power mode, PD0/PD1 state, DPLL_LP0 frequency, and each clk_hf divider and enable state.",
+        "explanation": "Structuring your table this way makes it directly auditable against the datasheet limits and directly translatable into PDL calls. For the face recognition terminal, your three rows look like this. **Active face recognition (System HP, PD0 On, PD1 On):** DPLL_LP0 = 320 MHz; `clk_hf[0]` divider = 2 (160 MHz to CM33); `clk_hf[1]` divider = 1, enabled (320 MHz to CM55); `clk_hf[2]` divider = 3, enabled (106.66666666666667 MHz to SoCMEM). **Idle monitoring (System LP or HP, PD0 On, PD1 Off):** DPLL_LP0 = target CM33 frequency (e.g., 80 MHz for LP mode); `clk_hf[0]` divider = 1 (CM33 at DPLL output); `clk_hf[1]` disabled; `clk_hf[2]` disabled. **Deep sleep:** both CPUs suspended, `clk_hf[0–13]` gated at root clocks, peripherals clock-gated via PERIO group registers. The datasheet confirms that `clk_hf[4:13]` are disabled in the base configuration, so your table only needs to actively manage `clk_hf[0]`, `clk_hf[1]`, and `clk_hf[2]` for the active and idle states.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+            "snippet": "clk_hf[4:13] state: Disabled — Peripherals clock gated at root clocks.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+            "page_number": 66,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "901c532b-fdec-4777-a0e8-549afe830b9e",
+            "snippet": "clk_hf[1] state: Enabled — APPCPUSS CM55 root clock running. clk_hf[2] state: Enabled — SoCMEM CM55 root clock running.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_68/ChunkType.table_901c532b-fdec-4777-a0e8-549afe830b9e_0.png",
+            "page_number": 68,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "fd182785-d166-47e2-a7eb-4242f2f0d83f",
+            "snippet": "PD0: On — Low power domain powered. PD1: On — High power domain powered. clk_hf[0] divider: 2 — SYSCPUSS CM33 clock frequency 1/2 of source.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_fd182785-d166-47e2-a7eb-4242f2f0d83f_0.png",
+            "page_number": 67,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your colleague's draft table has an LP mode row with DPLL_LP0 = 320 MHz, `clk_hf[1]` divider = 1 (320 MHz to CM55), and `clk_hf[0]` divider = 2 (160 MHz to CM33). Before you flag it, predict: is this configuration valid for System LP mode?",
+        "reveal": "Invalid on both counts. The documented LP-mode maximum for `CLK_HF[1]` is 140 MHz, so 320 MHz exceeds it by more than 2x. The LP-mode maximum for `CLK_HF[0]` is 80 MHz, so 160 MHz also exceeds it. The dividers do not rescue the configuration because the problem is the delivered frequency, not the DPLL output alone. To fix the LP mode row, you would need to reduce DPLL_LP0 to at most 140 MHz (to satisfy `clk_hf[1]`) and set `clk_hf[0]` divider to 2 (delivering 70 MHz, within the 80 MHz LP ceiling). Alternatively, if CM55 is not needed in LP mode, disable `clk_hf[1]` and set DPLL_LP0 to 80 MHz with `clk_hf[0]` divider = 1.",
+        "hint": "Check the LP-mode column in Table 20 for both CLK_HF[0] and CLK_HF[1] before evaluating the divider math."
+      },
+      {
+        "prediction_prompt": "You are filling in the SoCMEM row of your active face recognition state (System HP, DPLL_LP0 = 320 MHz). The HP-mode limit for `CLK_HF[2]` is 240 MHz. What is the minimum integer divider for `clk_hf[2]` that keeps SoCMEM within spec, and what frequency does it deliver?",
+        "reveal": "Divider = 2, delivering 160 MHz. With DPLL_LP0 at 320 MHz, a divider of 1 would pass 320 MHz to SoCMEM, which exceeds the 240 MHz HP ceiling. A divider of 2 delivers 160 MHz, which is well within the 240 MHz limit and is the minimum integer value that keeps the configuration valid. A divider of 3 would deliver approximately 106.66666666666667 MHz, which is also valid but unnecessarily reduces SoCMEM bandwidth. Record divider = 2 in your table for this state.",
+        "hint": "Start with divider = 1 and increment until the delivered frequency falls at or below 240 MHz."
+      }
+    ],
+    "summary": "Your clock configuration table translates documented HP/LP frequency limits into concrete DPLL_LP0 output frequencies and integer `clk_hf` divider settings for each operating state — and the PD1 on/off state determines which `clk_hf` outputs must be disabled entirely.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "With DPLL_LP0 set to 320 MHz and `clk_hf[0]` divider set to 2, the CM33 receives ___ MHz.",
+      "answer": "160",
+      "distractors": [
+        "320",
+        "80",
+        "64"
+      ],
+      "explanation": "The delivered frequency equals the DPLL output divided by the integer divider value: 320 MHz ÷ 2 = 160 MHz, which is exactly the HP-mode ceiling for CLK_HF[0]."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each terminal operating state to the correct clk_hf[1] configuration when PD1 is off:",
+      "pairs": [
+        {
+          "left": "Active face recognition, PD1 On",
+          "right": "clk_hf[1] enabled, divider = 1"
+        },
+        {
+          "left": "Idle monitoring, PD1 Off",
+          "right": "clk_hf[1] disabled"
+        },
+        {
+          "left": "CM33-only LP operation, PD1 Off",
+          "right": "clk_hf[1] disabled, APP_MMIO0 all disabled"
+        }
+      ],
+      "explanation": "When PD1 is off, the CM55 domain is unpowered, so clk_hf[1] must be disabled and all APPCPUSS peripheral clocks must be gated. Leaving clk_hf[1] enabled with PD1 off clocks a powered-down domain."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet base configuration tables do not specify the exact DPLL_LP0 output frequency for LP mode operation — only that it should be the 'greater of CM33 or CM55 condition frequency.' A concrete LP mode DPLL frequency for the idle monitoring state requires the learner to choose a CM33 target frequency, which is not prescribed in the source material without an application-specific power budget.",
+    "The datasheet does not document the PDL API calls (e.g., Cy_SysClk_DpllLpSetFrequency, Cy_SysClk_ClkHfSetDivider) needed to implement the clock configuration table in firmware. Learners will need the PSoC Edge E8 Architecture Reference Manual and PDL documentation to translate the table into code."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring the clock tree for a face recognition terminal based on the PSOC Edge E8. During active face recognition, both the Cortex-M55 and Cortex-M33 must run at their maximum allowed frequencies in System HP mode. You are setting up DPLL_LP0 as the single clock source for all `clk_hf` dividers.",
+        "question_text": "To supply the CM55 at 320 MHz and the CM33 at 160 MHz simultaneously using a single DPLL_LP0 output, what DPLL_LP0 output frequency and `clk_hf[0]` divider setting should you configure?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "DPLL_LP0 = 320 MHz, `clk_hf[0]` divider = 1, so CM33 receives 320 MHz",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "DPLL_LP0 = 320 MHz, `clk_hf[0]` divider = 2, so CM33 receives 160 MHz",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "DPLL_LP0 = 160 MHz, `clk_hf[0]` divider = 1, so CM55 and CM33 both receive 160 MHz",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. In System HP mode, CM55 (CLK_HF[1]) can run up to 320 MHz and CM33 (CLK_HF[0]) up to 160 MHz. Setting DPLL_LP0 to 320 MHz and applying a divider of 2 on `clk_hf[0]` yields exactly 160 MHz for the CM33, while `clk_hf[1]` with divider = 1 delivers 320 MHz to the CM55.",
+        "incorrect": "Option (a) would overdrive the CM33 beyond its 160 MHz HP-mode limit. Option (c) would underclock the CM55 to 160 MHz, wasting available performance. The correct approach sets DPLL_LP0 to the highest required frequency (320 MHz) and uses the `clk_hf[0]` divider to scale down for the CM33. Review the root clock divider frequency table and the base configuration table."
+      },
+      "references": [
+        {
+          "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+          "snippet": "CLK_HF[0] – SYSCPUSS, CM33 | Max HP: 160 MHz | Max LP: 80 MHz; CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55 | Max HP: 320 MHz | Max LP: 140 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+          "snippet": "DPLL_LP0 frequency: Greater of CM33 or CM55 condition frequency — DPLL output frequency is lowest to meet CPU frequency(s) in specification CM33 and CM55 columns; clk_hf[0,1,2,3] divider source: DPLL_LPO — Root clock dividers source set to DPLL_LP0 output",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+          "page_number": 66,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O3",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are building a clock configuration table for the face recognition terminal. The terminal has three operating states: (1) Active face recognition — CM55 at full speed, CM33 active; (2) Idle monitoring — only CM33 running, CM55 powered down; (3) Deep sleep between events — both CPUs suspended. You need to select the correct system power mode and clock path configuration for the idle monitoring state.",
+        "question_text": "For the idle monitoring state, where only the CM33 is active and the CM55 domain (PD1) is powered off, which clock configuration correctly reflects the documented behavior of the PSOC Edge E8?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "PD1 off, `clk_hf[1]` and `clk_hf[2]` disabled, `clk_hf[0]` divider = 1, CM33 runs at DPLL_LP0 frequency",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "PD1 off, `clk_hf[1]` enabled at reduced frequency, `clk_hf[0]` divider = 2, CM33 runs at half DPLL_LP0 frequency",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "PD1 off, `clk_hf[1]` and `clk_hf[2]` disabled, `clk_hf[0]` divider = 2, CM33 runs at half DPLL_LP0 frequency",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. When PD1 is off, the documented configuration gates `clk_hf[1]` (APPCPUSS/CM55 root clock) and `clk_hf[2]` (SoCMEM root clock), and sets the `clk_hf[0]` divider to 1 so the CM33 receives the full DPLL_LP0 output frequency. All APPCPUSS resources are also clock-gated via APP_MMIO.",
+        "incorrect": "When PD1 is powered off, `clk_hf[1]` must be disabled — it cannot remain enabled at any frequency because the high-performance domain is not powered. Additionally, the PD0-on/PD1-off configuration specifies `clk_hf[0]` divider = 1, not 2. A divider of 2 applies only when both PD0 and PD1 are on. Review the PD0=On, PD1=Off configuration table."
+      },
+      "references": [
+        {
+          "chunk_id": "909f2b51-2d8b-4b15-810f-c00ac316870d",
+          "snippet": "PD0 = On, PD1 = Off: clk_hf[0] divider = 1 — SYSCPUSS CM33 clock frequency same as source; clk_hf[1] state = Disabled — APPCPUSS CM55 root clock gated; clk_hf[2] state = Disabled — SoCMEM root clock gated; APP_MMIO0 = All disabled; APP_MMIO2 = All disabled",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_909f2b51-2d8b-4b15-810f-c00ac316870d_0.png",
+          "page_number": 67,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "fd182785-d166-47e2-a7eb-4242f2f0d83f",
+          "snippet": "PD0 = On, PD1 = On: clk_hf[0] divider = 2 — SYSCPUSS CM33 clock frequency 1/2 of source",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_fd182785-d166-47e2-a7eb-4242f2f0d83f_0.png",
+          "page_number": 67,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a colleague's draft clock configuration table for the face recognition terminal. For the LP (Low Power) mode entry, they have specified: DPLL_LP0 output = 320 MHz, `clk_hf[1]` divider = 1 (delivering 320 MHz to CM55), and `clk_hf[0]` divider = 2 (delivering 160 MHz to CM33).",
+        "question_text": "You need to decide whether this LP mode clock configuration is valid for the PSOC Edge E8. What is your assessment?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Invalid — in LP mode, CLK_HF[1] is limited to 140 MHz and CLK_HF[0] is limited to 80 MHz, so both the CM55 and CM33 frequencies exceed their LP-mode maximums",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Invalid — DPLL_LP0 cannot output 320 MHz in LP mode because the PLL_LP output is capped at 350 MHz and the divider settings are incompatible",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Valid — the `clk_hf` dividers reduce the frequencies to safe levels, and the DPLL output frequency itself is not constrained by the power mode",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The root clock divider frequency table specifies that in LP mode, CLK_HF[1] (CM55/APPCPUSS) is limited to 140 MHz and CLK_HF[0] (CM33/SYSCPUSS) is limited to 80 MHz. The proposed configuration delivers 320 MHz to CM55 and 160 MHz to CM33, both of which violate LP-mode limits regardless of the DPLL output frequency.",
+        "incorrect": "Option (b) is partially misleading — while PLL_LP has an LP-mode output cap of 350 MHz, the core problem is that the resulting `clk_hf` frequencies delivered to the CPUs exceed their LP-mode limits. Option (c) is incorrect because the power mode directly constrains the maximum frequency at each `clk_hf` output, not just the DPLL. Review Table 20 (Root clock divider frequencies) for HP vs. LP limits."
+      },
+      "references": [
+        {
+          "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+          "snippet": "CLK_HF[0] – SYSCPUSS, CM33 | Max HP: 160 MHz | Max LP: 80 MHz; CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55 | Max HP: 320 MHz | Max LP: 140 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+          "snippet": "PLL_LP Output frequency. LP mode: Max 350 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+          "page_number": 112,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are completing the SoCMEM clock entry in your clock configuration table for the active face recognition state (System HP mode, both PD0 and PD1 on). DPLL_LP0 is set to 320 MHz and feeds all `clk_hf` dividers. You need to determine the maximum allowable `clk_hf[2]` output frequency for SoCMEM in HP mode and the minimum integer divider setting to stay within that limit.",
+        "question_text": "Given a DPLL_LP0 output of 320 MHz, what is the minimum integer divider value for `clk_hf[2]` that keeps SoCMEM within its HP-mode frequency limit?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Divider = 1, delivering 320 MHz — SoCMEM's HP-mode limit is 320 MHz",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Divider = 3, delivering approximately 107 MHz — SoCMEM's HP-mode limit is 110 MHz",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Divider = 2, delivering 160 MHz — SoCMEM's HP-mode limit is 240 MHz",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The root clock divider table specifies CLK_HF[2] (SoCMEM) has a maximum of 240 MHz in HP mode. With DPLL_LP0 at 320 MHz, a divider of 2 yields 160 MHz, which is within the 240 MHz limit. A divider of 1 would deliver 320 MHz, exceeding the 240 MHz cap.",
+        "incorrect": "Option (a) is incorrect — 320 MHz exceeds SoCMEM's HP-mode limit of 240 MHz. Option (b) applies the LP-mode limit (110 MHz) instead of the HP-mode limit (240 MHz), resulting in an unnecessarily conservative and incorrect divider. With DPLL_LP0 at 320 MHz, divider = 2 gives 160 MHz, which satisfies the 240 MHz HP-mode maximum. Review Table 20 for CLK_HF[2] limits."
+      },
+      "references": [
+        {
+          "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+          "snippet": "CLK_HF[2] - SoCMEM | Max HP: 240 MHz | Max LP: 110 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+          "snippet": "clk_hf[1,2,3] divider = 1 — Clk_hf output frequency = input",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+          "page_number": 66,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

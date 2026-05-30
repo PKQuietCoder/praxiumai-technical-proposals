@@ -1,0 +1,46 @@
+{
+  "courseId": "5985e18b-a317-4198-a5e3-6cdc01412d77",
+  "courseName": "",
+  "createdAt": "2026-05-29T20:59:45.521418",
+  "sections": {
+    "1": {
+      "title": "STM32N6 Family Overview and Variant Selection",
+      "subsections": {
+        "1": "Understanding the STM32N6 Product Family",
+        "2": "Making the Variant Selection Decision"
+      }
+    },
+    "2": {
+      "title": "Core Architecture — Cortex-M55, Memory, and Power",
+      "subsections": {
+        "1": "Cortex-M55 Core and On-Chip Memory",
+        "2": "Power Management for Access Control Applications"
+      }
+    },
+    "3": {
+      "title": "Neural-ART NPU — Architecture and Throughput Assessment",
+      "subsections": {
+        "1": "Neural-ART NPU Architecture and Capabilities"
+      }
+    },
+    "4": {
+      "title": "Camera-to-Inference Pipeline Architecture",
+      "subsections": {
+        "1": "Camera Input Subsystem",
+        "2": "ISP Processing and DMA-to-NPU Handoff"
+      }
+    },
+    "5": {
+      "title": "Security Architecture for Biometric Data Protection",
+      "subsections": {
+        "1": "Hardware Security Features and Their Roles"
+      }
+    },
+    "6": {
+      "title": "Memory Layout and External Memory Interfaces",
+      "subsections": {
+        "1": "Designing the Memory Layout for Your Inference Pipeline"
+      }
+    }
+  }
+}

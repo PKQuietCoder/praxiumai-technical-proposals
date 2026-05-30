@@ -1,0 +1,288 @@
+{
+  "subsection_id": "3.2.1",
+  "subsection_title": "Apply the IPC Block for Task Synchronization",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Select the correct IPC block (IPC0 or IPC1) to signal events between the Cortex-M55 and Cortex-M33 domains",
+    "Use the IPC channel locking scheme to coordinate shared resource access across cores",
+    "Identify which IPC block wakes the high-performance domain from deep sleep and which wakes the low-power domain"
+  ],
+  "content": {
+    "hook_sentence": "Two cores writing to the same SRAM buffer without coordination will silently corrupt your recognition state — and the IPC block's hardware locking scheme is the only mechanism on the PSOC Edge E8 that prevents it.",
+    "introduction": "Building on the power domain architecture from the previous section, you now need a reliable way for the Cortex-M55 and Cortex-M33 to coordinate work across those domains. The PSOC Edge E8 provides two dedicated Inter-Processor Communication (IPC) blocks — one per domain — that handle event signaling, cross-domain wakeup, and shared resource locking entirely in hardware. Getting the IPC topology right is what lets your face recognition firmware hand off cleanly between always-on presence detection and full inference without race conditions or missed wakeups.",
+    "key_points": [
+      {
+        "point": "Two IPC blocks serve the two power domains: IPC0 in the low-power domain, IPC1 in the high-performance domain.",
+        "explanation": "The PSOC Edge E8 places one IPC instance in each CPU domain. **IPC0** lives alongside the Cortex-M33 and NNLite in the low-power domain; **IPC1** lives alongside the Cortex-M55 and Ethos-U55 in the high-performance domain. Each instance provides 16 channels and 8 interrupt structures. When you need the Cortex-M55 to signal the Cortex-M33 — for example, after completing a face recognition inference and triggering the door unlock GPIO sequence — you use IPC1 (in the high-performance domain) to issue a Notify interrupt toward the low-power domain. Choosing the wrong block means your interrupt never reaches the target CPU.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "this product line incorporates two Inter-Processor Communication (IPC) blocks, namely IPC0 in the low-power domain and IPC1 in the high-performance domain.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "Each IPC instance includes 16 channels and 8 interrupt structures. The IPC channels can be used for communication and synchronization between CPUs.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "IPC interrupts carry Notify and Release events — the primary mechanism for signaling task handoffs between cores.",
+        "explanation": "Each IPC block can interrupt the other CPU, signaling an event. The two event types you will use most are **Notify** (tell the other core that work is ready or an action is required) and **Release** (tell the other core that a shared resource or channel is free). In your face recognition terminal, a typical handoff looks like this: the Cortex-M55 finishes inference, writes the result to a shared SRAM buffer, then issues a Notify via IPC1 to interrupt the Cortex-M33. The Cortex-M33 ISR reads the result and drives the door relay GPIO. Without the Notify, the Cortex-M33 has no deterministic way to know the result is ready.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "The IPC interrupts let one CPU interrupt the other, signaling an event. This is used to trigger events such as Notify and Release of the corresponding IPC channels.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "IPC0 wakes the high-performance domain; IPC1 wakes the low-power domain — but neither block is deep-sleep capable itself.",
+        "explanation": "This asymmetry is easy to get backwards. IPC0 (low-power domain) can wake up the high-performance CPU subsystem from deep sleep. IPC1 (high-performance domain) can wake up the low-power CPU subsystem from CPU deep sleep. The blocks themselves are not system deep sleep capable, meaning they cannot operate while the entire system is in deep sleep — but they can issue the wakeup signal that brings the target domain back to active state. For your terminal's power strategy: when the Cortex-M33 detects a face approaching via NNLite and needs to bring the Cortex-M55 and Ethos-U55 online for full recognition, it uses **IPC0** to trigger that wakeup. Attempting to use IPC1 for this purpose will fail because IPC1 is in the domain that is powered down.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "IPCs are not system deep sleep capable; however, IPC can wake up other CPUs from deep sleep. IPC0 can wakeup the high-performance CPU subsystem, whereas IPC1 can wake up the low-power CPU subsystem from CPU deep sleep.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Use the IPC channel locking scheme to prevent concurrent access to shared SRAM resources.",
+        "explanation": "Each IPC channel implements a hardware locking scheme you can use to manage shared resources. When both the Cortex-M55 and Cortex-M33 need to read and write a shared status buffer — such as the recognition state variable your terminal uses to track whether a face is currently being processed — you acquire the lock on a designated IPC channel before accessing the buffer, then release it when done. The hardware enforces mutual exclusion: only one core holds the lock at a time. This is more reliable than software-only mutex implementations across power domains, because the lock state persists in hardware even if one core is in CPU sleep. Reserve a specific channel for each shared resource and document the assignment clearly in your firmware architecture.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "Each IPC channel also implements a locking scheme that can be used to manage shared resources.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "The IPC channels can be used for communication and synchronization between CPUs.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "IPC0 channels 0 and 1 are reserved for the secure enclave — do not assign them to application tasks.",
+        "explanation": "Out of IPC0's 16 channels, channels 0 and 1 are reserved for the secure enclave. If you assign application-level tasks or shared resource locks to these channels, you will conflict with secure enclave operations, which can cause unpredictable behavior in your TF-M secure services. Start your application channel assignments at IPC0 channel 2 and above. This constraint applies only to IPC0; IPC1 channels do not carry the same reservation.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+            "snippet": "IPC0 channels 0 and 1 are reserved for the secure enclave.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition terminal firmware has the Cortex-M33 running always-on presence detection via NNLite. The high-performance domain (Cortex-M55 + Ethos-U55) is in CPU deep sleep to save power. The Cortex-M33 detects a face and needs to wake the Cortex-M55 to start full recognition inference. Which IPC block does it use, and why does the other block fail here?",
+        "reveal": "The Cortex-M33 uses IPC0 (in the low-power domain) to issue the wakeup. IPC0 is documented to wake up the high-performance CPU subsystem from deep sleep. IPC1 cannot be used here because IPC1 resides in the high-performance domain, which is currently powered down — there is no active clock or power to drive IPC1's logic. Once IPC0 issues the wakeup, the high-performance domain powers up, the Cortex-M55 resumes execution, and the Ethos-U55 becomes available for the full face recognition inference pipeline.",
+        "hint": "Think about which domain is still powered and which block lives there."
+      },
+      {
+        "prediction_prompt": "The Cortex-M55 has completed face recognition inference and written a match result to a shared SRAM status buffer. Simultaneously, the Cortex-M33 is polling that same buffer to decide whether to trigger the door relay. You have not yet implemented any locking. What is the failure mode, and which IPC feature resolves it?",
+        "reveal": "Without locking, the Cortex-M55 can write a partial result to the buffer at the same moment the Cortex-M33 reads it, producing a torn read — the Cortex-M33 sees a mix of old and new data and may trigger the relay incorrectly (false unlock or missed unlock). The IPC channel locking scheme resolves this: you designate one IPC channel as the lock for the shared buffer. Before any core accesses the buffer, it acquires the hardware lock on that channel. The hardware ensures only one core holds the lock at a time, so reads and writes are always atomic from the application's perspective. Release the lock immediately after the access to minimize contention.",
+        "hint": "Consider what happens when a write is not atomic relative to a concurrent read."
+      }
+    ],
+    "summary": "Use IPC0 (low-power domain) to wake the Cortex-M55 and signal events toward the high-performance domain; use IPC1 (high-performance domain) to signal the Cortex-M33; and use the per-channel hardware locking scheme to protect any shared SRAM resource accessed by both cores — while keeping IPC0 channels 0 and 1 free for the secure enclave.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When the Cortex-M33 needs to wake the Cortex-M55 from CPU deep sleep, it should use ___ to issue the wakeup signal.",
+      "answer": "IPC0",
+      "distractors": [
+        "IPC1",
+        "the bus bridge",
+        "an SEV instruction from the high-performance domain"
+      ],
+      "explanation": "IPC0 lives in the low-power domain, which remains active during deep sleep, and is the block documented to wake up the high-performance CPU subsystem. IPC1 is in the powered-down high-performance domain and cannot operate while that domain is asleep."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each inter-core coordination scenario to the correct IPC mechanism:",
+      "pairs": [
+        {
+          "left": "Prevent both cores from corrupting a shared SRAM status buffer",
+          "right": "IPC channel locking scheme"
+        },
+        {
+          "left": "Tell the Cortex-M33 that a face recognition result is ready",
+          "right": "Notify interrupt via IPC1"
+        },
+        {
+          "left": "Signal that a shared channel is available for the next operation",
+          "right": "Release event via IPC interrupt"
+        }
+      ],
+      "explanation": "The locking scheme provides hardware mutual exclusion for shared resources; Notify interrupts signal task-ready events from one core to the other; Release events indicate a channel or resource is free for the next user."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not provide PDL API names or code examples for configuring IPC channels, issuing Notify/Release events, or acquiring channel locks. Hands-on implementation guidance requires the ModusToolbox PDL documentation and Architecture Reference Manual as supplementary sources.",
+    "The document does not specify which IPC1 channels (if any) are reserved for system use, beyond the IPC0 channels 0 and 1 reservation for the secure enclave."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are partitioning firmware tasks for the PSOC Edge E8-based face recognition terminal. The Cortex-M55 (high-performance domain) and Cortex-M33 (low-power domain) are both active, and you need to use the IPC block to coordinate between them.",
+        "question_text": "The Cortex-M55 has just completed a face recognition inference and needs to notify the Cortex-M33 to trigger the door unlock GPIO sequence. Which IPC mechanism should you use to signal this event from the high-performance domain to the low-power domain?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Use IPC0 in the low-power domain to send a Notify interrupt, waking the Cortex-M33 from CPU deep sleep and triggering the GPIO sequence",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Use IPC1 in the high-performance domain to send a Notify interrupt, signaling the Cortex-M33 to trigger the GPIO sequence",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Use IPC0 channels 0 or 1 in the low-power domain to send a Notify interrupt, since those channels are reserved for cross-domain signaling",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. IPC1 resides in the high-performance domain and can wake up the low-power CPU subsystem from CPU deep sleep. Using IPC1 to issue a Notify interrupt is the correct mechanism for the Cortex-M55 to signal the Cortex-M33.",
+        "incorrect": "IPC0 resides in the low-power domain and is used by the low-power subsystem — it is not the right block for the Cortex-M55 to initiate a signal. Additionally, IPC0 channels 0 and 1 are reserved for the secure enclave and must not be used for general task synchronization. IPC1, located in the high-performance domain, is the correct block for signaling from the Cortex-M55 to the Cortex-M33."
+      },
+      "references": [
+        {
+          "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+          "snippet": "IPC0 in the low-power domain and IPC1 in the high-performance domain... IPC1 can wake up the low-power CPU subsystem from CPU deep sleep... IPC interrupts let one CPU interrupt the other, signaling an event. This is used to trigger events such as Notify and Release of the corresponding IPC channels. IPC0 channels 0 and 1 are reserved for the secure enclave.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are designing the shared-resource access strategy for the face recognition terminal firmware. Both the Cortex-M55 and Cortex-M33 need to read and write a shared status buffer in system SRAM that tracks the current recognition state.",
+        "question_text": "To prevent both cores from corrupting the shared status buffer when they access it concurrently, which IPC feature should you use to coordinate access?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Use the IPC channel locking scheme, which implements a hardware lock per channel to manage exclusive access to the shared resource",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Use the IPC interrupt structures to have each core poll for a free interrupt slot before writing to the shared buffer",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Use the bus bridge between the M55 and M33 domains, which provides built-in arbitration for concurrent SRAM access",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. Each IPC channel implements a locking scheme specifically designed to manage shared resources between CPUs. This hardware lock ensures only one core holds access to the shared buffer at a time, preventing data corruption.",
+        "incorrect": "IPC interrupt structures are designed for event signaling (Notify/Release), not for arbitrating shared memory access. The bus bridge allows cross-domain resource access but does not provide arbitration or locking for concurrent writes. The IPC channel locking scheme is the documented mechanism for managing shared resources between the two CPU domains."
+      },
+      "references": [
+        {
+          "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+          "snippet": "Each IPC channel also implements a locking scheme that can be used to manage shared resources. The IPC interrupts let one CPU interrupt the other, signaling an event. This is used to trigger events such as Notify and Release of the corresponding IPC channels.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring the power management strategy for the face recognition terminal. Between recognition events, the Cortex-M55 and Ethos-U55 are placed into CPU deep sleep to save power. The Cortex-M33 remains active for always-on presence detection using NNLite.",
+        "question_text": "When the Cortex-M33 detects a face approaching the terminal and needs to wake the Cortex-M55 to begin full face recognition inference, which IPC block should it use to trigger the wakeup?",
+        "question_note": ""
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "IPC1 in the high-performance domain, because it has direct access to the Cortex-M55 interrupt controller",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "IPC1 in the high-performance domain, because IPCs are not deep-sleep capable and only IPC1 can issue cross-domain wakeups",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "IPC0 in the low-power domain, because IPC0 can wake up the high-performance CPU subsystem from deep sleep",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. IPC0 resides in the low-power domain alongside the Cortex-M33 and is specifically documented as the block that can wake up the high-performance CPU subsystem. This makes it the right choice for the Cortex-M33 to trigger wakeup of the Cortex-M55.",
+        "incorrect": "IPC1 resides in the high-performance domain — it is the block used by the Cortex-M55 to signal the Cortex-M33, not the other way around. The documentation states that IPC0 (low-power domain) wakes up the high-performance CPU subsystem, while IPC1 (high-performance domain) wakes up the low-power CPU subsystem from CPU deep sleep."
+      },
+      "references": [
+        {
+          "chunk_id": "2c1cbeb8-af0d-4c72-916b-4692bc1e1249",
+          "snippet": "IPC0 in the low-power domain and IPC1 in the high-performance domain. IPCs are not system deep sleep capable; however, IPC can wake up other CPUs from deep sleep. IPC0 can wakeup the high-performance CPU subsystem, whereas IPC1 can wake up the low-power CPU subsystem from CPU deep sleep.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_2c1cbeb8-af0d-4c72-916b-4692bc1e1249_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    }
+  ]
+}

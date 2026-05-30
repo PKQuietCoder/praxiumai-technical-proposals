@@ -1,0 +1,674 @@
+<analysis>
+
+## Pre-Design Analysis
+
+### 1. Learning Goals and Associated Objectives
+
+**G1: Variant Selection**
+- O1: Compare STM32N6x5xx vs STM32N6x7xx feature tables and produce a written variant selection recommendation identifying NPU vs. crypto tradeoff
+- O6: Evaluate package options and verify I/O count sufficiency for the face recognition terminal PCB design
+
+**G2: Camera-to-Inference Pipeline Architecture**
+- O2: Map the end-to-end camera-to-inference data path (CSI-2 → DCMIPP → ISP → HPDMA → NPU)
+- O3: Assess Neural-ART NPU 600 Gops throughput and architectural features against real-time face recognition workload
+
+**G3: Security Architecture and Memory Layout**
+- O4: Select and justify security features (TrustZone, SAES, CRYP, HASH, MCE, PKA) for biometric data protection
+- O5: Define memory layout (TCM, AXISRAM, XSPI) allocating regions to specific pipeline roles
+
+### 2. Major Topic Areas from Technical Document
+
+1. **Device Overview & Variant Differentiation** — STM32N6x5xx vs STM32N6x7xx, ordering information, device summary
+2. **Cortex-M55 Core** — Helium/MVE, FPU, TrustZone, NVIC, ICACHE/DCACHE, TCM RAM
+3. **SRAM Configuration** — AHBSRAM, AXISRAM1-6, BKPSRAM, FLEXRAM, VENCRAM, ECC
+4. **Power Supply Management** — Voltage scaling, SMPS, power domains, low-power modes
+5. **Neural-ART NPU (Section 3.5)** — 600 Gops, streaming engines, weight decompression, AXI interfaces
+6. **Boot Modes** — External flash boot, serial boot, development boot
+7. **GPIO** — Configuration, alternate functions, TrustZone support
+8. **DMA Controllers** — GPDMA (Section 3.9) and HPDMA (Section 3.10), channel implementations
+9. **Chrom-ART / DMA2D / GFXMMU** — Image manipulation accelerators
+10. **Memory Interfaces** — FMC (Section 3.16), XSPI (Section 3.17), SDMMC (Section 3.18)
+11. **Camera Subsystem** — DCMI, DCMIPP, CSI-2 (Sections 3.25-3.26)
+12. **Display & Graphics** — LTDC, GPU2D, GFXTIM (Sections 3.28-3.29)
+13. **Video Encoder** — VENC, H264, JPEG (Section 3.30-3.31)
+14. **Security Features** — RNG, SAES, CRYP, HASH, MCE, PKA (Sections 3.32-3.37)
+15. **Communication Peripherals** — USB, Ethernet, I2C, SPI, USART, SDMMC, FDCAN
+16. **Timers & Watchdogs** — TIMx, LPTIM, IWDG, WWDG, RTC
+17. **Analog Peripherals** — ADC, DTS, VREFBUF, MDF, ADF
+18. **Package Information** — VFBGA142 through VFBGA264, mechanical data
+19. **Electrical Characteristics** — Operating conditions, power consumption, I/O characteristics
+
+### 3. Persona's Top Pain Points
+
+1. **NPU vs. Crypto Tradeoff**: Jin-ho needs both AI acceleration AND strong security, but the STM32N6 forces a choice — STM32N6x7xx has NPU but no SAES/CRYP/MCE/PKA; STM32N6x5xx has full crypto but no NPU.
+2. **NPU Throughput Sufficiency**: Is 600 Gops at 1 GHz enough for real-time face matching? The datasheet doesn't specify per-inference latency, creating a gap that must be flagged.
+3. **Camera-ISP-NPU Integration Without CPU Bottlenecks**: Configuring the CSI-2 → DCMIPP → ISP → HPDMA → NPU pipeline to avoid CPU intervention in the data path.
+4. **Memory Layout for Low-Latency Inference**: Allocating TCM, AXISRAM, and XSPI regions correctly to support the biometric pipeline without memory bandwidth bottlenecks.
+
+### 4. Logical Content Sequence
+
+1. **Foundation**: Device family overview, variant differentiation (must come first — establishes the core architectural constraint)
+2. **Core Architecture**: Cortex-M55, memory hierarchy, power management (enables understanding of performance envelope)
+3. **NPU Deep Dive**: Neural-ART architecture, throughput assessment (central to the product's AI capability)
+4. **Camera Pipeline**: CSI-2, DCMIPP, ISP, DMA (prerequisite to understanding the full inference pipeline)
+5. **Security Architecture**: TrustZone, SAES, CRYP, MCE, PKA, HASH (addresses the crypto side of the tradeoff)
+6. **Memory Layout**: TCM, AXISRAM, XSPI allocation (integrates knowledge from core + NPU + security)
+7. **Communication & Peripheral Integration**: USB, Ethernet, GPIO, timers (supporting peripherals for the terminal)
+8. **Package Selection**: I/O counts, physical dimensions (final hardware decision)
+9. **Synthesis**: Full pipeline integration, variant recommendation
+
+### 5. Duration Calculation
+
+- Target: 2 hours = 120 minutes
+- Course Introduction: 3 minutes
+- Course Summary: 3 minutes
+- Available for content: 114 minutes
+- Each subsection: 7 minutes
+- Number of subsections: 114 ÷ 7 = 16.28 → **16 subsections** (112 minutes content + 3 intro + 3 summary = 118 minutes; add 2 minutes buffer in intro/summary = 120 minutes)
+
+Wait — let me recalculate to hit exactly 120 minutes:
+- 16 subsections × 7 min = 112 min
+- Course Introduction: 3 min
+- Course Summary: 3 min  
+- Remaining: 2 min → distribute as padding in intro/summary (make intro 4 min, summary 4 min)
+- Total: 112 + 4 + 4 = 120 minutes ✓
+
+**Module Structure Plan (16 subsections across modules):**
+
+- **Module 1**: STM32N6 Family Overview & Variant Selection (2 sections, 4 subsections = 28 min)
+- **Module 2**: Core Architecture — Cortex-M55, Memory & Power (2 sections, 3 subsections = 21 min)
+- **Module 3**: Neural-ART NPU — Architecture & Throughput Assessment (1 section, 2 subsections = 14 min)
+- **Module 4**: Camera-to-Inference Pipeline (2 sections, 3 subsections = 21 min)
+- **Module 5**: Security Architecture for Biometric Data (2 sections, 2 subsections = 14 min)
+- **Module 6**: Memory Layout & External Interfaces (1 section, 2 subsections = 14 min)
+
+Total subsections: 4 + 3 + 2 + 3 + 2 + 2 = **16 subsections** ✓
+Total content time: 16 × 7 = 112 min + 4 min intro + 4 min summary = **120 minutes** ✓
+
+### 6. Delivery Format Opportunities
+
+- **Feature comparison tables** → Interactive comparison diagram (O1, O6)
+- **NPU architecture** → Annotated block diagram / video walkthrough (O3)
+- **Camera-ISP-NPU pipeline** → Interactive pipeline diagram with clickable stages (O2)
+- **Security feature mapping** → Case study / scenario-based activity (O4)
+- **Memory layout** → Drag-and-drop allocation exercise (O5)
+- **Variant selection** → Decision-tree scenario / branching case study (O1)
+- **Package selection** → Data table analysis exercise (O6)
+
+</analysis>
+
+---
+
+# STM32N6 for Face Recognition Terminals: Hardware Architecture and Variant Selection
+
+## Course Metadata
+
+| Field | Detail |
+|---|---|
+| **Target Learner** | Jin-ho Park — Firmware Engineer, Biometric Access Control Systems |
+| **Total Duration** | 120 minutes |
+| **Format** | Self-paced eLearning (video, interactive diagrams, case studies, formative checks) |
+| **Prerequisites** | Familiarity with ARM Cortex-M microcontrollers, embedded firmware development, basic knowledge of DMA and peripheral configuration |
+| **Source Document** | STM32N6x5xx / STM32N6x7xx Datasheet (DS14791 Rev 9) |
+| **Delivery Platform** | LMS-compatible (SCORM 1.2 / xAPI) |
+| **Assessment Strategy** | Formative checks per subsection; summative scenario-based assessment at course end |
+
+---
+
+## Course Introduction (4 minutes)
+
+**Format:** Video + Scenario Setup
+
+You're evaluating the STM32N6 microcontroller family for a face recognition access control terminal — a product that needs real-time AI inference, a high-resolution camera pipeline, and strong biometric data security. The challenge: ST's STM32N6 family forces a hard architectural choice between NPU acceleration and hardware cryptography. No single variant gives you both.
+
+This course walks you through the STM32N6 datasheet systematically, giving you the technical grounding to make that variant selection decision, architect the camera-to-inference pipeline, specify the security subsystem, and plan the memory layout — all grounded in what the datasheet actually says (and what it doesn't).
+
+**By the end of this course, you will be able to:**
+- Select and justify the correct STM32N6 variant for a face recognition terminal
+- Map the CSI-2 → DCMIPP → ISP → HPDMA → NPU data pipeline
+- Assess whether the Neural-ART NPU's 600 Gops is sufficient for your workload
+- Specify the security feature set for biometric data protection
+- Define the memory layout for low-latency inference
+- Choose the right package for your PCB form factor
+
+**How this course is organized:** Six modules follow the datasheet's own structure — from device overview through core architecture, NPU, camera pipeline, security, and memory. Each module builds on the last. Plan for about 2 hours total, with natural stopping points between modules.
+
+---
+
+## Module 1: STM32N6 Family Overview and Variant Selection (32 minutes)
+
+> **Module Goal:** You will understand the STM32N6 product family structure, read the feature/peripheral count tables, and produce a justified variant selection recommendation for a face recognition terminal.
+
+**Addresses:** G1 (Variant Selection), O1, O6
+
+---
+
+### Section 1.1: Understanding the STM32N6 Product Family (14 minutes)
+
+> This section establishes the foundational architecture of the STM32N6 family and the critical NPU-vs-crypto tradeoff that defines your variant selection decision.
+
+---
+
+#### Subsection 1.1.1: Identify the STM32N6 Variants
+
+**Duration:** 7 minutes
+**Format:** Annotated interactive diagram + narrated overview
+
+**Content:**
+- The STM32N6 family covers four device lines: STM32N645xx, STM32N647xx (collectively STM32N6x7xx — NPU variants) and STM32N655xx, STM32N657xx (collectively STM32N6x5xx — crypto variants)
+- All variants share the same Arm Cortex-M55 core running up to 800 MHz (overdrive), the same communication peripheral set (USB, Ethernet, I2C, SPI, FDCAN), and the same package options (VFBGA142 through VFBGA264)
+- The defining split: STM32N6x7xx includes the ST Neural-ART accelerator (NPU); STM32N6x5xx includes the full hardware crypto engine (SAES, CRYP, PKA, MCE)
+- No variant in the current family combines both NPU and full crypto — this is the central architectural constraint you must resolve for your product
+- The ordering information table (Section 7) encodes this: "7" in the line position = Neural ART option; "5" = No Neural ART option; "5" in the die position = Crypto, 4 Mbytes; "4" = No crypto, 4 Mbytes
+- Reading the part number STM32N657X0H3Q: N=neural, 6=Cortex-M55, 5=crypto die, 7=Neural ART line — this combination (N657) is the STM32N6x7xx with NPU but without the crypto die features
+
+**Learning Check:** *Multiple choice* — Which part number suffix combination indicates a device with the Neural-ART NPU but without SAES/CRYP/PKA/MCE? (A) N655, (B) N647, (C) N657, (D) N645. *Answer: B and C — both x7xx variants have NPU; the "5" die in N657 refers to flash size, not crypto availability. Correct answer: B (N647) and C (N657) both have NPU. The question tests careful reading of the ordering table.*
+
+---
+
+#### Subsection 1.1.2: Read the Feature/Peripheral Count Tables
+
+**Duration:** 7 minutes
+**Format:** Guided table analysis exercise (interactive side-by-side table comparison)
+
+**Content:**
+- Tables 2–5 in the datasheet are your primary variant selection tool — each table covers one device line (N645xx, N647xx, N655xx, N657xx) and lists every feature and peripheral count per package
+- Key rows to locate immediately for a face recognition terminal: Neural-ART (accelerator row), SAES/CRYPT/PKA/MCE1.4 (crypto rows), Camera subsystem (CSI-2, DCMIPP), Number of I/Os per package
+- STM32N647xx Table 3 shows: Neural-ART = Yes; SAES = No; CRYPT = No; PKA = No; MCE1.4 = No — this is your NPU-only variant
+- STM32N655xx Table 4 shows: SAES = Yes; CRYPT = Yes; PKA = Yes; MCE1.4 = Yes; Neural-ART = No — this is your crypto-only variant
+- Both variant families share: 2x USB 2.0 OTG HS, 1-Gbit Ethernet with TSN, 2x SDMMC, 3x XSPI, parallel and CSI-2 camera interfaces, ISP with three parallel pipes
+- Maximum CPU frequency is identical across all variants: 600 MHz nominal, 800 MHz with overdrive mode
+
+**Learning Check:** *Fill-in-the-blank* — In the STM32N655xx feature table, the Neural-ART row shows _______, while the SAES row shows _______. In the STM32N647xx table, these values are reversed: Neural-ART = _______, SAES = _______. *Answers: No; Yes; Yes; No.*
+
+---
+
+### Section 1.2: Making the Variant Selection Decision (18 minutes)
+
+> This section takes you from reading the tables to making and documenting a justified variant selection recommendation, including package selection for your PCB.
+
+---
+
+#### Subsection 1.2.1: Analyze the NPU-vs-Crypto Tradeoff
+
+**Duration:** 7 minutes
+**Format:** Branching scenario / decision-tree case study
+
+**Content:**
+- A face recognition access control terminal has two non-negotiable requirements: (1) real-time DNN inference for face matching, and (2) secure storage and transmission of biometric templates
+- The STM32N6x7xx (NPU variant) provides the Neural-ART accelerator at 600 Gops — essential for running face recognition models in hardware without CPU involvement; it does NOT provide SAES, CRYP, PKA, or MCE
+- The STM32N6x5xx (crypto variant) provides SAES (SESIP/PSA Level 3 certified, side-channel attack resistant), CRYP (AES-128/192/256), PKA (public key), and MCE (inline memory encryption) — but NO NPU
+- Architectural implication: if you select the NPU variant (x7xx), biometric template encryption must be handled in software on the Cortex-M55 (using Helium vector instructions for AES), or offloaded to a companion security element; if you select the crypto variant (x5xx), face recognition inference must run on the Cortex-M55 CPU without hardware NPU acceleration
+- The datasheet does not describe any roadmap variant combining both — treat this as a hard constraint in your architecture document
+- Your recommendation must explicitly state this tradeoff and justify which requirement takes priority for your product's performance and certification targets
+
+**Learning Check:** *Short answer* — Your product manager asks why you can't simply use the STM32N657xx (which has both "5" and "7" in its name). Write a one-sentence technical explanation citing the datasheet. *Model answer: The "5" in STM32N657xx refers to the die flash size (4 Mbytes with crypto die), but Table 5 confirms that SAES, CRYPT, PKA, and MCE1.4 are all "No" for this variant — the "7" line designation indicates Neural-ART is present, and the crypto hardware is absent regardless of the die designation.*
+
+---
+
+#### Subsection 1.2.2: Evaluate Package Options for Your PCB
+
+**Duration:** 7 minutes
+**Format:** Data table analysis + interactive I/O count calculator
+
+**Content:**
+- The STM32N6 is available in six VFBGA packages: VFBGA142 (8×8mm, 0.5mm pitch, 75 I/Os), VFBGA169 (6×6mm, 0.4mm pitch, 90 I/Os), VFBGA178 (12×12mm, 0.8mm pitch, 106 I/Os), VFBGA198 (10×10mm, 0.65mm pitch, 126 I/Os), VFBGA223 (10×10mm, 0.5mm pitch, 144 I/Os), VFBGA264 (14×14mm, 0.8mm pitch, 165 I/Os)
+- For a face recognition terminal, count your minimum required I/Os: CSI-2 camera (4 differential pairs = 8 pins + REXT), XSPI external flash (up to 16 data lines + CLK + NCS = 18+ pins), USB (differential pair + ID + VBUS), Ethernet RMII (7 pins minimum), GPIO for door relay, LED indicators, tamper detection, and debug (JTAG/SWD = 5 pins)
+- A realistic minimum I/O count for this peripheral set is approximately 80–100 I/Os, which eliminates the VFBGA142 (75 I/Os) and makes the VFBGA169 (90 I/Os) marginal
+- The VFBGA264 (14×14mm, 0.8mm pitch) provides 165 I/Os — maximum flexibility for the full peripheral set including dual XSPI ports (XSPIM_P1 and XSPIM_P2), dual USB, and Ethernet
+- Package selection also affects PCB complexity: 0.4mm pitch (VFBGA169) requires HDI PCB manufacturing; 0.8mm pitch (VFBGA264, VFBGA178) is more manufacturable for standard PCB processes
+- Document your selected package designation with the datasheet table reference (e.g., "VFBGA264, Table 3, Section 6.7") in your hardware specification
+
+**Learning Check:** *Scenario calculation* — Your PCB designer confirms the board can accommodate a 14×14mm package at 0.8mm pitch. Your peripheral list requires CSI-2 (8 pins), dual XSPI (36 pins), USB×2 (8 pins), Ethernet RMII (7 pins), JTAG (5 pins), and 30 GPIO. What is the minimum I/O count, and which packages meet this requirement? *Answer: 8+36+8+7+5+30 = 94 I/Os minimum. Packages meeting this: VFBGA169 (90 — marginal, may not fit), VFBGA178 (106 ✓), VFBGA198 (126 ✓), VFBGA223 (144 ✓), VFBGA264 (165 ✓). Given the 14×14mm constraint, VFBGA264 is the match.*
+
+---
+
+#### Subsection 1.2.3: Write Your Variant Selection Recommendation
+
+**Duration:** 7 minutes
+**Format:** Guided writing exercise with structured template
+
+**Content:**
+- A variant selection recommendation for a hardware specification document should include: (1) selected variant and package, (2) key features that satisfy each product requirement, (3) explicit statement of the architectural tradeoff, (4) mitigation strategy for the missing feature set
+- For a face recognition terminal prioritizing real-time inference: recommend STM32N647xx or STM32N657xx (STM32N6x7xx family) in VFBGA264 package — Neural-ART NPU satisfies the real-time inference requirement; SAES/CRYP/MCE absence must be mitigated via software AES on Cortex-M55 with Helium acceleration or an external secure element
+- For a terminal prioritizing certified biometric data security over inference speed: recommend STM32N655xx or STM32N657xx (STM32N6x5xx family) — SAES (SESIP/PSA Level 3), CRYP, MCE inline encryption, and PKA satisfy security requirements; face recognition inference runs on Cortex-M55 at up to 800 MHz with Helium vector processing
+- Your recommendation must flag the datasheet gap: no variant combines NPU + full crypto; no roadmap information is provided in the datasheet
+- The recommendation document should cite specific table references: "Per Table 3 (STM32N647xx features), Neural-ART = Yes, SAES = No" and "Per Table 4 (STM32N655xx features), SAES = Yes, Neural-ART = No"
+- This written recommendation becomes the authoritative record for your hardware architecture review
+
+**Learning Check:** *Document review* — Review the following variant recommendation excerpt: "We selected the STM32N657xx because it has both the '5' crypto die and '7' Neural ART line, giving us NPU and crypto." Identify the error and write the corrected statement. *Answer: The error is conflating the die designation ("5" = 4 Mbytes flash) with crypto availability. Correction: "Table 5 confirms that STM32N657xx has Neural-ART = Yes but SAES = No, CRYPT = No, PKA = No, MCE1.4 = No. The '5' in the part number refers to the flash die size, not crypto hardware availability."*
+
+---
+
+## Module 2: Core Architecture — Cortex-M55, Memory, and Power (21 minutes)
+
+> **Module Goal:** You will characterize the Cortex-M55 core's processing capabilities, understand the on-chip memory hierarchy, and identify power management features relevant to a continuously-operating access control terminal.
+
+**Addresses:** G2 (pipeline architecture foundation), G3 (memory layout foundation), O5
+
+---
+
+### Section 2.1: Cortex-M55 Core and On-Chip Memory (14 minutes)
+
+> Understanding the core's capabilities and memory hierarchy is prerequisite to planning your inference pipeline and memory allocation.
+
+---
+
+#### Subsection 2.1.1: Characterize the Cortex-M55 Core
+
+**Duration:** 7 minutes
+**Format:** Annotated block diagram + narrated video
+
+**Content:**
+- The Cortex-M55 runs at up to 800 MHz in overdrive mode (VOS high) or 600 MHz in nominal mode (VOS low), achieving 3616 CoreMark at 800 MHz (4.52 CoreMark/MHz)
+- Arm Helium (M-Profile Vector Extension, MVE) enables SIMD vector processing — critical for software AES if you select the NPU variant without hardware crypto, and for DSP preprocessing of camera frames
+- The FPU supports half, single, and double precision (IEEE 754 compliant) — relevant for neural network inference preprocessing and post-processing on the CPU
+- TrustZone is integrated into the core with MPU support — this is your hardware isolation boundary between the secure biometric processing domain and the non-secure application domain
+- The NVIC supports up to 196 maskable interrupt channels with 16 priority levels — you'll use this to manage DMA completion interrupts from the camera pipeline and NPU
+- Cache configuration: 32 KB ICACHE + 32 KB DCACHE — these are separate from TCM and operate on AXI bus accesses; TCM accesses bypass the cache entirely for deterministic latency
+
+**Learning Check:** *True/False* — The Cortex-M55's 32 KB ICACHE and 32 KB DCACHE are the same as the instruction TCM and data TCM. *Answer: False. The ICACHE and DCACHE are AXI bus caches. The ITCM (64 KB) and DTCM (128 KB) are separate tightly-coupled memories with zero-wait-state access that bypass the cache entirely.*
+
+---
+
+#### Subsection 2.1.2: Map the On-Chip Memory Hierarchy
+
+**Duration:** 7 minutes
+**Format:** Interactive memory map diagram with annotation tool
+
+**Content:**
+- The Cortex-M55 includes 64 KB instruction TCM (ITCM) and 128 KB data TCM (DTCM), both with ECC (single-error correction, double-error detection) — these provide zero-wait-state access for time-critical code and data
+- On-chip SRAM includes: AHBSRAM1/2, AXISRAM1 through AXISRAM6, BKPSRAM (backup), FLEXRAM, and VENCRAM — all with ECC featuring single-error detection/correction with interrupt generation and hardware/software erase capability
+- AXISRAM1 retains content in Standby mode (per Table 7); AXISRAM2–6 do not retain in Standby — this matters for your access control terminal's wake-from-standby behavior
+- The AXI cache (CACHEAXI1) provides an additional caching layer for AXI bus accesses to external memory — relevant when streaming model weights from XSPI-connected flash
+- For your face recognition pipeline: ITCM holds time-critical ISR and inference control code; DTCM holds active frame buffer data or intermediate inference results; AXISRAM holds larger working buffers; XSPI-mapped external memory holds model weights and biometric templates
+- ECC on all SRAM regions provides functional safety coverage — important for an access control system where memory corruption could cause false accepts or denials
+
+**Learning Check:** *Matching exercise* — Match each memory region to its primary characteristic: (1) ITCM, (2) DTCM, (3) AXISRAM1, (4) AXISRAM2-6. Characteristics: (A) 128 KB, zero-wait-state, ECC, data; (B) Retains content in Standby mode; (C) 64 KB, zero-wait-state, ECC, instruction; (D) Does not retain in Standby mode. *Answers: 1-C, 2-A, 3-B, 4-D.*
+
+---
+
+### Section 2.2: Power Management for Access Control Applications (7 minutes)
+
+> An access control terminal runs continuously but must manage power intelligently — this section covers the power architecture relevant to your deployment scenario.
+
+---
+
+#### Subsection 2.2.1: Apply Power Management to Your Terminal Design
+
+**Duration:** 7 minutes
+**Format:** Scenario-based video + configuration checklist
+
+**Content:**
+- The STM32N6 power controller manages four supply domains: Core domain (VDDCORE), VDD domain (VRET), Backup domain (VSW/VBAT), and Analog domain (VDDA18ADC)
+- Voltage scaling provides two run-mode settings: VOS high (enables 800 MHz overdrive) and VOS low (600 MHz nominal, lower power) — for a face recognition terminal, you'll likely run VOS high during active inference and consider VOS low during idle monitoring
+- The integrated SMPS step-down converter (switching at 2.4 MHz reference frequency) efficiently converts the 1.8V supply to VDDCORE (0.63–0.9V range) — peak efficiency ~88–89% at typical load currents
+- Low-power modes available: Sleep (CPU clock stopped, peripherals active), Stop SVOS high (most peripherals retained), Stop SVOS low (reduced retention), Standby — for an access control terminal, Stop SVOS high is the likely idle state, allowing HPDMA and camera to wake the system on motion detection
+- The NPU is listed as "O" (optional/configurable) in Run mode and Stop SVOS high, and "R" (retained/off) in Stop SVOS low — plan your power state transitions around NPU availability
+- The RTC remains functional in VBAT mode — use this for access log timestamping even during power interruptions
+
+**Learning Check:** *Scenario decision* — Your terminal is idle between access attempts. You want to maintain camera monitoring for motion detection while minimizing power. Which power mode do you select, and what is the key constraint on NPU availability in that mode? *Answer: Stop SVOS high mode. In this mode, HPDMA is retained (R) and can service camera data, but the NPU is listed as "O" (optional — can be kept on or off). If NPU is powered off in Stop SVOS high, you must wake to Run mode before executing inference.*
+
+---
+
+## Module 3: Neural-ART NPU — Architecture and Throughput Assessment (14 minutes)
+
+> **Module Goal:** You will characterize the Neural-ART NPU's architecture and produce a written throughput assessment that determines whether 600 Gops is sufficient for real-time face recognition, including explicit identification of datasheet gaps.
+
+**Addresses:** G2 (NPU subsystem), O3
+
+---
+
+### Section 3.1: Neural-ART NPU Architecture and Capabilities (14 minutes)
+
+> This section gives you the technical depth to evaluate the NPU against your face recognition workload requirements.
+
+---
+
+#### Subsection 3.1.1: Characterize the Neural-ART NPU Architecture
+
+**Duration:** 7 minutes
+**Format:** Annotated block diagram + narrated deep-dive video
+
+**Content:**
+- The Neural-ART NPU is available only on STM32N6x7xx devices (Section 3.5) — it is the design-time parametric and runtime reconfigurable neural network inference engine
+- Maximum operating frequency: 1 GHz (a dedicated PLL — PLL2 — is provided for the Neural-ART accelerator, separate from the system clock PLL)
+- Peak throughput: 600 Giga-operations per second (Gops) — achieved using optimized hardware units for DNN inference functions
+- The NPU instantiation includes convolution accelerators (CAs); the specific instantiation can vary, with a low-end version using two CAs
+- The host (Cortex-M55) configures the NPU subsystem through an AHB/AXI lite target port connected to the system bus matrix; the NPU has two 64-bit wide AXI-4 controller ports connecting to the system bus for memory access
+- System memory is shared between the host subsystem and the NPU subsystem — this means your memory layout must account for concurrent access patterns between the CPU and NPU
+
+**Learning Check:** *Short answer* — What is the NPU's maximum clock frequency, and how does it connect to the system bus? *Answer: 1 GHz maximum, driven by a dedicated PLL. It connects to the system bus matrix via two 64-bit AXI-4 controller ports for memory access, and is configured by the host via an AHB/AXI lite target port.*
+
+---
+
+#### Subsection 3.1.2: Assess NPU Throughput for Face Recognition
+
+**Duration:** 7 minutes
+**Format:** Guided assessment worksheet + gap analysis exercise
+
+**Content:**
+- Key NPU features for minimizing memory bandwidth bottlenecks: (1) dedicated streaming engines that optimize data flow and minimize internal buffer usage, (2) on-the-fly weight decompression — model weights stored compressed in external flash are decompressed during inference without CPU involvement, (3) real-time data encryption/decryption — the NPU can process encrypted model weights directly
+- 600 Gops provides substantial compute headroom for common face recognition model architectures (MobileNet-class models typically require 300–600 MOps per inference at standard input resolutions) — however, the datasheet does not specify per-inference latency in milliseconds for any specific model
+- **Critical datasheet gap to flag in your assessment:** The datasheet provides no end-to-end inference latency specification (e.g., milliseconds per face recognition inference at a given model size and input resolution). You cannot verify from the datasheet alone whether 600 Gops achieves your target latency (e.g., <500ms per recognition attempt)
+- Your written assessment must cite: 600 Gops at 1 GHz maximum; streaming engines and weight decompression as bandwidth-optimization features; absence of per-inference latency data as a gap requiring characterization on actual hardware with your target model
+- Next steps to close the gap: obtain ST's STM32Cube.AI toolchain, profile your target face recognition model (e.g., MobileNetV2-based face embedding network) on the STM32N6 evaluation board, and measure actual inference latency
+- The NPU's real-time encryption/decryption capability is relevant even on the x7xx variant — model weights stored in encrypted external flash can be decrypted inline during inference without a separate decryption step
+
+**Learning Check:** *Assessment writing exercise* — Write a two-sentence NPU throughput assessment for your hardware specification document. It must cite the 600 Gops rating, name one bandwidth-optimization feature, and flag the latency specification gap. *Model answer: "The STM32N6x7xx Neural-ART NPU provides 600 Gops at up to 1 GHz, with integrated streaming engines that minimize internal buffer usage and on-the-fly weight decompression that reduces external memory bandwidth requirements for compressed model weights. The datasheet does not specify per-inference latency for any model architecture; hardware characterization with the target face recognition model is required before confirming that the 600 Gops throughput meets the product's real-time recognition latency requirement."*
+
+---
+
+## Module 4: Camera-to-Inference Pipeline Architecture (21 minutes)
+
+> **Module Goal:** You will map the complete camera-to-inference data path on the STM32N6, identifying the role of each subsystem stage and the data handoff points between them, producing a pipeline diagram or written description suitable for a firmware architecture document.
+
+**Addresses:** G2 (pipeline architecture), O2
+
+---
+
+### Section 4.1: Camera Input Subsystem (14 minutes)
+
+> Understanding the camera subsystem's two paths and the CSI-2 interface specifications is the foundation for configuring your face capture pipeline.
+
+---
+
+#### Subsection 4.1.1: Configure the Camera Subsystem Architecture
+
+**Duration:** 7 minutes
+**Format:** Interactive pipeline diagram with clickable stage annotations
+
+**Content:**
+- The STM32N6 camera subsystem is built around two paths: (1) low-resolution path via DCMI with parallel interface (up to 24 Mpixel/s, 80 MHz on 14-bit input), and (2) high-resolution path via DCMIPP with parallel or CSI-2 serial interface (up to 5 Mpixels at 30 fps)
+- For a face recognition terminal, use the DCMIPP path — it connects to the CSI-2 interface and feeds the ISP, which can then feed the NPU via DMA
+- The DCMI path is recommended only for backward compatibility or for connecting a second camera sensor (the DCMIPP inputs from one sensor via CSI-2; the DCMI gets pixels from a second sensor via parallel interface)
+- The DCMIPP pixel pipeline block includes the parallel interface, the CSI-2 Host, and the PHY — all integrated into a single subsystem
+- Parallel interface specifications (for reference): 120 MHz up to 16-bit capability with I/O ReTime; supports RGB565/888, YUV422, RawBayer/Mono 8/10/12/14
+- The DCMIPP pixel clock input supports up to 120 MHz with 30–70% duty cycle (per Table 105)
+
+**Learning Check:** *Decision question* — Your face recognition terminal uses a single 5MP RGB camera sensor with a MIPI CSI-2 interface. Which camera path do you use, and why is the DCMI path not appropriate for this configuration? *Answer: Use the DCMIPP path with CSI-2 interface. The DCMI path uses a parallel interface and is recommended only for backward compatibility or a second sensor. The DCMIPP path is designed for high-resolution sensors and connects to the CSI-2 interface, which is required for your MIPI camera.*
+
+---
+
+#### Subsection 4.1.2: Specify the CSI-2 Interface Parameters
+
+**Duration:** 7 minutes
+**Format:** Specification table analysis + configuration checklist
+
+**Content:**
+- The CSI-2 serial interface complies with MIPI CSI-2 v1.3 (MIPI Alliance Specification, 29 May 2014) and D-PHY v1.2
+- Input rate: two data lanes at up to 2.5 Gbps/lane — this gives you a maximum aggregate bandwidth of 5 Gbps, sufficient for high-resolution, high-frame-rate camera sensors
+- Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10 — for a 5MP sensor at 30 fps, you need 150 Mpixel/s, well within the 200 Mpixel/s limit
+- Supported pixel formats: any MIPI CSI-2 v1.3 format including RGB565, RGB888, YUV422, rawBayer — select rawBayer for maximum ISP flexibility (the ISP can perform demosaicing)
+- Additional CSI-2 features: interlaced video support, interleaved packets, virtual channels — virtual channels allow multiplexing multiple logical streams over a single physical CSI-2 link
+- The CSI PHY supply current at 2.5 Gbps/lane (2 lanes): approximately 2.54–2.64 mA on VDDA18CSI and 3.41–3.86 mA on VDDCSI — include these in your power budget
+
+**Learning Check:** *Calculation check* — Your camera sensor outputs 5MP (2592×1944) at 30 fps in rawBayer 10-bit format. Calculate the required pixel rate and confirm it is within the CSI-2 interface limit. *Answer: 2592 × 1944 × 30 = 151,165,440 pixels/second ≈ 151 Mpixel/s. The CSI-2 interface supports up to 333 Mpixel/s for rawBayer 10, so 151 Mpixel/s is well within the limit.*
+
+---
+
+### Section 4.2: ISP Processing and DMA-to-NPU Handoff (7 minutes)
+
+> This section covers the ISP's three-pipe architecture and the critical DMA handoff that delivers processed frames to the NPU without CPU intervention.
+
+---
+
+#### Subsection 4.2.1: Map the ISP-to-NPU Data Path
+
+**Duration:** 7 minutes
+**Format:** Animated pipeline flow diagram + written description exercise
+
+**Content:**
+- The ISP provides processing of three parallel pipes on the same input stream — all three pipes process the same incoming camera data simultaneously, enabling simultaneous output at different resolutions or formats
+- ISP processing algorithms available per pipe: bad pixel correction, decimation, black-level tuning, exposure control, demosaicing, column conversion, contrast adjustment, cropping, downsizing, ROI isolation, gamma correction, YUV conversion, and pixel packer
+- **The critical handoff:** The ISP output can be directly fed via a DMA to the NPU — this is the zero-CPU-intervention path for your face recognition pipeline. The CPU does not need to copy frame data; the DMA handles the transfer from ISP output to NPU input buffer
+- The HPDMA (High Performance DMA) is the appropriate controller for this transfer — channels 12–15 support 2D addressing and 64-byte FIFOs, suitable for image data transfers including to AXI external memories
+- Complete pipeline stage sequence for your firmware architecture document: **CSI-2 PHY** (physical layer, 2.5 Gbps/lane) → **DCMIPP** (pixel pipeline, demultiplexing, format conversion) → **ISP** (three parallel pipes: bad pixel, demosaic, gamma, YUV, crop/resize) → **HPDMA** (DMA transfer, no CPU intervention) → **Neural-ART NPU** (DNN inference, 600 Gops)
+- The three ISP pipes enable simultaneous outputs: e.g., Pipe 1 → full-resolution frame for H264 encoding/recording; Pipe 2 → cropped/resized face ROI for NPU inference; Pipe 3 → thumbnail for display
+
+**Learning Check:** *Pipeline description exercise* — Write a four-stage pipeline description for your firmware architecture document, naming each subsystem, its key specification, and the handoff mechanism to the next stage. *Model answer: "(1) CSI-2 interface receives rawBayer 10 data at up to 2.5 Gbps/lane from the camera sensor. (2) DCMIPP pixel pipeline demultiplexes and routes the pixel stream to the ISP. (3) ISP processes three parallel pipes on the same input stream — Pipe 2 crops and resizes the face ROI for inference. (4) HPDMA transfers the ISP output directly to the NPU input buffer without CPU intervention. (5) Neural-ART NPU executes DNN inference at 600 Gops."*
+
+---
+
+## Module 5: Security Architecture for Biometric Data Protection (14 minutes)
+
+> **Module Goal:** You will select and justify the STM32N6 security features that protect biometric data at rest and in transit, producing a security feature mapping table that assigns each feature to a specific protection role in your access control terminal.
+
+**Addresses:** G3 (security architecture), O4
+
+---
+
+### Section 5.1: Hardware Security Features and Their Roles (14 minutes)
+
+> This section maps each security peripheral to a specific protection function in your biometric terminal, and explicitly addresses the constraint that full crypto is only available on the STM32N6x5xx variants.
+
+---
+
+#### Subsection 5.1.1: Map Security Features to Protection Roles
+
+**Duration:** 7 minutes
+**Format:** Interactive security feature mapping table + case study
+
+**Content:**
+- **TrustZone (Section 3.1):** Available on all variants. Provides hardware isolation between Secure and Non-Secure worlds. In your terminal: the Secure world runs biometric template storage, matching algorithms, and access decision logic; the Non-Secure world runs the UI, network stack, and logging. TrustZone-aware peripherals (HPDMA, GPIO, RTC) can be individually assigned to Secure or Non-Secure domains
+- **SAES — Secure AES Coprocessor (Section 3.33):** Available ONLY on STM32N655xx and STM32N657xx (STM32N6x5xx variants). Encrypts/decrypts data per NIST AES standard. Key differentiator: certified SESIP and PSA security assurance Level 3, with protection against side-channel attacks (SCA) including differential power analysis (DPA). Supports 128/256-bit keys, ECB/CBC/CTR/GCM/GMAC/CCM modes. Role: biometric template encryption/decryption with certified SCA resistance
+- **CRYP — Cryptographic Processor (Section 3.34):** Available ONLY on STM32N655xx and STM32N657xx. Higher-throughput AES (128/192/256-bit), supports DMA for bulk data. Role: high-throughput encryption of biometric data streams. Can load keys from SAES via Shared-key mode
+- **HASH — Hash Processor (Section 3.35):** Available on all variants (confirmed by Table 7 showing HASH in Run mode). SHA-1, SHA-2 family (SHA-224, SHA-256, SHA-384, SHA-512), HMAC. Role: biometric template integrity verification — hash stored templates and verify on retrieval to detect tampering
+- **MCE — Memory Cipher Engine (Section 3.36):** Available ONLY on STM32N6x5xx variants. Provides system bus inline encryption (writes) and decryption (reads) for XSPI-connected external memory. Role: transparent encryption of external flash containing biometric templates — reads and writes are automatically encrypted/decrypted without CPU involvement
+- **PKA — Public Key Accelerator (Section 3.37):** Available ONLY on STM32N6x5xx variants. Role: asymmetric cryptography for secure enrollment (signing biometric templates with a device private key) and mutual authentication with the access control server
+
+**Learning Check:** *Table completion* — Complete the security feature mapping table: Feature | Variant Availability | Protection Role. Fill in rows for TrustZone, SAES, MCE, HASH, and PKA. *Model answer: TrustZone | All variants | Secure/Non-Secure domain isolation; SAES | STM32N6x5xx only | Biometric template encryption (SESIP/PSA L3 certified); MCE | STM32N6x5xx only | Inline encryption of XSPI external flash; HASH | All variants | Template integrity verification; PKA | STM32N6x5xx only | Asymmetric crypto for enrollment signing and server authentication.*
+
+---
+
+#### Subsection 5.1.2: Apply MCE Inline Encryption to External Memory
+
+**Duration:** 7 minutes
+**Format:** Configuration walkthrough + scenario analysis
+
+**Content:**
+- The MCE (Memory Cipher Engine) sits on the system bus between the AXI interconnect and the XSPI interface — all writes to XSPI-mapped external memory pass through MCE for encryption; all reads pass through for decryption
+- MCE supports up to 4 configurable regions with 4 KB granularity, each with an independent encryption mode: bypass (no encryption), stream cipher (AES-CTR compliant per NIST SP800-38A), block cipher (AES-ECB compliant per NIST FIPS 197), and fast block cipher
+- Supported block ciphers: AES-128, AES-256, or Noekeon (12-round version) — selected at boot time
+- MCE includes a leakage-resilient mode of operation as defense against side-channel attacks — relevant for a biometric terminal where physical access by an attacker is a realistic threat model
+- For your terminal: configure MCE Region 1 for the biometric template storage area in XSPI-connected NOR flash (stream cipher mode for sequential access efficiency); configure MCE Region 2 for the model weights area (bypass mode if weights are not sensitive, or block cipher if IP protection is required)
+- MCE is transparent to the CPU and NPU — the NPU's on-the-fly decryption capability (mentioned in Section 3.5) works in conjunction with MCE for encrypted model weight access
+- **Critical constraint:** MCE is absent on STM32N6x7xx (NPU) variants — if you select the NPU variant, external flash encryption must be implemented in software or via a companion secure element
+
+**Learning Check:** *Architecture decision* — You've selected the STM32N6x7xx (NPU variant) for your terminal. A security audit requires that biometric templates stored in external NOR flash must be encrypted at rest. What is your mitigation strategy, given that MCE is not available on this variant? *Answer: Options include: (1) Software AES encryption/decryption on the Cortex-M55 using Helium vector instructions before writing to / after reading from XSPI flash; (2) Use an external secure element (e.g., STSAFE-A) for template encryption and key management; (3) Reconsider variant selection — if the security audit requires hardware-accelerated inline encryption, the STM32N6x5xx (crypto variant) with MCE may be required, accepting the loss of NPU hardware acceleration.*
+
+---
+
+## Module 6: Memory Layout and External Memory Interfaces (14 minutes)
+
+> **Module Goal:** You will define the memory layout for your STM32N6-based face recognition terminal, allocating each memory region to a specific pipeline role and producing a memory allocation table with datasheet justifications.
+
+**Addresses:** G3 (memory layout), O5
+
+---
+
+### Section 6.1: Designing the Memory Layout for Your Inference Pipeline (14 minutes)
+
+> This section integrates your knowledge of the memory hierarchy, NPU requirements, and security constraints into a concrete memory allocation plan.
+
+---
+
+#### Subsection 6.1.1: Allocate On-Chip Memory Regions
+
+**Duration:** 7 minutes
+**Format:** Drag-and-drop memory allocation exercise + annotated memory map
+
+**Content:**
+- **ITCM (64 KB, ECC):** Place time-critical inference control code here — ISR handlers for DMA completion, NPU job submission routines, and camera frame synchronization code. Zero-wait-state access ensures deterministic latency. Note: 64 KB is sufficient for control code but not for full model inference code; model execution runs from the NPU's own instruction set, not from ITCM
+- **DTCM (128 KB, ECC):** Place active frame buffer data for the current inference frame, intermediate preprocessing results, and the face detection bounding box output. Zero-wait-state access from the Cortex-M55 ensures fast preprocessing. The NPU accesses DTCM via the AXI bus (not zero-wait-state for NPU), so consider AXISRAM for NPU input/output buffers
+- **AXISRAM1–6 (ECC, various retention characteristics):** Use AXISRAM for NPU input/output feature maps, ISP output staging buffers, and the face embedding vector output. AXISRAM1 retains content in Standby mode — use it for persistent state (e.g., last recognized face ID for quick re-authentication)
+- **BKPSRAM:** Use for access log entries and configuration data that must survive power cycles (backed by VBAT)
+- **VENCRAM (128 KB):** Available for video encoder use; when VENC is disabled, VENCRAM can be statically assigned to the system via SYSCFG — use as additional working buffer if needed
+
+**Learning Check:** *Allocation decision* — Your NPU inference produces a 512-element float32 face embedding vector (2 KB). Where do you place this output buffer, and why? *Answer: Place in AXISRAM (e.g., AXISRAM2 or AXISRAM3). The NPU accesses AXISRAM via its 64-bit AXI-4 controller ports efficiently. DTCM is optimal for CPU access but the NPU accesses it via AXI (not zero-wait-state for NPU). AXISRAM provides a good balance of NPU and CPU accessibility for the embedding vector that both the NPU (writes) and CPU (reads for matching) need to access.*
+
+---
+
+#### Subsection 6.1.2: Plan External Memory with XSPI and MCE
+
+**Duration:** 7 minutes
+**Format:** Memory map diagram + configuration specification exercise
+
+**Content:**
+- The XSPI interface supports memory-mapped mode — external NOR flash or HyperRAM appears to the system as internal memory, accessible by address without explicit read commands. This is essential for NPU weight streaming: the NPU's streaming engines can fetch compressed model weights directly from XSPI-mapped flash as if reading internal memory
+- XSPI supports single, dual, quad, and octal communication; SDR and DTR (double-transfer rate); HyperBus protocol — for maximum bandwidth to the NPU, use octal DTR mode (up to 200 MHz clock = 400 MT/s effective, 8 bits wide = 400 MB/s peak)
+- The XSPI I/O manager (XSPIM) manages three XSPI interfaces (XSPI1, XSPI2, XSPI3) with two physical ports (Port 1: 16-bit I/O; Port 2: 8-bit I/O) — you can connect NOR flash to Port 1 and HyperRAM to Port 2 for simultaneous access
+- **Memory allocation for external memory (with MCE on STM32N6x5xx):**
+  - MCE Region 1 (stream cipher): Biometric template database in NOR flash — encrypted at rest, decrypted transparently on read
+  - MCE Region 2 (bypass or block cipher): Model weights in NOR flash — bypass if not IP-sensitive; block cipher for IP protection
+  - MCE Region 3 (bypass): Firmware image and application code — typically not encrypted (verified by secure boot instead)
+  - HyperRAM (via XSPI Port 2): Large frame buffers for multi-frame face capture sequences
+- **Without MCE (STM32N6x7xx NPU variant):** External flash regions are unencrypted at the hardware level; software encryption must be applied before write and after read for sensitive regions
+- Each allocation in your memory specification document must cite the relevant datasheet section: XSPI memory-mapped mode (Section 3.17.1), XSPIM (Section 3.17.2), MCE (Section 3.36), SRAM configuration (Section 3.2)
+
+**Learning Check:** *Specification exercise* — Complete this memory allocation table row: "Model Weights | Location: _______ | Access mode: _______ | Encryption: _______ (STM32N6x5xx) / _______ (STM32N6x7xx) | Datasheet reference: _______." *Model answer: Model Weights | XSPI-mapped NOR flash (memory-mapped mode) | Memory-mapped read (NPU streaming engine fetches directly) | MCE block cipher or bypass (Section 3.36) | Software AES or unencrypted | Section 3.17.1 (XSPI memory-mapped mode), Section 3.36 (MCE).*
+
+---
+
+## Course Summary and Final Assessment (4 minutes)
+
+**Format:** Summary video + scenario-based summative assessment
+
+### What You've Covered
+
+Over the past 2 hours, you've worked through the STM32N6 datasheet systematically, building the technical foundation for your face recognition terminal hardware specification:
+
+| Module | Key Deliverable |
+|---|---|
+| 1: Variant Selection | Written variant recommendation with NPU/crypto tradeoff statement |
+| 2: Core Architecture | Memory hierarchy map and power mode selection |
+| 3: Neural-ART NPU | Throughput assessment with datasheet gap identification |
+| 4: Camera Pipeline | Four-stage pipeline description (CSI-2 → DCMIPP → ISP → HPDMA → NPU) |
+| 5: Security Architecture | Security feature mapping table with variant constraints |
+| 6: Memory Layout | Memory allocation table with XSPI and MCE configuration |
+
+### Final Assessment: Hardware Architecture Scenario
+
+**Scenario:** Your product manager has approved a face recognition terminal design. You must finalize the hardware specification. Answer the following:
+
+1. **(O1)** Your terminal requires real-time face recognition inference AND hardware-certified biometric template encryption. The datasheet shows no variant provides both. Write a two-paragraph variant selection recommendation that: (a) selects a variant and justifies it, (b) explicitly states the architectural tradeoff, and (c) proposes a mitigation for the missing feature.
+
+2. **(O2)** Draw or describe the four-stage camera-to-inference pipeline, naming each subsystem, its key specification, and the handoff mechanism. Confirm that the ISP output feeds the NPU via DMA without CPU intervention.
+
+3. **(O3)** Your latency requirement is <300ms per face recognition attempt. Write a one-paragraph NPU throughput assessment that cites 600 Gops, names a bandwidth-optimization feature, and flags the datasheet gap that prevents you from confirming this requirement from the datasheet alone.
+
+4. **(O4)** Complete the security feature mapping table for your selected variant, assigning each available feature to a protection role and noting which features are absent.
+
+5. **(O5/O6)** Specify the package designation for your terminal and justify the I/O count. Then complete the memory allocation table placing model weights, biometric templates, inference control code, and active frame buffers in appropriate memory regions.
+
+*Passing score: 80% — all five questions must demonstrate correct identification of variant constraints, pipeline stages, and datasheet gaps.*
+
+---
+
+## Downloadable Job Aids
+
+1. **STM32N6 Variant Selection Decision Tree** — A one-page flowchart guiding the NPU-vs-crypto decision based on product requirements (inference speed priority vs. security certification priority), with variant names and table references at each decision node.
+
+2. **STM32N6 Feature Comparison Quick Reference** — Side-by-side table of STM32N6x5xx vs. STM32N6x7xx key features: Neural-ART, SAES, CRYP, PKA, MCE, package options, I/O counts, CPU frequency, and camera subsystem — extracted from Tables 2–5.
+
+3. **Camera-to-NPU Pipeline Architecture Template** — A fillable pipeline diagram template with labeled stages (CSI-2 → DCMIPP → ISP Pipe 1/2/3 → HPDMA → NPU), key specifications per stage, and handoff mechanism annotations. Includes CSI-2 input rate (2.5 Gbps/lane) and ISP pipe count (3 parallel pipes).
+
+4. **Security Feature Mapping Table** — A pre-formatted table with columns: Feature | Datasheet Section | Variant Availability | Protection Role | Configuration Notes. Pre-populated with TrustZone, SAES, CRYP, HASH, MCE, PKA, and RNG rows.
+
+5. **Memory Allocation Worksheet** — A structured worksheet for planning on-chip and external memory allocation, with columns: Region | Size | ECC | Retention | Assigned Pipeline Role | Datasheet Reference. Pre-populated with ITCM, DTCM, AXISRAM1–6, BKPSRAM, XSPI Region 1–4 rows.
+
+6. **Package Selection Checklist** — A step-by-step I/O counting worksheet listing peripheral categories (CSI-2, XSPI, USB, Ethernet, JTAG, GPIO), minimum pin counts per category, total minimum I/O calculation, and package options table (VFBGA142 through VFBGA264 with size, pitch, and I/O count).
+
+7. **NPU Throughput Assessment Template** — A structured one-page template for documenting NPU suitability: (1) NPU specification (600 Gops, 1 GHz, streaming engines, weight decompression), (2) workload estimate (model ops count, target latency), (3) datasheet gap statement, (4) characterization plan (toolchain, evaluation board, measurement methodology).
+
+8. **STM32N6 Datasheet Navigation Guide** — A quick-reference index mapping common engineering tasks to specific datasheet sections and table numbers: variant selection (Tables 2–5, Section 7), camera configuration (Sections 3.25–3.26, Table 105), NPU (Section 3.5), security (Sections 3.32–3.37), memory (Section 3.2), XSPI (Section 3.17), packages (Section 6).
+
+---
+
+## Course Design Notes
+
+### Pedagogical Approach
+
+This course applies a **task-first, reference-second** instructional model. Each subsection begins with the engineering task Jin-ho needs to perform (e.g., "write a variant selection recommendation," "map the pipeline stages"), then provides the datasheet content needed to complete that task. This approach mirrors how experienced engineers actually use datasheets — purposefully, not sequentially.
+
+**Bloom's Taxonomy Alignment:**
+- Modules 1–2: Remember and Understand (reading tables, identifying features)
+- Modules 3–4: Analyze (assessing NPU throughput, mapping pipeline stages)
+- Modules 5–6: Evaluate and Create (selecting security features, designing memory layout)
+- Final Assessment: Synthesize (producing a complete hardware specification)
+
+### Assessment Strategy
+
+**Formative assessments** (one per subsection, 16 total) use varied formats — multiple choice, true/false, fill-in-the-blank, short answer, scenario decisions, and document review — to maintain engagement and provide immediate feedback. Each formative check is directly aligned to the subsection's learning objective and mirrors the type of task Jin-ho would perform on the job.
+
+**Summative assessment** uses a five-part scenario that requires Jin-ho to produce actual engineering deliverables (written recommendation, pipeline description, assessment paragraph, mapping table, memory allocation table) — the same artifacts he would create in his actual role. This ensures transfer to workplace performance.
+
+### Varied Delivery Formats
+
+Content type drives format selection:
+- **Comparative data** (variant tables) → Interactive side-by-side comparison diagrams
+- **Architecture** (NPU, pipeline) → Annotated block diagrams with narrated video
+- **Decision-making** (variant selection, power modes) → Branching scenario / decision tree
+- **Specification analysis** (CSI-2 parameters, package data) → Guided table analysis exercises
+- **Planning tasks** (memory layout) → Drag-and-drop allocation exercises
+- **Document production** (recommendation, assessment) → Guided writing exercises with structured templates
+
+### Accessibility Considerations
+
+- All video content includes closed captions and full transcripts
+- Interactive diagrams include keyboard navigation and screen reader-compatible alt text
+- Color is never the sole differentiator in comparison tables (pattern/label redundancy)
+- All job aids are provided in both PDF and editable Word/Excel formats
+- Formative checks include explanatory feedback for both correct and incorrect responses
+
+---
+
+## Alignment to Learning Objectives
+
+| Objective | Module | Section | Subsection(s) |
+|---|---|---|---|
+| **O1** — Compare variant feature tables and produce variant selection recommendation | Module 1 | 1.1, 1.2 | 1.1.1, 1.1.2, 1.2.1, 1.2.3 |
+| **O2** — Map camera-to-inference data path (CSI-2 → DCMIPP → ISP → HPDMA → NPU) | Module 4 | 4.1, 4.2 | 4.1.1, 4.1.2, 4.2.1 |
+| **O3** — Assess Neural-ART NPU throughput and flag datasheet gaps | Module 3 | 3.1 | 3.1.1, 3.1.2 |
+| **O4** — Select and justify security features for biometric data protection | Module 5 | 5.1 | 5.1.1, 5.1.2 |
+| **O5** — Define memory layout allocating regions to pipeline roles | Module 6 | 6.1 | 6.1.1, 6.1.2 |
+| **O6** — Evaluate package options and verify I/O count | Module 1 | 1.2 | 1.2.2, 1.2.3 |
+
+**Goal-to-Module Mapping:**
+
+| Goal | Primary Modules | Supporting Modules |
+|---|---|---|
+| **G1** — Variant selection and justification | Module 1 | Module 2 (core specs), Module 3 (NPU specs) |
+| **G2** — Camera-to-inference pipeline architecture | Module 4 | Module 2 (DMA), Module 3 (NPU) |
+| **G3** — Security architecture and memory layout | Modules 5 & 6 | Module 1 (variant constraint), Module 2 (memory hierarchy) |
+
+---
+
+## Course Developer Notes
+
+### Addressing Jin-ho's Pain Points
+
+**Pain Point 1: Choosing between NPU and crypto variants**
+This is the central tension of the entire course. Module 1 addresses it directly and early — Subsection 1.2.1 uses a branching scenario that forces Jin-ho to articulate which requirement takes priority and document the tradeoff explicitly. The course does not resolve the tension for him; it gives him the framework to resolve it for his specific product. Subsection 1.2.3 provides a structured template for writing the recommendation, which becomes a reusable artifact in his actual work.
+
+**Pain Point 2: NPU throughput sufficiency for real-time face matching**
+Module 3 addresses this directly. Critically, Subsection 3.1.2 explicitly teaches Jin-ho to identify and document the datasheet gap — the absence of per-inference latency data. This is a professional skill (knowing what the datasheet doesn't tell you) that prevents overconfidence in the 600 Gops figure. The learning check requires him to write the gap statement in his own words, ensuring he can reproduce this in his actual hardware specification.
+
+**Pain Point 3: Camera-ISP-NPU integration without CPU bottlenecks**
+Module 4 builds the pipeline understanding stage by stage. Subsection 4.2.1 specifically highlights the "ISP output → DMA → NPU" path as the zero-CPU-intervention mechanism, and the learning check requires Jin-ho to write a four-stage pipeline description — the exact artifact he would include in a firmware architecture document. The three-pipe ISP architecture is explained in the context of simultaneous outputs (recording + inference + display), which is the realistic use case for a face recognition terminal.
+
+**Pain Point 4: Memory layout for low-latency inference**
+Module 6 addresses this with a concrete allocation exercise. Subsection 6.1.1 distinguishes between ITCM (for control code), DTCM (for CPU-accessed data), and AXISRAM (for NPU-accessible buffers) — a distinction that is easy to miss when reading the datasheet. Subsection 6.1.2 connects XSPI memory-mapped mode to the NPU's streaming engine capability, explaining why model weights in external flash can be streamed directly to the NPU without CPU-managed transfers.
+
+### Content Gaps Acknowledged in Course Design
+
+The course explicitly teaches Jin-ho to identify and document three datasheet gaps that affect his design:
+1. No per-inference latency specification for the Neural-ART NPU (addressed in Subsection 3.1.2)
+2. No variant combining NPU + full crypto (addressed in Subsections 1.2.1 and 1.2.3)
+3. No reference to specific face recognition model architectures validated on the NPU (addressed in Subsection 3.1.2)
+
+These gaps are treated as professional engineering knowledge — knowing what you don't know from the datasheet is as important as knowing what you do know. The course directs Jin-ho to appropriate next steps (STM32Cube.AI toolchain, evaluation board characterization) without fabricating information not present in the source document.
+
+### Source Document Fidelity
+
+All technical specifications cited in this course are drawn exclusively from the STM32N6x5xx/STM32N6x7xx datasheet (DS14791 Rev 9). No specifications have been inferred, estimated, or sourced from external documents. Where the datasheet is ambiguous or silent (e.g., per-inference latency, model compatibility), the course explicitly flags this as a gap rather than filling it with assumptions.

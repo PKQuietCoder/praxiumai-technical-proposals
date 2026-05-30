@@ -1,0 +1,388 @@
+{
+  "subsection_id": "4.1.1",
+  "subsection_title": "Select the Right Model Variant for Deployment Requirements",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Differentiate FS2-D and FS2-AWB by their credential and connectivity specifications",
+    "Select and justify the correct model variant given a deployment scenario specifying card types and connectivity needs"
+  ],
+  "content": {
+    "hook_sentence": "Recommending the wrong FaceStation 2 variant to a customer whose facility runs HID Prox cards means deploying a device that physically cannot read their existing credentials — a mistake that surfaces only after installation.",
+    "introduction": "FaceStation 2 ships in two variants, FS2-D and FS2-AWB, that share the same face recognition engine, processor, and physical form factor but diverge sharply on RF credential support and wireless connectivity. As the product owner, the variant decision is yours to drive — and getting it wrong creates rework, customer escalations, and credibility damage with the sales team. The differentiating specs are narrow but decisive, so knowing exactly where the two models split is the core skill this lesson builds.",
+    "key_points": [
+      {
+        "point": "FS2-D and FS2-AWB share a common hardware baseline — the difference is entirely in RF options and wireless connectivity.",
+        "explanation": "Both variants run on the same 1.4 GHz quad-core CPU with 8 GB Flash and 1 GB RAM, use the same 4-inch color TFT LCD, support the same Ethernet (10/100/1000 Mbps), RS-485, Wiegand, TTL, Relay, and USB 2.0 interfaces, and carry identical face recognition capacity (30,000 users in 1:1 mode, 4,000 in 1:N mode). When a stakeholder asks whether the two models differ in processing power or door control capability, the answer is no — the split is purely in credential and wireless specs. This matters because it keeps your justification focused: you are not trading off performance or interface richness, only credential compatibility and network connectivity.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "CPU: 1.4 GHz Quad Core. Memory: 8GB Flash + 1GB RAM. Ethernet: Supported (10/100/1000 Mbps, auto MDI/MDI-X). RS-485: 1ch Host or Slave (Selectable). Wiegand: 1ch In and 1ch Out.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Max. User: 30,000 (1:1), 4,000(1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "FS2-AWB adds three capabilities the FS2-D lacks: HID Prox card reading, iCLASS SE/SR/Seos credential support, and 2.4 GHz BLE — plus Wi-Fi.",
+        "explanation": "The RF options table is the single most important reference for variant selection. FS2-D supports 125 kHz EM and 13.56 MHz MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, and NFC. FS2-AWB extends that list with 125 kHz HID Prox, iCLASS SE/SR/Seos, and 2.4 GHz BLE — the three credential types most commonly required by enterprise customers migrating from legacy HID infrastructure or adding mobile credentials. Wi-Fi (IEEE 802.11 b/g) is also exclusive to the FS2-AWB. When a deployment requires any of these four capabilities — HID Prox, iCLASS, BLE, or Wi-Fi — FS2-AWB is the only viable choice. FS2-D cannot be field-upgraded to add them.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC. FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Use a two-question filter to drive variant selection: does the deployment require HID Prox, iCLASS, or BLE credentials? Does it require wireless connectivity?",
+        "explanation": "In practice, you will encounter deployment scenarios where the customer lists several requirements at once. Apply this filter in order. First, check credential requirements: if the customer's existing infrastructure or planned mobile credential rollout includes HID Prox, iCLASS SE/SR/Seos, or BLE, the answer is FS2-AWB — full stop. Second, check connectivity: if running Ethernet to every entry point is not feasible and the site needs Wi-Fi, again the answer is FS2-AWB. Only when both answers are 'no' — the customer uses EM, MIFARE, DESFire, FeliCa, or NFC exclusively, and Ethernet is available — does FS2-D become the appropriate recommendation. This filter prevents the common mistake of defaulting to FS2-AWB for every enterprise customer regardless of actual requirements.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Justify your model recommendation by naming the specific credential or connectivity requirement that drove the decision — not by listing all features of the chosen variant.",
+        "explanation": "When you present a variant recommendation to a sales engineer or customer, the justification should be tight and requirement-anchored. For example: 'The customer needs HID Prox compatibility for their existing card population and BLE for executive mobile credentials — both are exclusive to FS2-AWB, so that is the correct variant.' Listing every FS2-AWB feature in response to a specific requirement question signals that you are reading from a spec sheet rather than reasoning from requirements. Stakeholders trust product owners who can map a requirement directly to a differentiating spec and stop there. The same discipline applies when recommending FS2-D: cite the specific credential types in use and confirm Ethernet availability, then close the recommendation.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC. FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A sales engineer brings you a new enterprise opportunity. The customer's 12-building campus currently uses HID Prox cards for all employees. Their IT team wants to roll out BLE-based mobile credentials for the executive floor within six months. Running Ethernet to all 47 entry points is not feasible due to building age. Before you read further — which variant do you recommend, and what is the single most important reason?",
+        "reveal": "FS2-AWB is the only viable recommendation, and the justification requires just two sentences: HID Prox is not supported by FS2-D, so the customer's existing card infrastructure would be incompatible from day one. BLE and Wi-Fi are also exclusive to FS2-AWB, covering both the planned mobile credential rollout and the wireless connectivity constraint. All three of the customer's differentiating requirements — HID Prox, BLE, and Wi-Fi — appear only in the FS2-AWB spec. FS2-D is eliminated by the first requirement alone; the other two reinforce the same conclusion.",
+        "hint": "Run the two-question filter: credential requirements first, then connectivity."
+      },
+      {
+        "prediction_prompt": "A facilities manager at a mid-size logistics company tells you their access control system uses MIFARE Classic cards throughout, Ethernet is already cabled to every entry point, and they have no plans to add mobile credentials. They want the most cost-effective FaceStation 2 option. Which variant fits, and what is your justification?",
+        "reveal": "FS2-D is the correct recommendation. MIFARE is supported by both variants, but none of the FS2-AWB-exclusive capabilities — HID Prox, iCLASS, BLE, or Wi-Fi — appear in this customer's requirements. Recommending FS2-AWB here would add cost for features the customer will never use. Your justification: 'Your credential infrastructure uses MIFARE, which FS2-D supports fully. Ethernet is available at all entry points, so Wi-Fi is not needed. FS2-D covers your requirements without the additional cost of FS2-AWB's extended credential and wireless capabilities.'",
+        "hint": "Check whether any FS2-AWB-exclusive feature appears in the requirements before defaulting to the higher-spec variant."
+      }
+    ],
+    "summary": "Variant selection comes down to two questions: does the deployment require HID Prox, iCLASS, or BLE credentials, or does it need Wi-Fi? If yes to either, FS2-AWB is the only option; if no to both, FS2-D is sufficient. Anchor your recommendation to the specific requirement that drove the decision.",
+    "figures": [
+      {
+        "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db",
+        "after_key_point": 0,
+        "caption": "FaceStation 2's physical design is identical across both variants — the FS2-D and FS2-AWB differ only in RF credential support and wireless connectivity, not in form factor, display, or camera hardware.",
+        "alt_text": "Front-facing photograph of the FaceStation 2 device against a dark background. The device has a black rectangular body with a 4-inch color TFT LCD screen on the upper portion displaying the Face Station 2 logo on the left side and a clock showing 09:15 AM on 03/24 FRI on the right side, along with a phone icon and other function icons. Below the screen, two camera lenses are visible in a horizontal housing. The Suprema brand name is printed near the bottom of the device. An RFID reader area is visible at the top of the device.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each deployment requirement to the model variant it mandates:",
+      "pairs": [
+        {
+          "left": "Customer uses HID Prox cards throughout the facility",
+          "right": "FS2-AWB only"
+        },
+        {
+          "left": "Customer uses MIFARE cards with Ethernet at all entry points",
+          "right": "FS2-D or FS2-AWB"
+        },
+        {
+          "left": "Customer needs BLE mobile credentials for executives",
+          "right": "FS2-AWB only"
+        },
+        {
+          "left": "Customer needs Wi-Fi because Ethernet cabling is not feasible",
+          "right": "FS2-AWB only"
+        }
+      ],
+      "explanation": "HID Prox, iCLASS, BLE, and Wi-Fi are exclusive to FS2-AWB. MIFARE is supported by both variants, so when no FS2-AWB-exclusive requirement is present and Ethernet is available, either model is technically viable."
+    },
+    {
+      "after_key_point": 3,
+      "type": "fill_blank",
+      "stem": "When justifying a variant recommendation to a stakeholder, you should anchor your rationale to the ___ that drove the model selection, not to a full feature comparison.",
+      "answer": "specific requirement",
+      "distractors": [
+        "price difference",
+        "full specification list",
+        "certification status"
+      ],
+      "explanation": "Requirement-anchored justifications demonstrate that you are reasoning from the customer's needs to the spec, not reading from a data sheet. Citing the specific credential or connectivity need that only one variant supports is more credible and more useful to the stakeholder than listing all features."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not specify pricing differences between FS2-D and FS2-AWB, which may be relevant when cost is a stated customer constraint.",
+    "The document does not clarify whether FS2-AWB's Wi-Fi supports 5 GHz or only 2.4 GHz bands beyond the IEEE 802.11 b/g notation, which could matter for customers with 5 GHz-only wireless infrastructure.",
+    "The document does not address whether iCLASS SE, SR, and Seos are supported at the same read range as other 13.56 MHz cards, or whether BLE read range differs from the 50 mm figure listed for MIFARE/DESFire."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales engineer contacts you about a new enterprise customer whose facility currently uses HID Prox cards for access control and wants to add BLE-based mobile credentials for executives. The customer also needs wireless connectivity because running Ethernet to all entry points is not feasible.",
+        "question_text": "Based on the customer's credential and connectivity requirements, which FaceStation 2 model variant should you recommend, and what is the primary reason?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FS2-D, because it supports 125kHz EM and 13.56MHz card types, covering the customer's existing card infrastructure",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FS2-AWB, because it supports HID Prox, BLE credentials, and Wi-Fi connectivity — all three of which the FS2-D does not include",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Either model, because both variants support MIFARE and NFC, which are compatible with most modern credential systems",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FS2-AWB is the only variant that supports HID Prox (125kHz), BLE (2.4GHz), and Wi-Fi (IEEE 802.11 b/g). The FS2-D lacks all three of these capabilities, making it unsuitable for this deployment.",
+        "incorrect": "The FS2-D does not support HID Prox, BLE, or Wi-Fi — all of which are required by this customer. Shared features like MIFARE and NFC do not address the customer's specific requirements. Only the FS2-AWB covers HID Prox, BLE, and Wi-Fi. Review the RF Options and connectivity specifications for each model variant."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a pre-sales call, a facilities manager asks whether FaceStation 2 can be deployed at a covered outdoor entrance where ambient light levels can reach approximately 22,000 lx on bright days. She is concerned the device may fail to recognize faces in high-glare conditions and wants a clear answer before approving the purchase.",
+        "question_text": "How should you respond to the facilities manager's suitability concern?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Confirm the deployment is supported, because 22,000 lx falls within the 0–25,000 lx operating illuminance range, meaning the device is designed to function under those lighting conditions",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Advise against the deployment, because outdoor environments introduce variables beyond illuminance — such as wind and temperature — that are not covered by the operating illuminance specification",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Recommend an indoor installation instead, because the 25,000 lx upper limit is intended to cover indoor lighting only and outdoor use has not been validated",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The FaceStation 2 supports an operating illuminance range of 0–25,000 lx, which the specification describes as covering complete darkness to all indoor lighting conditions. At 22,000 lx, the environment falls within the supported range, giving you a clear, evidence-based basis to confirm suitability.",
+        "incorrect": "The specification states the operating illuminance range is 0–25,000 lx, and 22,000 lx falls within that range. The specification does not restrict this range to indoor use only, nor does it exclude outdoor covered environments based on illuminance alone. Introducing unsupported caveats about wind or temperature would go beyond what the specification substantiates. Review the operating illuminance specification before making suitability claims."
+      },
+      "references": [
+        {
+          "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+          "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a product review with the security team, a security architect raises a concern: 'Face recognition systems are easy to fool — someone could just hold up a photo or use a screen showing someone's face to gain unauthorized access. We can't recommend this for high-security doors.' You need to address this concern using FaceStation 2's documented security features.",
+        "question_text": "Which response most accurately counters the security architect's concern using FaceStation 2's specification-supported features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 uses IR-based live face detection to distinguish real faces from printed images and LCD screens, and its Android 5.0 security layer adds an additional system-level protection — both directly address the spoofing scenario described",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FaceStation 2 stores a high-quality image log of every authentication attempt, which allows security teams to audit and detect any spoofing incidents after they occur",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 uses a 1.4 GHz quad-core processor and 140 IR LEDs to process face images at high speed, making it significantly harder for spoofing attempts to succeed before the system locks out",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The architect's concern is about active spoofing using photos or screens. IR-based live face detection directly prevents this by analyzing whether the presented face is real, and the Android 5.0 security layer adds system-level protection. These are the specification-supported features that directly counter the stated vulnerability.",
+        "incorrect": "Image logging (option b) is a reactive audit tool — it does not prevent spoofing from succeeding in the first place, which is the architect's concern. Processing speed and IR LED count (option c) are hardware performance features, not anti-spoofing mechanisms. The specification-supported features that directly address spoofing are live face detection via IR-based image analysis and the Android 5.0 security layer. Review the Enhanced Security section of the FaceStation 2 specification."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. In a cross-functional planning meeting, the head of engineering asks: 'We're scoping a deployment for a large corporate campus with 28,000 enrolled employees. Each employee will be authenticated individually against their own stored template. Can FaceStation 2 handle that user volume in this authentication mode?'",
+        "question_text": "How should you respond to the engineering lead's question about user capacity for this deployment?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Confirm the deployment is feasible, because FaceStation 2 supports up to 30,000 users in 1:1 mode, which covers the 28,000-employee requirement with capacity to spare",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Flag a capacity concern, because FaceStation 2 supports a maximum of 4,000 users, which is well below the 28,000-employee requirement regardless of authentication mode",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Confirm the deployment is feasible, because FaceStation 2's group matching speed of 1:5,000 match/sec means it can process 28,000 employees faster than standard 1:1 authentication",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. FaceStation 2 supports a maximum of 30,000 users in 1:1 (verification) mode. Since the scenario describes individual authentication against a stored template, 1:1 mode applies, and 28,000 users falls within the supported capacity.",
+        "incorrect": "The 4,000-user limit applies to 1:N (identification) mode — where the system searches across all enrolled users without a claimed identity — not to 1:1 verification mode. Group matching speed is a performance metric, not a capacity figure, and does not determine how many users can be enrolled. For a deployment where each employee authenticates against their own template, 1:1 mode applies, and the 30,000-user capacity is the relevant figure. Review the User Capacity specification."
+      },
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "Matching Speed: 1:4,000 match/sec, Group Matching: 1:5,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    },
+    {
+      "mcq_id": "MCQ5",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a deployment review for a hospital client, an operations manager raises a concern: 'We have staff who use wheelchairs and a number of pediatric employees in training programs. We're worried the device will be mounted at a fixed height that excludes these users entirely.' You need to address this objection using FaceStation 2's documented ergonomic features.",
+        "question_text": "Which response most accurately addresses the operations manager's usability concern using FaceStation 2's specification-supported design features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Acknowledge the concern and recommend pairing FaceStation 2 with a height-adjustable mounting pole, which is a common third-party solution for accessibility in healthcare environments",
+          "is_correct": false,
+          "id": "MCQ5_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Confirm that FaceStation 2 is ADA-compliant and designed to meet accessibility standards for wheelchair users and children across all deployment environments",
+          "is_correct": false,
+          "id": "MCQ5_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Explain that FaceStation 2 supports a 145cm–210cm height range and includes a tilt-type bracket specifically designed to accommodate wheelchair users and children, directly addressing the populations the manager described",
+          "is_correct": true,
+          "id": "MCQ5_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The specification documents a 145cm–210cm height range and a tilt-type bracket designed for wheelchair users and children — both of which directly address the manager's concern about those specific user populations. These are the specification-supported features you can cite with confidence.",
+        "incorrect": "Recommending third-party mounting solutions (option a) goes beyond what the specification supports and does not address the built-in design features. Claiming ADA compliance (option b) overstates what the specification substantiates — the spec describes ergonomic design features, not regulatory compliance certifications. Always cite only what the specification supports. Review the Ergonomics and User Convenience section."
+      },
+      "references": [
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ5_opt_3"
+    }
+  ]
+}

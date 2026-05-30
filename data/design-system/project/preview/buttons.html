@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);background:var(--white);color:var(--fg-1);padding:20px 22px;}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+  .row:last-child{margin-bottom:0;}
+  .btn{font:var(--label);border-radius:var(--radius-sm);padding:9px 18px;border:1.5px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:background var(--duration) var(--ease),color var(--duration) var(--ease);}
+  .btn svg{width:17px;height:17px;}
+  .primary{background:var(--ocean-400);color:#fff;}
+  .primary:hover{background:var(--ocean-600);}
+  .secondary{background:#fff;color:var(--ocean-600);border-color:var(--ocean-400);}
+  .secondary:hover{background:var(--ocean-50);}
+  .tertiary{background:transparent;color:var(--ocean-600);padding-left:6px;padding-right:6px;}
+  .tertiary:hover{text-decoration:underline;}
+  .danger{background:var(--error);color:#fff;}
+  .disabled{background:var(--grey-200);color:var(--grey-400);cursor:not-allowed;}
+  .sm{padding:6px 13px;font-size:13px;}
+</style></head>
+<body>
+  <div class="row">
+    <button class="btn primary">Find your product <i data-lucide="arrow-right"></i></button>
+    <button class="btn secondary">Contact us</button>
+    <button class="btn tertiary">Learn more <i data-lucide="arrow-right"></i></button>
+    <button class="btn danger">Delete</button>
+    <button class="btn disabled" disabled>Unavailable</button>
+  </div>
+  <div class="row">
+    <button class="btn primary sm">Download</button>
+    <button class="btn secondary sm"><i data-lucide="filter"></i> Filter</button>
+    <button class="btn secondary sm"><i data-lucide="share-2"></i> Share</button>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

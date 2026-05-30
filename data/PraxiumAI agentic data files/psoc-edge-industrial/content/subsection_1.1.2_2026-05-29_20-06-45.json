@@ -1,0 +1,366 @@
+{
+  "subsection_id": "1.1.2",
+  "subsection_title": "Identify Key Compute Blocks",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Map each face recognition terminal function (inference, display rendering, always-on I/O, secure key management) to the correct CPU domain based on documented power and performance characteristics",
+    "Identify the IPC block as the hardware mechanism for synchronized inter-core handoff between the Cortex-M55 and Cortex-M33",
+    "Explain why placing an always-on polling loop on the Cortex-M55 eliminates the HP domain's energy-saving power-down capability"
+  ],
+  "content": {
+    "hook_sentence": "Assigning your always-on sensor loop to the wrong CPU core doesn't just waste power — it structurally prevents the high-performance domain from ever powering down, turning a minor firmware decision into a permanent energy penalty.",
+    "introduction": "Building on the three-domain power architecture from §1.1.1, you now need to match each terminal function to the specific compute block that handles it. The PSOC Edge E8 gives you two CPU subsystems with very different performance and power profiles, plus dedicated ML accelerators and an inter-processor communication block — and the assignment decisions you make here directly determine whether your terminal can hit its power budget in idle monitoring mode.",
+    "key_points": [
+      {
+        "point": "The Cortex-M55 and Ethos-U55 in the HP domain handle compute-intensive, latency-sensitive workloads: face recognition inference and display rendering.",
+        "explanation": "The HP domain's Cortex-M55 runs at up to 320 MHz with Helium DSP extensions, 32 KB instruction and data caches, and 256 KB each of I-TCM and D-TCM. Paired with the Ethos-U55 NPU (also at 320 MHz), this subsystem is purpose-built for the kind of heavy lifting your face recognition pipeline demands. The graphics subsystem — 2.5D GPU, display controller, MIPI DSI/DBI — also lives in the HP domain, so display rendering is naturally co-located with inference. For your terminal, this means face detection inference and UI rendering both belong on the M55/HP side. The 4-channel HPDMA and 5120 KB SoCMEM (system SRAM) give the M55 the bandwidth and working memory to move image data and model activations without stalling the CPU.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+            "snippet": "Arm® Cortex®-M55 up to 320 MHz | Helium DSP | Arm® Ethos-U55 NPU up to 320 MHz... 32 KB I-Cache | 32 KB D-Cache | 4-ch HPDMA | 256 KB I-TCM | 256 KB D-TCM",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+            "page_number": 2,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+            "snippet": "HIGH PERFORMANCE DOMAIN... Graphics Subsystem: 2.5D Rendering, MIPI DSI, Multi-plane Composition, MIPI DBI... High Performance CPU Subsystem: 4-channel HPDMA, Cortex®-M55, 320 MHz, Ethos-U55, 320 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+            "page_number": 7,
+            "chunk_type": "figure"
+          },
+          {
+            "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+            "snippet": "the high-performance domain is used for high-speed communication channels (>100 MHz, display controller outputting frames via MIPI DSI), and DSP and neural network processing, where work is done as fast as possible",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The Cortex-M33 and NNLite in the LP domain own always-on functions: door-lock GPIO monitoring, secure key management, and lightweight presence detection.",
+        "explanation": "The LP domain runs the Cortex-M33 at up to 160 MHz with TrustZone, the NNLite NPU, 512 KB RRAM, 1 MB SRAM, and the lock-step secure enclave. Critically, this domain is never switched off in normal operation — it is the \"virtual always-on\" domain. For your terminal, this maps directly to two functions: monitoring the door-lock GPIO (which must respond even when the HP domain is powered down) and managing secure access credentials via the secure enclave and hardware crypto accelerator. Both require continuous availability at low power, which is exactly what the LP domain provides. Attempting to run either of these on the M55 would require keeping the HP domain powered at all times, eliminating your ability to save energy between recognition events. The LP domain also hosts 11x SCB (UART, I2C, SPI), I3C, Ethernet, and CAN-FD peripherals — so your access control I/O (door relay, reader bus) connects here naturally.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+            "snippet": "LOW POWER DOMAIN \"VIRTUAL\" ALWAYS-ON... GPIO, 32x TCPWM, 11x SCB (UART, I2C, SPI), 1x I3C, Crypto... Lock-Step Secure Enclave... Cortex®-M33, 160 MHz, 16 KB I-Cache, RRAM 512 KB, SRAM 1 MB (granular), 2x 16-channel DMA",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+            "page_number": 7,
+            "chunk_type": "figure"
+          },
+          {
+            "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+            "snippet": "the low-power domain is never switched off unless chip power is cut off... the high-performance domain can be selectively powered down to save energy and reactivated when needed, while the low-power domain continues to remain active",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+            "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b1cdf8cf-9cb5-4d7e-9f0f-6c5aad4a7a97",
+            "snippet": "Lockstep Secure Enclave in low-power always-on domain: Secure Infineon RoT key storage; secure boot... Hardware crypto accelerator with comprehensive support of cryptographic algorithms",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_8/ChunkType.text_b1cdf8cf-9cb5-4d7e-9f0f-6c5aad4a7a97_0.png",
+            "page_number": 8,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The bus bridge between domains enables cross-domain resource access, but it does not justify running always-on workloads on the M55.",
+        "explanation": "The datasheet confirms that the CPUs can access resources in each other's domains via a bus bridge. A colleague might argue this means you can freely run any task on either core. That reasoning is architecturally flawed for always-on workloads. The HP domain can be selectively powered down to save energy. If you place your always-on sensor polling loop on the M55, the HP domain must stay powered continuously — you lose the entire power-down mechanism. The bus bridge is a data path, not a power management strategy. Its purpose is to let the M55 occasionally reach LP-domain peripherals (or vice versa) during active operation, not to justify keeping the HP domain alive for low-rate I/O tasks that the M33 handles natively at a fraction of the power cost.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+            "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+            "snippet": "the high-performance domain can be selectively powered down to save energy and reactivated when needed, while the low-power domain continues to remain active",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The IPC block synchronizes task handoff between the two cores — use it when the M55 completes inference and needs to signal the M33 to act.",
+        "explanation": "The PSOC Edge E8 includes a dedicated inter-processor communication (IPC) block for synchronizing tasks between the Cortex-M55 and Cortex-M33. The block diagram shows IPC0 on the deep sleep / LP domain interconnect and IPC1 on the HP domain AXI/AHB interconnect. For your face recognition terminal, the canonical handoff scenario is: the M55 completes a face recognition inference, then uses the IPC block to signal the M33 to trigger the door-lock GPIO output. The IPC block ensures neither core acts on the result simultaneously and that the handoff is hardware-synchronized — no software polling loop over a shared SRAM region is needed, and no TCPWM workaround is required. Using a shared SRAM region with a polling loop would work functionally but introduces race conditions and keeps the M33 burning cycles checking a flag; the IPC block is the architecturally correct solution.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+            "snippet": "Interconnect (AHB), IPC0... Interconnect (AXI, AHB), IPC1",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+            "page_number": 7,
+            "chunk_type": "figure"
+          },
+          {
+            "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+            "snippet": "Low Power (LP) Domain: Arm® Cortex®-M33 up to 160 MHz... NNLite NPU up to 160 MHz... High Performance (HP) Domain: Arm® Cortex®-M55 up to 320 MHz... Arm® Ethos-U55 NPU up to 320 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+            "page_number": 2,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The cryptographic accelerator is accessible from both CPUs, but its security functions belong architecturally to the M33's TrustZone SPE.",
+        "explanation": "The hardware crypto accelerator supports AES (128/192/256), RSA (up to 4096-bit), ECDSA, SHA2/SHA3, TRNG, and PRNG. The datasheet states it is accessible by both the Cortex-M33 and Cortex-M55. However, for an access control terminal, secure key storage and PSA-compliant cryptographic operations belong in the M33's secure processing environment (SPE) via TrustZone. The lock-step secure enclave in the LP domain holds the hardware unique key (HUK) and device certificates. The M55 (running in the non-secure processing environment, NSPE) can request crypto services from the M33's TF-M implementation, but it should not directly manage access credentials. This separation is not just a software convention — it is the architectural intent of the LP domain's always-on secure enclave.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "a2016f0f-8a34-4b91-9243-674940728a24",
+            "snippet": "This subsystem is a hardware implementation for acceleration of cryptographic functions and random number generators. It is accessible by Cortex®-M33 and Cortex®-M55 CPUs.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_24/ChunkType.text_a2016f0f-8a34-4b91-9243-674940728a24_0.png",
+            "page_number": 24,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b1cdf8cf-9cb5-4d7e-9f0f-6c5aad4a7a97",
+            "snippet": "Lockstep Secure Enclave in low-power always-on domain: Secure Infineon RoT key storage; secure boot... Factory provisioned device unique keypair (DICE_DeviceID), Hardware Unique Key (HUK), Unique Device Secret (UDS) and Infineon device certificates",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_8/ChunkType.text_b1cdf8cf-9cb5-4d7e-9f0f-6c5aad4a7a97_0.png",
+            "page_number": 8,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your colleague proposes this firmware architecture: run the always-on liveness detection sensor polling loop on the Cortex-M55 so the Cortex-M33 is fully dedicated to TrustZone secure boot and PSA key management. They justify it by pointing out that the CPUs can access each other's domain resources via the bus bridge. Before reading further — what is the primary architectural problem with this proposal?",
+        "reveal": "The bus bridge argument is technically correct but architecturally irrelevant to the power management problem. The HP domain can be selectively powered down between recognition events to save energy. If the always-on polling loop runs on the M55, the HP domain must stay powered continuously — you permanently lose the power-down mechanism. The M33 is the correct home for always-on sensor polling: it runs in the LP domain, which is never switched off in normal operation, and it has direct access to GPIO and the 11x SCB peripherals the sensor bus uses. The M55 should wake only when the M33 signals (via IPC) that a presence event has occurred and full inference is needed.",
+        "hint": "Think about what 'always-on' means for the HP domain's power state, not just the bus bridge's data path capability."
+      },
+      {
+        "prediction_prompt": "The Cortex-M55 completes a face recognition inference and determines the person is authorized. The M33 needs to pulse the door-lock GPIO to grant access. Both cores must not act on the result simultaneously. You have three options: (A) write a flag to a shared SoCMEM address and have the M33 poll it, (B) configure a TCPWM one-shot timer on the M55 to generate an interrupt to the M33 after inference, or (C) use the IPC block. Which do you choose, and why?",
+        "reveal": "Option C — the IPC block — is the correct choice. The IPC block is included specifically for synchronizing tasks between the two CPUs, making it the architecturally intended mechanism for exactly this handoff. Option A (shared SRAM polling) introduces race conditions and wastes M33 cycles checking a flag; it also requires the M33 to know when to start polling. Option B (TCPWM timer) is a workaround that conflates timing with synchronization — a timer fires after a fixed delay, not when inference actually completes, and it does not provide mutual exclusion. The IPC block handles the synchronized handoff cleanly without software polling overhead.",
+        "hint": "Consider which option was designed for CPU-to-CPU synchronization versus which options repurpose unrelated hardware."
+      }
+    ],
+    "summary": "Assign face recognition inference and display rendering to the Cortex-M55/HP domain, always-on GPIO monitoring and secure key management to the Cortex-M33/LP domain, and use the IPC block for synchronized inter-core handoff — keeping the HP domain free to power down between recognition events.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 0,
+        "caption": "The PSOC Edge E8 detailed block diagram shows the three power domains and their compute blocks. The HP domain (bottom) contains the Cortex-M55, Ethos-U55, HPDMA, and graphics subsystem; the LP domain (middle) contains the Cortex-M33, NNLite, secure enclave, and all always-on peripherals. IPC0 and IPC1 appear on the interconnect buses between domains.",
+        "alt_text": "Detailed block diagram of the PSOC Edge E8 showing three nested power domains. The Deep Sleep domain at top contains Autonomous Analog blocks and 2x LPCOMP. The Low Power domain in the middle contains the Cortex-M33 at 160 MHz with 16 KB I-Cache, RRAM 512 KB, SRAM 1 MB, 2x 16-channel DMA, Lock-Step Secure Enclave, GPIO, 32x TCPWM, 11x SCB, I3C, Crypto, Ethernet, CAN FD, and NNLite, connected via AHB interconnect with IPC0. The High Performance domain at bottom contains System SRAM SoCMEM 5120 KB, the High Performance CPU Subsystem with Cortex-M55 at 320 MHz with 32 KB I and D caches, 4-channel HPDMA, and Ethos-U55 at 320 MHz, plus SD Host Controllers, SMIF, USB, Audio Interfaces including TDM/I2S and PDM/PCM, and Graphics Subsystem with 2.5D rendering, MIPI DSI and DBI, connected via AXI/AHB interconnect with IPC1. An I/O subsystem on the right shows 2x Smart I/O and various GPIO types.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When you need the door-lock GPIO to respond even while the HP domain is powered down, you should assign that monitoring task to the ___ domain.",
+      "answer": "low-power (LP)",
+      "distractors": [
+        "high-performance (HP)",
+        "deep sleep",
+        "SoCMEM"
+      ],
+      "explanation": "The LP domain is never switched off in normal operation, making it the correct home for always-on I/O tasks. Placing them on the HP domain would prevent that domain from powering down between recognition events."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each inter-core communication approach to its primary drawback for the face recognition terminal handoff scenario:",
+      "pairs": [
+        {
+          "left": "Shared SRAM region with M33 polling loop",
+          "right": "Wastes M33 cycles and introduces race conditions"
+        },
+        {
+          "left": "TCPWM one-shot timer interrupt to M33",
+          "right": "Fires after a fixed delay, not when inference actually completes"
+        },
+        {
+          "left": "IPC block",
+          "right": "Designed specifically for synchronized CPU-to-CPU task handoff"
+        }
+      ],
+      "explanation": "The IPC block is the architecturally intended mechanism for synchronizing tasks between the two CPUs. The other approaches repurpose unrelated hardware or introduce software-level race conditions."
+    }
+  ],
+  "content_gaps": [
+    "IPC block register-level API and semaphore mechanism: The datasheet confirms the IPC block exists for CPU synchronization but does not detail the IPC channel configuration, semaphore protocol, or PDL API calls needed to implement the handoff in firmware. Learners will need the Architecture Reference Manual and ModusToolbox PDL IPC documentation to implement this in code.",
+    "NNLite vs Ethos-U55 capability comparison: This subsection references both accelerators in domain context but does not detail their supported NN kernel sets or MAC throughput differences. That comparison is covered in a later subsection on ML accelerator selection."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are partitioning firmware tasks for a face recognition terminal built on the PSoC Edge E8. You have identified four functions that must run concurrently: (1) running the face detection neural network inference, (2) rendering the UI on the MIPI-DSI display, (3) monitoring a door-lock GPIO in always-on mode, and (4) managing secure key storage for access credentials.",
+        "question_text": "Which assignment correctly maps these four functions to the appropriate CPU domains based on their documented power and performance characteristics?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Face detection inference and display rendering on the Cortex-M55 high-performance domain; door-lock GPIO monitoring and secure key management on the Cortex-M33 low-power domain",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Face detection inference and secure key management on the Cortex-M55 high-performance domain; display rendering and door-lock GPIO monitoring on the Cortex-M33 low-power domain",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "All four functions on the Cortex-M55 high-performance domain, with the Cortex-M33 low-power domain placed in deep sleep to conserve energy between recognition events",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The high-performance domain (Cortex-M55, up to 320 MHz) is documented for DSP/neural network processing and display controller output via MIPI-DSI, making it the right home for inference and rendering. The low-power domain (Cortex-M33) is the always-on domain designed for security functions such as secure key storage and for monitoring I/O that must remain active even when the high-performance domain is powered down.",
+        "incorrect": "Review the documented roles of each domain. The high-performance domain handles compute-intensive and display tasks (neural network inference, MIPI-DSI rendering), while the low-power domain is specifically designed to remain always-on for security and I/O monitoring. Secure key management belongs to the low-power domain's Secure Enclave, not the high-performance domain."
+      },
+      "references": [
+        {
+          "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+          "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+          "snippet": "The high-performance domain is used for high-speed communication channels (>100 MHz, display controller outputting frames via MIPI DSI), and DSP and neural network processing... the low-power domain continues to remain active.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+          "page_number": 17,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+          "snippet": "High Performance (HP) Domain: Arm Cortex-M55 up to 320 MHz, Helium DSP, Arm Ethos-U55 NPU up to 320 MHz... Low Power (LP) Domain: Arm Cortex-M33 up to 160 MHz... Secure Enclave: Secure Boot, TRNG, Crypto Accelerator, Secure Key Storage",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+          "page_number": 2,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing a colleague's firmware architecture document for the face recognition terminal. The document proposes running the always-on liveness detection sensor polling loop on the Cortex-M55 high-performance domain so that the Cortex-M33 is free for TrustZone-based secure boot and PSA key management. Your colleague argues this is acceptable because the CPUs can access each other's domain resources via a bus bridge.",
+        "question_text": "What is the primary architectural problem with this proposal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The bus bridge between domains introduces unacceptable latency for sensor polling, making the Cortex-M55 unsuitable for any I/O-bound task regardless of power mode",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Placing the always-on polling loop on the Cortex-M55 prevents the high-performance domain from being selectively powered down between recognition events, eliminating a key energy-saving mechanism",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The Cortex-M33 cannot run TrustZone and PSA key management simultaneously with secure boot, so offloading sensor polling does not free enough resources to justify the trade-off",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The documented power strategy for the high-performance domain is to process work as fast as possible and then power down to save energy, while the low-power domain remains always-on. Anchoring a continuous sensor polling loop to the Cortex-M55 prevents the high-performance domain from ever being powered down, defeating this energy management design.",
+        "incorrect": "The core issue is power management, not latency or TrustZone capacity. The high-performance domain is designed to be selectively powered down when not needed, with the low-power domain handling always-on tasks. Tying a continuous polling loop to the Cortex-M55 prevents that power-down, which is the primary architectural flaw in the proposal."
+      },
+      "references": [
+        {
+          "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+          "snippet": "The high-performance domain can be selectively powered down to save energy and reactivated when needed, while the low-power domain continues to remain active.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+          "page_number": 17,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+          "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are designing the inter-core communication scheme for the face recognition terminal. The Cortex-M55 completes a face recognition inference and needs to signal the Cortex-M33 to trigger an access control output on a GPIO. Both cores must not act on the result simultaneously, and the handoff must be synchronized.",
+        "question_text": "Which hardware block on the PSoC Edge E8 should you use to coordinate this synchronized handoff between the two CPU cores?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "A shared SRAM region in the high-performance domain, accessed by the Cortex-M33 via the bus bridge with a software polling loop",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "A TCPWM block configured as a one-shot timer to generate an interrupt to the Cortex-M33 after the inference completes on the Cortex-M55",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The inter-processor communication (IPC) block, which is included specifically for synchronizing tasks between the two CPUs",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The PSoC Edge E8 includes a dedicated IPC block specifically for synchronizing tasks between the Cortex-M55 and Cortex-M33 CPUs. This is the architecturally correct mechanism for coordinated inter-core handoffs.",
+        "incorrect": "While shared SRAM polling and timer-based interrupts can work in some architectures, the PSoC Edge E8 provides a dedicated IPC block specifically designed for synchronizing tasks between its two CPU cores. Using the purpose-built IPC block is the correct and documented approach for this use case."
+      },
+      "references": [
+        {
+          "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+          "snippet": "An inter-processor communication (IPC) block is included for synchronizing the CPUs' tasks.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_9a63d279-e06e-4bb1-b60b-64c37a335521_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+          "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    }
+  ]
+}

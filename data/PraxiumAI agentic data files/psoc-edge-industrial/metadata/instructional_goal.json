@@ -1,0 +1,88 @@
+{
+  "instructional_goal": "Given the PSOC Edge E8 datasheet and the ModusToolbox development environment, you will configure the PSOC Edge E8 multi-core hardware architecture — selecting appropriate ML accelerators, power domains, clock sources, and security subsystem settings — to satisfy the real-time inference, power budget, and PSA-compliant security requirements of a face recognition access control terminal.",
+  "audience": "Firmware engineers responsible for peripheral bring-up, power management, and ML inference integration on the Infineon PSOC Edge E8 platform, targeting biometric access control products requiring high-performance vision processing and embedded security.",
+  "conditions": [
+    "Working from the PSOC Edge E8 Industrial datasheet and Architecture Reference Manual as primary references",
+    "Targeting a face recognition terminal application with real-time ML inference, MIPI-DSI display output, and PSA-compliant secure boot requirements",
+    "Using the ModusToolbox SDK and Peripheral Driver Library (PDL) as the software development framework"
+  ],
+  "tools_and_resources": [
+    "PSOC Edge E8 Industrial Datasheet (this document)",
+    "PSOC Edge E8 Architecture Reference Manual",
+    "ModusToolbox IDE, SDK, and Peripheral Driver Library (PDL)",
+    "DEEPCRAFT Studio for ML model-to-firmware workflow",
+    "KIT_PSE84_EVAL or KIT_PSE84_AI development kit"
+  ],
+  "boundaries": {
+    "in_scope": [
+      "Multi-core processor architecture (Cortex-M55/M33, Ethos-U55, NNLite) and workload partitioning decisions",
+      "Power domain configuration (HP/LP modes, deep sleep, hibernate) and clock tree setup (IHO, DPLL, clock dividers)",
+      "Security subsystem architecture (TrustZone, TF-M, PSA Level 2/4, secure boot, EPC2/EPC4 selection)",
+      "Key peripheral configuration relevant to the application: MIPI-DSI display pipeline, GPIO, SCB (I2C/SPI/UART), SMIF, and memory subsystem (SRAM, RRAM)"
+    ],
+    "out_of_scope": [
+      "ML model training, quantization, and optimization (covered by DEEPCRAFT Studio separately)",
+      "Camera sensor driver development and ISP pipeline (camera input hardware not covered in this datasheet)",
+      "PCB layout, signal integrity, and hardware design (covered in AN236517)",
+      "Detailed register-level programming and bit-field manipulation (covered in the Registers Reference Manual)"
+    ]
+  },
+  "assumptions": [
+    "Learners have working knowledge of ARM Cortex-M architecture concepts (interrupts, memory maps, privilege levels) but have not previously worked with the PSOC Edge E8 specifically",
+    "Learners are proficient in embedded C/C++ firmware development and are familiar with SDK/HAL-based peripheral initialization patterns",
+    "Learners have a basic conceptual understanding of TrustZone and PSA security frameworks but need guidance on how they are implemented on this specific device",
+    "Learners understand general ML inference concepts (neural network types, quantization) but need guidance on selecting between Ethos-U55 and NNLite for specific workload characteristics",
+    "Learners have access to the development kit and ModusToolbox environment but may not have completed any PSOC Edge E8 bring-up prior to this training"
+  ],
+  "evidence": [
+    {
+      "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+      "relevance": "Describes the multi-CPU architecture (Cortex-M55, Ethos-U55, Cortex-M33, NNLite) and IPC block — directly supports the workload partitioning and ML accelerator selection aspect of the goal"
+    },
+    {
+      "chunk_id": "b715b1f0-02ea-4d22-9231-0a2e448ccf95",
+      "relevance": "Introduces the neural net processing section covering both Ethos-U55 and NNLite, which are central to the face recognition ML inference requirement"
+    },
+    {
+      "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+      "relevance": "Describes NNLite as optimized for low-power always-on ML use cases (wake word, HAR), helping learners decide when to use NNLite vs Ethos-U55 for face recognition pipeline stages"
+    },
+    {
+      "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+      "relevance": "Defines the four system power modes (HP, LP, CPU Active, CPU Sleep, Deep Sleep) — essential for configuring power domains to balance ML performance against power budget"
+    },
+    {
+      "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+      "relevance": "Explains the high-performance vs low-power domain architecture and typical use case (HP domain for DSP/NN processing, LP domain always-on), directly informing power domain configuration decisions"
+    },
+    {
+      "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+      "relevance": "Details security features including EPC2/EPC4, TrustZone, secure boot, and PSA compliance — directly relevant to the PSA-compliant security requirement for an access control device"
+    },
+    {
+      "chunk_id": "e35b3a4d-ce7c-4bd0-b159-75aec0e24d08",
+      "relevance": "Describes the security architecture with Cortex-M33 TrustZone SPE/NSPE and TF-M, showing how secure and non-secure processing environments are partitioned — critical for PSA compliance"
+    },
+    {
+      "chunk_id": "298884e5-2156-4c9a-a1db-97c5a653dc94",
+      "relevance": "Describes the 2.5D GPU and MIPI-DSI display controller — relevant to the display pipeline configuration for the face recognition terminal UI"
+    },
+    {
+      "chunk_id": "536f3ac5-2813-4242-a95e-437ac0c202d5",
+      "relevance": "Lists the full PSOC Edge E8 development ecosystem resources including ModusToolbox, PDL, application notes, and training — establishes the tools and references available to learners"
+    },
+    {
+      "chunk_id": "e8cfb6c9-e049-4f26-8fd7-0e065728fb76",
+      "relevance": "Describes the clock subsystem including IHO, PILO, ECO, WCO, and DPLLs — essential for clock tree configuration which affects both ML accelerator performance and power consumption"
+    }
+  ],
+  "confidence": "high",
+  "confidence_rationale": "The datasheet provides comprehensive coverage of all architectural elements referenced in the goal (ML accelerators, power domains, clock tree, security subsystem, display pipeline). The persona's needs map directly and specifically to documented hardware features. The 2-hour duration is appropriate for an architectural orientation and configuration decision-making course at this level — not deep implementation, but informed configuration choices. The only moderate uncertainty is around camera input pipeline, which is not covered in this datasheet, but that is correctly scoped out.",
+  "questions_for_sme": [
+    "For a face recognition terminal, is the primary ML inference workload expected to run on the Ethos-U55 (high-performance, higher power) or NNLite (low-power, always-on), or a pipeline split between both — and what are the typical model sizes and latency targets that would drive this decision?",
+    "What level of PSA compliance (EPC2 vs EPC4) is required for the target access control product, and does the training need to cover the provisioning workflow (AN238041) or only the runtime security architecture?",
+    "Is camera/image sensor input (e.g., MIPI-CSI) expected to be in scope for this training, given that the PSOC Edge E8 datasheet does not document a camera input interface — or is image data assumed to arrive via another path (e.g., external processor over SPI/USB)?",
+    "Should the training cover the ModusToolbox SDK at a conceptual level (what APIs exist and when to use them) or at a hands-on configuration level (actually writing PDL initialization code), given the 2-hour constraint?",
+    "Are there specific power consumption targets (e.g., mA budgets for active face recognition vs idle/monitoring modes) that should be used as concrete design constraints in the training scenarios?"
+  ]
+}

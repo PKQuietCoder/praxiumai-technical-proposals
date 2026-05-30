@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- PLACEHOLDER LOGO. The official Infineon logo is the "Infineon" wordmark in
+     engineering blue with a red/orange dot + swoosh mark. That trademarked SVG was
+     not available to copy. This typographic stand-in approximates placement/color.
+     Replace with the official asset and re-wire across the UI kits. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../colors_and_type.css" />
+<style>
+  body { margin: 0; display: grid; place-items: center; min-height: 100vh; background: var(--white); }
+  .dds-logo {
+    display: inline-flex; align-items: center; gap: 0;
+    font-family: var(--font-sans); font-weight: 600; letter-spacing: -0.01em;
+    color: var(--engineering-blue); font-size: 40px; line-height: 1;
+    user-select: none;
+  }
+  /* dot + swoosh stand-in for the brand mark */
+  .dds-logo .mark { position: relative; width: 0.62em; height: 0.62em; margin-right: 0.28em; flex: none; }
+  .dds-logo .mark .dot {
+    position: absolute; top: 0; left: 0; width: 0.30em; height: 0.30em; border-radius: 50%;
+    background: var(--error); /* Infineon red */
+  }
+  .dds-logo .mark .swoosh {
+    position: absolute; bottom: 0; left: 0.04em; width: 0.58em; height: 0.30em;
+    border-radius: 0 0 0.6em 0.6em / 0 0 0.6em 0.6em;
+    border-bottom: 0.13em solid var(--orange);
+    border-right: 0.13em solid var(--orange);
+    transform: rotate(8deg);
+  }
+  .label { position: fixed; bottom: 16px; left: 0; right: 0; text-align: center;
+    font: var(--caption); color: var(--fg-3); }
+</style>
+</head>
+<body>
+  <div class="dds-logo" role="img" aria-label="Infineon (placeholder logo)">
+    <span class="mark" aria-hidden="true"><span class="swoosh"></span><span class="dot"></span></span>Infineon
+  </div>
+  <div class="label">Placeholder wordmark — replace with the official Infineon logo SVG</div>
+</body>
+</html>

@@ -1,0 +1,341 @@
+{
+  "subsection_id": "1.2.2",
+  "subsection_title": "Apply PDL for Peripheral Setup",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Map each face recognition terminal interface (MIPI-DSI display, I2C sensor bus, SPI flash, UART debug) to the correct PSOC Edge E8 peripheral using the PDL",
+    "Identify the SCB0 Deep Sleep constraint and its PCB-level implication for an I2C slave interface that must remain active during low-power states",
+    "Apply the DSI.REXT pin requirement when the 2.5D GPU and MIPI-DSI host controller are used in the terminal design"
+  ],
+  "content": {
+    "hook_sentence": "Assigning your UART debug interface to SCB0 seems harmless — until you discover SCB0 doesn't support UART mode at all, and your debug port is silently dead on first power-up.",
+    "introduction": "Building on the four-step ModusToolbox workflow from §1.2.1, the peripheral configurator generates PDL initialization code — but only after you make the right hardware-level decisions about which SCB instance handles which interface and what external components your PCB must supply. For the face recognition terminal, four interfaces need assignment: the MIPI-DSI display, an I2C sensor bus, a SPI NOR flash, and a UART debug port. Getting these assignments wrong costs you a board respin, not just a firmware fix.",
+    "key_points": [
+      {
+        "point": "SCB0 is restricted to I2C slave and SPI slave modes — it cannot be configured as UART or as any master interface.",
+        "explanation": "The PSOC Edge E8 has 12 SCBs total. SCB1 through SCB11 are fully flexible: each can be configured as I2C, UART, or SPI, and can operate as either master or slave. SCB0 is the exception. It only supports I2C slave mode and SPI slave mode. This means you cannot assign UART debug, I2C master, or SPI master roles to SCB0 — those assignments will silently fail or produce no output. When you open the peripheral configurator and check the SCB list, SCB0's mode options are intentionally limited to slave-only I2C and SPI. Any interface that needs to initiate transactions must go to SCB1 or higher.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+            "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves. SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "SCB0's Deep Sleep capability comes with a hardware cost: your PCB must supply an external clock to SCB0.",
+        "explanation": "SCB0 has one capability that SCB1–SCB11 lack: it can remain operational when the system enters Deep Sleep power mode. This makes it the correct choice for an I2C slave interface that must stay accessible during low-power idle periods — for example, a secure element that the host system polls even when the terminal is between access events. The trade-off is that SCB0 requires an external clock source on the PCB to sustain operation in Deep Sleep; the on-chip oscillators that drive the other SCBs are gated in that power mode. When you assign an interface to SCB0, you are committing your hardware design to route that external clock signal to the SCB0 clock pin. This is a PCB constraint, not a firmware-only decision, so it must be resolved before layout.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+            "snippet": "SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The MIPI-DSI display pipeline uses the dedicated Display Controller and DSI host — not an SCB — and requires a 200 Ω resistor on the DSI.REXT pin.",
+        "explanation": "The face recognition terminal's display output routes through the 2.5D GPU, which hands rendered frames to the Display Controller, which in turn drives the MIPI-DSI host controller. This is a dedicated hardware path, entirely separate from the SCB blocks. When you configure this pipeline in the peripheral configurator, you are enabling the Display Controller and DSI host, not an SCB in any mode. There is one mandatory PCB requirement: the DSI.REXT pin must be connected to a 200 Ω resistor tied to ground. If DSI.REXT is left unconnected or tied directly to ground without the resistor, the graphics feature will not function correctly. This is a hardware bring-up checklist item — confirm it before your first display power-on.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+            "snippet": "Frames rendered by the GPU are transferred to the MIPI display serial interface (DSI) host controller by the display controller (DC). Both DBI (command mode) and DPI (video mode) standards are supported over the DSI interface as per the MIPI standards specification.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_601897f0-c9fa-42e6-944f-c64de37b76d6_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a795bb27-bc8e-402e-a5e4-771426c1aa89",
+            "snippet": "If the graphics feature is used, connect the DSI.REXT pin to a 200 Ω resistor to ground. If not, tied to ground.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_41/ChunkType.text_a795bb27-bc8e-402e-a5e4-771426c1aa89_0.png",
+            "page_number": 41,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "A complete peripheral assignment for the face recognition terminal maps each interface to its correct PSOC Edge E8 hardware block before you write a single line of PDL initialization code.",
+        "explanation": "Once you understand the SCB constraints and the dedicated display path, the terminal's four interfaces resolve cleanly. The MIPI-DSI display goes to the Display Controller plus DSI host (not an SCB). The I2C sensor bus, operating as master, goes to SCB1 or any SCB from SCB1 to SCB11 — SCB0 is excluded because master mode is not supported there. The SPI NOR flash, also a master interface, goes to another SCB in that same range (e.g., SCB2). The UART debug port goes to any SCB from SCB1 to SCB11 configured in UART mode — again, SCB0 is excluded because it does not support UART at all. With this mapping in hand, you open the peripheral configurator, enable the correct SCB instances, set each one's mode (I2C master, SPI master, UART), and the PDL generates the initialization structures. The GPIO HSIOM routing for each SCB's pins is configured in the Pins tab of the same tool.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+            "snippet": "SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "61c3d775-87bf-4945-a9dc-9a73df8c7411",
+            "snippet": "I²C, SPI, and UART via serial communication blocks (SCB). SCB0 supports only I²C and SPI... Installable software development kits (SDK) for peripheral initialization, clock and pin configuration, and middleware selection",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_61c3d775-87bf-4945-a9dc-9a73df8c7411_0.png",
+            "page_number": 9,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2f90d1ca-61fb-40b0-b10c-1cbd00b1a57b",
+            "snippet": "Peripheral driver library (PDL) provides the low-level, device-specific firmware drivers for accessing the hardware sub-systems and peripherals",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.text_2f90d1ca-61fb-40b0-b10c-1cbd00b1a57b_0.png",
+            "page_number": 11,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your terminal design needs an I2C slave interface to a secure element that must respond to host queries even when the system is in Deep Sleep between access events. You plan to assign this to SCB0. Before you finalize the schematic, what PCB-level requirement does this choice impose, and what would happen if you assigned this same interface to SCB1 instead?",
+        "reveal": "Assigning the I2C slave to SCB0 is the correct functional choice — SCB0 is the only SCB that can operate in Deep Sleep. However, it requires an external clock signal routed to SCB0 on the PCB; without it, SCB0 cannot sustain operation when the on-chip clocks are gated. If you assigned the same interface to SCB1 instead, SCB1 would work fine in Active and Sleep modes, but it cannot operate in Deep Sleep. The secure element would become unreachable during low-power idle periods, breaking the always-available access control requirement. The PCB cost of the external clock for SCB0 is the correct trade-off for this use case.",
+        "hint": "Think about which power mode the terminal enters between access events, and which SCB can remain active in that mode."
+      },
+      {
+        "prediction_prompt": "A junior engineer's peripheral plan assigns UART debug to SCB0, arguing it's a good choice because SCB0 supports Deep Sleep and keeps the debug port accessible during low-power states. You review the plan. What is wrong with this reasoning, and what should the corrected assignment be?",
+        "reveal": "The reasoning is flawed at the hardware level: SCB0 does not support UART mode at all. It only supports I2C slave and SPI slave. Assigning UART to SCB0 in the peripheral configurator is not a valid configuration — the UART mode option simply does not exist for SCB0. The corrected assignment moves UART debug to any SCB from SCB1 to SCB11 configured in UART mode. The engineer's goal of keeping debug accessible in Deep Sleep is also unachievable regardless of SCB choice, since UART is not a Deep Sleep-capable interface on this device. The correct fix is SCB1 (or another available SCB) in UART mode, with the understanding that debug output is available only in Active and Sleep states.",
+        "hint": "Check what modes SCB0 actually supports before evaluating the power-mode argument."
+      }
+    ],
+    "summary": "Before writing PDL initialization code, lock down your peripheral assignment: MIPI-DSI display to the dedicated Display Controller and DSI host (with a 200 Ω resistor on DSI.REXT), I2C master and SPI master interfaces to SCB1–SCB11, UART debug to SCB1–SCB11, and Deep Sleep I2C slave interfaces exclusively to SCB0 — which requires an external clock on your PCB.",
+    "figures": [
+      {
+        "chunk_id": "2edab2cd-3c89-44b7-862d-133345563b4f",
+        "after_key_point": 3,
+        "caption": "The ModusToolbox four-step workflow: in step 2 (Configure Peripherals), you enable specific SCB instances and set their mode — this is where SCB0's restricted mode options become visible and where the Display Controller is enabled for the MIPI-DSI pipeline.",
+        "alt_text": "Four overlapping software windows showing the ModusToolbox workflow. Window 1 shows Project Creator with BSP selection. Window 2 shows the Peripherals tab with a Communication section listing SCB0 through SCB7 as checkboxes, with SCB2 checked. Window 3 shows Library Manager with APP_KIT_PSOCE84_EVK active and sub-projects for proj_cm33_ns, proj_cm33_s, and proj_cm55. Window 4 shows Eclipse IDE with main.c open, displaying include directives for cyhal.h, cybsp.h, FreeRTOS.h, and task definitions.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_11/ChunkType.figure_2edab2cd-3c89-44b7-862d-133345563b4f_0.png",
+        "page_number": 11
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When you need a UART debug interface on the PSOC Edge E8, you must assign it to ___ because SCB0 does not support that mode.",
+      "answer": "SCB1 through SCB11",
+      "distractors": [
+        "SCB0 with UART mode enabled",
+        "any SCB with an external clock",
+        "the dedicated UART peripheral"
+      ],
+      "explanation": "SCB0 only supports I2C slave and SPI slave modes. UART requires an SCB from SCB1 to SCB11, which support I2C, UART, and SPI in both master and slave configurations."
+    },
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each I2C slave interface requirement to the correct SCB assignment:",
+      "pairs": [
+        {
+          "left": "I2C slave that must respond during Deep Sleep",
+          "right": "SCB0 with external clock on PCB"
+        },
+        {
+          "left": "I2C slave needed only in Active and Sleep modes",
+          "right": "SCB1–SCB11, no external clock required"
+        },
+        {
+          "left": "I2C master for sensor bus",
+          "right": "SCB1–SCB11 configured as master"
+        }
+      ],
+      "explanation": "SCB0 is the only SCB that operates in Deep Sleep, but it requires an external clock and supports only slave modes. Master interfaces and non-Deep-Sleep slaves belong on SCB1–SCB11."
+    }
+  ],
+  "content_gaps": [
+    "PDL API signatures and initialization code patterns for SCB configuration (e.g., Cy_SCB_UART_Init, Cy_SCB_I2C_Init) are not present in the provided datasheet chunks — the Architecture Reference Manual and PDL API documentation are required for hands-on coding exercises.",
+    "GPIO HSIOM routing specifics for each SCB instance (which port/pin maps to which SCB signal) require the GPIO alternate functions table from the datasheet (section 7) and the Pins configurator, neither of which is fully represented in the provided chunks.",
+    "The SCB0 external clock frequency requirement and acceptable clock sources for Deep Sleep operation are not specified in the provided chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are bringing up the face recognition terminal hardware and need to configure the serial communication peripherals using the ModusToolbox PDL. The terminal design requires an I2C slave interface for a secure element that must remain accessible even when the system enters Deep Sleep to preserve power during idle periods between access events.",
+        "question_text": "Which SCB instance should you assign to this I2C slave interface, and what constraint does that choice impose on your hardware design?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "SCB0, which supports I2C slave mode in Deep Sleep with an external clock — your PCB must supply that external clock signal to SCB0",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "SCB1, which supports I2C slave mode in Deep Sleep using the internal IHO — no external clock is required on the PCB",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Any SCB from SCB1 to SCB11, since all SCBs support I2C slave mode and Deep Sleep operation with the on-chip PILO as the clock source",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. SCB0 is the only SCB that can operate in System Deep Sleep power mode, and it only supports I2C slave mode and SPI slave mode in that state. However, it requires an external clock to do so, which is a hardware design constraint you must account for on the PCB.",
+        "incorrect": "SCB1 through SCB11 do not support Deep Sleep operation — only SCB0 does. SCB0 requires an external clock for Deep Sleep operation; the internal IHO and PILO are not available to it in that mode. Review the SCB peripheral documentation in the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves. SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O6",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are finalizing the PCB bring-up checklist for the face recognition terminal. The design uses the PSOC Edge E8's 2.5D GPU and MIPI-DSI host controller to drive a 720p display for the terminal UI. During hardware review, a colleague questions whether the DSI.REXT pin needs any external component.",
+        "question_text": "What is the correct handling of the DSI.REXT pin for this terminal design, and what happens if it is left unconnected?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "DSI.REXT must be tied directly to ground — leaving it unconnected causes the DSI PHY to draw excess current and overheat",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "DSI.REXT must be connected to a 200 Ω resistor to ground — leaving it unconnected means the graphics feature will not function correctly",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "DSI.REXT must be pulled up to VDDD through a 200 Ω resistor — leaving it floating causes the display controller to default to DBI command mode",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. When the graphics feature is used, DSI.REXT must be connected to a 200 Ω resistor to ground. If the graphics feature is not used, the pin should be tied to ground directly. Leaving it unconnected when the GPU and MIPI-DSI pipeline are active will cause the graphics feature to malfunction.",
+        "incorrect": "The documented requirement is a 200 Ω resistor from DSI.REXT to ground — not a direct tie to ground, and not a pull-up to VDDD. This resistor is required whenever the graphics feature is in use. Review the PSOC Edge E8 hardware design guidelines for the DSI interface."
+      },
+      "references": [
+        {
+          "chunk_id": "a795bb27-bc8e-402e-a5e4-771426c1aa89",
+          "snippet": "If the graphics feature is used, connect the DSI.REXT pin to a 200 Ω resistor to ground. If not, tied to ground.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_41/ChunkType.text_a795bb27-bc8e-402e-a5e4-771426c1aa89_0.png",
+          "page_number": 41,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are writing the peripheral initialization code for the face recognition terminal using the ModusToolbox PDL. The terminal requires four serial interfaces: a MIPI-DSI display, an I2C bus for the IR sensor array, a SPI link to an external NOR flash, and a UART for debug output. You need to assign each interface to a PSOC Edge E8 peripheral.",
+        "question_text": "Which peripheral assignment correctly maps all four interfaces to their appropriate PSOC Edge E8 hardware blocks?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "MIPI-DSI display → Display Controller + DSI host; I2C sensor bus → SCB0 (master); SPI flash → SCB2; UART debug → SCB3",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MIPI-DSI display → Display Controller + DSI host; I2C sensor bus → SCB1 (master); SPI flash → SCB2; UART debug → SCB3",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "MIPI-DSI display → SCB0 in DSI mode; I2C sensor bus → SCB1 (master); SPI flash → SMIF; UART debug → SCB2",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The MIPI-DSI display is driven by the dedicated Display Controller and DSI host controller block — not an SCB. The I2C sensor bus should use SCB1 or higher as an I2C master, because SCB0 only supports I2C slave and SPI slave modes. SPI flash and UART debug can use any of SCB1–SCB11 configured in the appropriate mode.",
+        "incorrect": "Two common errors appear in the wrong options: SCB0 cannot operate as an I2C master — it only supports I2C slave and SPI slave modes. Additionally, the MIPI-DSI display is not routed through an SCB; it uses the dedicated Display Controller and DSI host controller. Review the SCB and display pipeline sections of the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves. SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+          "snippet": "Frames rendered by the GPU are transferred to the MIPI display serial interface (DSI) host controller by the display controller (DC). Both DBI (command mode) and DPI (video mode) standards are supported over the DSI interface as per the MIPI standards specification.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_601897f0-c9fa-42e6-944f-c64de37b76d6_0.png",
+          "page_number": 39,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O6",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a junior engineer's peripheral configuration plan for the face recognition terminal. Their plan assigns the UART debug interface to SCB0, the I2C sensor bus to SCB1 as master, and the SPI NOR flash to SCB2 as master. They argue that SCB0 is a good choice for UART debug because it supports Deep Sleep, keeping the debug port accessible during low-power states.",
+        "question_text": "What is the critical flaw in assigning UART debug to SCB0, and what should you recommend instead?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "SCB0 does not support UART mode at all — reassign UART debug to any of SCB1 through SCB11 configured in UART mode",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "SCB0 supports UART but only as a slave receiver — reassign UART debug to SCB1 configured as a full-duplex UART master",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "SCB0 supports UART in Active mode only, not Deep Sleep — reassign UART debug to SCB1 and accept that debug is unavailable in Deep Sleep",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. SCB0 only supports I2C slave mode and SPI slave mode — it has no UART capability at all. The junior engineer's reasoning about Deep Sleep accessibility is irrelevant because UART is simply not a supported mode for SCB0. UART debug must be assigned to one of SCB1 through SCB11.",
+        "incorrect": "The flaw is more fundamental than a mode or direction limitation: SCB0 does not support UART at all. It is restricted to I2C slave and SPI slave modes only. There is no UART slave or master variant available on SCB0. Review the SCB0 capability constraints in the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "This product line has 12 SCBs. SCB1 to SCB11 can be configured to implement an I2C, UART, or SPI interface, and can be masters or slaves. SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    }
+  ]
+}

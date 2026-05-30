@@ -1,0 +1,375 @@
+{
+  "subsection_id": "1.2.2",
+  "subsection_title": "Evaluate Package Options for Your PCB",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Select the appropriate VFBGA package for the STM32N657xx based on I/O count requirements and PCB form factor constraints",
+    "Explain the tradeoff between package size, ball pitch, and I/O availability across the six STM32N6 package options",
+    "Justify a package selection decision by mapping peripheral I/O requirements to datasheet package specifications"
+  ],
+  "content": {
+    "hook_sentence": "Choosing a package that is one size too small can invalidate your entire variant selection — the STM32N657xx with Neural-ART and crypto is useless if the package you chose cannot physically expose enough pins to connect your camera, memory, and Ethernet simultaneously.",
+    "introduction": "You have already confirmed that the STM32N657xx is the only variant that satisfies both the Neural-ART NPU and full crypto requirements for your face recognition terminal. The next decision — package selection — is where hardware architecture meets PCB reality. The package you choose determines how many I/Os are physically accessible, what board area the device occupies, and whether your assembly process can reliably handle the ball pitch. Getting this wrong forces a board respin.",
+    "key_points": [
+      {
+        "point": "Six VFBGA packages are available, ranging from 6 x 6 mm to 14 x 14 mm — each with a different ball count, pitch, and accessible I/O count.",
+        "explanation": "The STM32N6 family is offered in six very thin fine pitch ball grid array (VFBGA) packages. From smallest to largest: VFBGA169 (6 x 6 mm, 0.4 mm pitch), VFBGA142 (8 x 8 mm, 0.5 mm pitch), VFBGA198 (10 x 10 mm, 0.65 mm pitch), VFBGA223 (10 x 10 mm, 0.5 mm pitch), VFBGA178 (12 x 12 mm, 0.8 mm pitch), and VFBGA264 (14 x 14 mm, 0.8 mm pitch). Notice that physical size and ball count do not always move together — the VFBGA169 is physically smaller than the VFBGA142 despite having more balls, because its 0.4 mm pitch packs balls more tightly into a smaller footprint. When you are reviewing the datasheet Section 6, use both the physical dimensions and the I/O count column together; neither alone tells the full story.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+            "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+            "page_number": 0,
+            "chunk_type": "figure"
+          },
+          {
+            "chunk_id": "758d6bc8-a18c-4c32-b0c8-6dd77319d1ab",
+            "snippet": "This VFBGA is a 169-ball, 6 x 6 mm, 0.4 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_237/ChunkType.text_758d6bc8-a18c-4c32-b0c8-6dd77319d1ab_0.png",
+            "page_number": 237,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "8d50efaa-1dff-4c5b-bc2b-b1f476187a09",
+            "snippet": "This VFBGA is a 178-ball, 12 x 12 mm, 0.80 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_240/ChunkType.text_8d50efaa-1dff-4c5b-bc2b-b1f476187a09_0.png",
+            "page_number": 240,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "97b302f0-2139-47f2-a943-143e6e742327",
+            "snippet": "This VFBGA is a 198-ball, 10 x 10 mm, 0.65 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_242/ChunkType.text_97b302f0-2139-47f2-a943-143e6e742327_0.png",
+            "page_number": 242,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fc553998-3069-4594-8eda-8a66dfff4170",
+            "snippet": "This VFBGA is a 264-ball, 14 x 14 mm, 0.8 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_249/ChunkType.text_fc553998-3069-4594-8eda-8a66dfff4170_0.png",
+            "page_number": 249,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "I/O count — not ball count — is the binding constraint for your peripheral set; the VFBGA264 provides the maximum 165 I/Os, while the VFBGA142 provides only 75.",
+        "explanation": "Ball count and I/O count are not the same number. Many balls in a BGA package are assigned to power supply rails (VDD, VSS, VDDA, VDDCORE), analog references (VREF+), and dedicated function pins (BOOT0, NRST, PDR_ON) — none of which count as general-purpose or peripheral I/Os. For your face recognition terminal, the peripheral set includes the CSI-2 camera interface, XSPI external memory, USB, Ethernet, and GPIO lines for door lock and alarm outputs. Your hardware lead's I/O estimate for this set will land somewhere in the 110–130+ range depending on how many GPIO outputs the access control logic requires. The datasheet feature tables (Tables 2–5) list the I/O count per package: VFBGA142 provides 75 I/Os, while VFBGA264 provides 165 I/Os. If your peripheral set requires 130 I/Os, the VFBGA198 and VFBGA178 will fall short regardless of their ball counts — you need to check the I/O column specifically.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "43fcb2d1-76cc-4b8e-88d9-a2df34f3f5fc",
+            "snippet": "Row P: PF12, VREF+, VSSA, CSI_D1N, CSI_CKN, CSI_D0N, CSI_REX_T, VDDCSI, PG14, PA12, PA9, PA2, PA6, PA1, PG10",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_80/ChunkType.figure_43fcb2d1-76cc-4b8e-88d9-a2df34f3f5fc_0.png",
+            "page_number": 80,
+            "chunk_type": "figure"
+          },
+          {
+            "chunk_id": "c07f466f-f98c-4e88-880e-549f31b13562",
+            "snippet": "In order to meet environmental requirements, ST offers these devices in different grades of ECOPACK packages, depending on their level of environmental compliance.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_233/ChunkType.text_c07f466f-f98c-4e88-880e-549f31b13562_0.png",
+            "page_number": 233,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Ball pitch drives PCB manufacturability — a 0.4 mm pitch package demands tighter design rules than a 0.8 mm pitch package of similar I/O count.",
+        "explanation": "When you compare the VFBGA169 (6 x 6 mm, 0.4 mm pitch) to the VFBGA178 (12 x 12 mm, 0.8 mm pitch), the VFBGA169 is physically much smaller but its 0.4 mm pitch requires finer PCB trace routing, smaller via capture pads, and tighter solder mask tolerances. For a face recognition terminal that is not a consumer wearable, the board area saved by a 0.4 mm pitch package rarely justifies the added assembly complexity and yield risk. The VFBGA178 and VFBGA264 both use 0.8 mm pitch, which is more forgiving for standard PCB fabrication processes and makes rework easier if you need to replace a device during bring-up. When your PCB layout engineer reviews the package options, pitch is the first manufacturability filter — I/O count is the second.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "758d6bc8-a18c-4c32-b0c8-6dd77319d1ab",
+            "snippet": "This VFBGA is a 169-ball, 6 x 6 mm, 0.4 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_237/ChunkType.text_758d6bc8-a18c-4c32-b0c8-6dd77319d1ab_0.png",
+            "page_number": 237,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "8d50efaa-1dff-4c5b-bc2b-b1f476187a09",
+            "snippet": "This VFBGA is a 178-ball, 12 x 12 mm, 0.80 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_240/ChunkType.text_8d50efaa-1dff-4c5b-bc2b-b1f476187a09_0.png",
+            "page_number": 240,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fc553998-3069-4594-8eda-8a66dfff4170",
+            "snippet": "This VFBGA is a 264-ball, 14 x 14 mm, 0.8 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_249/ChunkType.text_fc553998-3069-4594-8eda-8a66dfff4170_0.png",
+            "page_number": 249,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "For most face recognition terminal designs, the VFBGA223 or VFBGA264 is the practical choice — the VFBGA223 balances I/O count and board area, while the VFBGA264 maximizes I/O headroom.",
+        "explanation": "Once you have your I/O budget and your PCB form factor constraint, the selection narrows quickly. The VFBGA223 (10 x 10 mm, 0.5 mm pitch) provides more I/Os than the VFBGA198 while occupying the same 10 x 10 mm footprint — making it the better choice when board area is constrained but I/O count is the binding requirement. The VFBGA264 (14 x 14 mm, 0.8 mm pitch) provides the maximum 165 I/Os and uses the most PCB-friendly 0.8 mm pitch, but its 14 x 14 mm footprint is larger. For a terminal requiring 130+ I/Os, the VFBGA223 is the smallest package that can satisfy the requirement; the VFBGA264 provides additional headroom if your GPIO count grows during detailed design. Document your selection with the package designation code (e.g., B0GK for VFBGA223, B0GH for VFBGA264) and the datasheet section reference so your hardware architecture document is traceable.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "fc553998-3069-4594-8eda-8a66dfff4170",
+            "snippet": "This VFBGA is a 264-ball, 14 x 14 mm, 0.8 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_249/ChunkType.text_fc553998-3069-4594-8eda-8a66dfff4170_0.png",
+            "page_number": 249,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "97b302f0-2139-47f2-a943-143e6e742327",
+            "snippet": "This VFBGA is a 198-ball, 10 x 10 mm, 0.65 mm pitch, very thin fine pitch ball grid array package.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_242/ChunkType.text_97b302f0-2139-47f2-a943-143e6e742327_0.png",
+            "page_number": 242,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "bafb47d6-cdf7-4e71-9ea7-d133ee3d4219",
+            "snippet": "For a list of available options (such as speed or package) or for further information on any aspect of this device, contact the nearest ST sales office.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_253/ChunkType.text_bafb47d6-cdf7-4e71-9ea7-d133ee3d4219_0.png",
+            "page_number": 253,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your hardware lead estimates the face recognition terminal needs approximately 110 I/Os to support CSI-2, XSPI, USB, Ethernet, and GPIO outputs. Two proposals are on the table: Proposal A uses the VFBGA169 (6 x 6 mm, 0.4 mm pitch) to minimize board area; Proposal B uses the VFBGA178 (12 x 12 mm, 0.8 mm pitch). Which proposal should you recommend, and what is the primary reason?",
+        "reveal": "Recommend Proposal B. The VFBGA169 is a 169-ball package in a 6 x 6 mm footprint, but its I/O count is insufficient for a 110 I/O requirement — many of its 169 balls are consumed by power, ground, and dedicated function pins, leaving far fewer than 110 accessible I/Os. The VFBGA178, despite being physically larger at 12 x 12 mm, provides enough I/Os to support the full peripheral set. The 0.8 mm pitch of the VFBGA178 also simplifies PCB routing compared to the 0.4 mm pitch of the VFBGA169. Board area is a secondary concern here; I/O sufficiency is the binding constraint. Proposal A fails on I/O count before board size even becomes relevant.",
+        "hint": "Check the I/O count first, then consider physical size — a smaller package that cannot expose enough pins is not a valid option regardless of its footprint."
+      },
+      {
+        "prediction_prompt": "You are finalizing the hardware architecture document for the face recognition terminal. Your peripheral set requires at least 130 I/Os. You want the smallest possible package that meets this requirement. Looking at the available VFBGA options, which package do you select, and why is the VFBGA264 not the best answer even though it provides more I/Os?",
+        "reveal": "Select the VFBGA223 (10 x 10 mm, 0.5 mm pitch). The VFBGA223 provides sufficient I/Os to meet the 130 I/O requirement while occupying a 10 x 10 mm footprint — smaller than the VFBGA264's 14 x 14 mm. The VFBGA264 provides 165 I/Os (more than needed) but at the cost of a larger board footprint. Since the objective is the smallest package that satisfies the requirement, the VFBGA223 is the correct answer. The VFBGA264 is the right choice only if your I/O count grows beyond what the VFBGA223 can support, or if the 0.8 mm pitch of the VFBGA264 is required for your assembly process versus the 0.5 mm pitch of the VFBGA223.",
+        "hint": "The goal is minimum footprint that satisfies the I/O floor — not maximum I/O count."
+      }
+    ],
+    "summary": "Package selection for the STM32N657xx comes down to two filters applied in order: I/O count must meet or exceed your peripheral set's requirement, then physical size and ball pitch determine which qualifying package fits your PCB and assembly process. For a face recognition terminal with a full peripheral set, the VFBGA223 or VFBGA264 are the practical candidates — document your choice with the package designation code and the datasheet Section 6 reference.",
+    "figures": [
+      {
+        "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+        "after_key_point": 0,
+        "caption": "All six STM32N6 VFBGA package options with their physical dimensions and ball pitch. Use this as your starting reference when comparing footprint constraints against I/O requirements.",
+        "alt_text": "Diagram showing a VFBGA package icon on the left with a list of six package variants on the right: VFBGA142 at 8 by 8 mm with 0.5 mm pitch, VFBGA169 at 6 by 6 mm with 0.4 mm pitch, VFBGA178 at 12 by 12 mm with 0.8 mm pitch, VFBGA198 at 10 by 10 mm with 0.65 mm pitch, VFBGA223 at 10 by 10 mm with 0.5 mm pitch, and VFBGA264 at 14 by 14 mm with 0.8 mm pitch.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+        "page_number": 0
+      },
+      {
+        "chunk_id": "43fcb2d1-76cc-4b8e-88d9-a2df34f3f5fc",
+        "after_key_point": 1,
+        "caption": "VFBGA142 ballout (top view) showing how balls are allocated across power rails, dedicated function pins, and GPIO — illustrating why ball count and accessible I/O count differ significantly.",
+        "alt_text": "Top-view ballout diagram of the VFBGA142 package arranged in a 15-column by 18-row grid labeled columns 1 through 15 and rows A through R. Balls are assigned to signals including PDR_ON, OTG interfaces, oscillator pins, CSI differential pairs on rows P and R, VDDCORE power rails in the center rows, VSS ground balls, and GPIO ports including PC, PE, PD, PB, PA, PF, PG, and PN series pins. Many central positions in rows F through M are empty, representing the depopulated center region typical of BGA packages.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_80/ChunkType.figure_43fcb2d1-76cc-4b8e-88d9-a2df34f3f5fc_0.png",
+        "page_number": 80
+      },
+      {
+        "chunk_id": "cd9e2693-3dd8-4484-87ae-eb6c97e01941",
+        "after_key_point": 3,
+        "caption": "VFBGA223 outline drawing showing bottom view ball grid, side view height profile, and top view footprint dimensions — the 10 x 10 mm package that balances I/O count and board area for most terminal designs.",
+        "alt_text": "Three-view technical drawing of the VFBGA223 package. Bottom view shows a grid of balls arranged in rows A through W and columns 1 through 19, with a depopulated central square region and the A1 ball pad corner marked at the lower left. Side view shows the package height profile with dimensions A, A1, and A2 referenced from the seating plane, with GD&T callouts for flatness (ccc C) and profile (ddd C). Top view shows the rectangular package outline with dimensions B, E, A, and D, datum references A and B, and a profile tolerance callout (aaa C, 4 times). Package designation B0GK VFBGA223 ME V2 is noted.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_246/ChunkType.figure_cd9e2693-3dd8-4484-87ae-eb6c97e01941_0.png",
+        "page_number": 246
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When verifying that a VFBGA package can support your peripheral set, the correct specification to check first is ___, not total ball count.",
+      "answer": "I/O count",
+      "distractors": [
+        "package dimensions",
+        "ball pitch",
+        "power ball count"
+      ],
+      "explanation": "Many balls in a BGA package are consumed by power, ground, and dedicated function pins. The I/O count column in the feature table reflects only the pins available for peripheral and GPIO connections, which is the binding constraint for peripheral set compatibility."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each package selection scenario to the primary factor that drives the decision:",
+      "pairs": [
+        {
+          "left": "Two packages have the same 10 x 10 mm footprint but different I/O counts",
+          "right": "I/O count is the deciding factor"
+        },
+        {
+          "left": "Two packages have similar I/O counts but one uses 0.4 mm pitch and the other 0.8 mm pitch",
+          "right": "Ball pitch and PCB manufacturability is the deciding factor"
+        },
+        {
+          "left": "Your peripheral set requires 130 I/Os and you want the smallest qualifying footprint",
+          "right": "Find the smallest package whose I/O count meets or exceeds the requirement"
+        }
+      ],
+      "explanation": "Package selection applies two filters in order: I/O sufficiency first, then physical size and pitch. When I/O counts differ within the same footprint, I/O count wins. When I/O counts are comparable, pitch and board area become the tiebreaker."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet chunks provided do not include the explicit I/O count per package from Tables 2–5 (e.g., VFBGA223: X I/Os, VFBGA264: 165 I/Os). The I/O counts referenced in the learning objectives (VFBGA142: 75 I/Os, VFBGA264: 165 I/Os) come from the objective metadata rather than a directly retrieved chunk. Learners should be directed to Tables 2–5 in the datasheet for the authoritative per-package I/O count values.",
+    "The datasheet does not specify which package variants are available for the STM32N657xx specifically versus other STM32N6 sub-variants. Learners should verify package availability for their exact part number using the ordering information in Section 7 or by contacting ST sales."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are finalizing the hardware architecture specification for a face recognition access control terminal. The design requires simultaneous support for a CSI-2 camera interface, XSPI external memory, USB, Ethernet, and multiple GPIO lines for door lock and alarm outputs. You have selected the STM32N647xx variant for its Neural-ART NPU. You are now reviewing the STM32N6 datasheet Section 6 to choose a package.",
+        "question_text": "Your peripheral set requires at least 130 I/Os. Which package should you select to meet this requirement while keeping the PCB footprint as small as possible?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "VFBGA198 (10 x 10 mm, 0.65 mm pitch) — provides more balls than VFBGA178 but its I/O count falls short of 130",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "VFBGA223 (10 x 10 mm, 0.5 mm pitch) — provides sufficient I/Os for the peripheral set and is smaller than the VFBGA264",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "VFBGA264 (14 x 14 mm, 0.8 mm pitch) — provides the maximum 165 I/Os and is the only package that supports all peripherals",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The VFBGA223 provides enough I/Os to satisfy the 130-I/O requirement and has a smaller 10 x 10 mm footprint compared to the VFBGA264 (14 x 14 mm). When the requirement is met by a smaller package, choosing the larger one adds unnecessary PCB area without benefit.",
+        "incorrect": "Review the I/O counts and physical dimensions in the STM32N6 datasheet package tables (Section 6). The goal is to select the smallest package that still meets the minimum I/O count — not automatically the largest. The VFBGA198 does not reach 130 I/Os, and the VFBGA264, while valid, is larger than necessary when the VFBGA223 already satisfies the requirement."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165; VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+          "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+          "page_number": 0,
+          "chunk_type": "figure"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O6",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing two competing PCB layout proposals for the face recognition terminal. Proposal A uses the VFBGA169 (6 x 6 mm, 0.4 mm pitch, 75 I/Os) to minimize board size. Proposal B uses the VFBGA178 (12 x 12 mm, 0.8 mm pitch) to ease PCB routing. Your terminal requires CSI-2 camera, XSPI external memory, USB, Ethernet, and GPIO outputs — a peripheral set your hardware lead estimates needs approximately 110 I/Os.",
+        "question_text": "Which proposal should you recommend, and what is the primary reason?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Proposal A — the VFBGA169 minimizes board area and the 0.4 mm pitch simplifies assembly for high-volume production",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Proposal B — the VFBGA178 provides sufficient I/Os for the peripheral set, whereas the VFBGA169 at 75 I/Os cannot support the required 110 I/Os",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Proposal A — the VFBGA169 is the smallest package available and board size is the highest-priority constraint for access control terminals",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The VFBGA169 provides only 75 I/Os, which is insufficient for a peripheral set requiring approximately 110 I/Os. Regardless of its smaller footprint, a package that cannot accommodate the required I/O count is not a valid choice. The VFBGA178 meets the I/O requirement and should be recommended.",
+        "incorrect": "Package selection must first satisfy the minimum I/O count before other factors like board size or pitch are considered. The VFBGA169 provides only 75 I/Os — well below the 110 required. A smaller package that cannot support the peripheral set is not a viable option. Review the I/O counts per package in the STM32N6 datasheet Section 6 tables."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75; VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+          "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+          "page_number": 0,
+          "chunk_type": "figure"
+        },
+        {
+          "chunk_id": "8d50efaa-1dff-4c5b-bc2b-b1f476187a09",
+          "snippet": "This VFBGA is a 178-ball, 12 x 12 mm, 0.80 mm pitch, very thin fine pitch ball grid array package.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_240/ChunkType.text_8d50efaa-1dff-4c5b-bc2b-b1f476187a09_0.png",
+          "page_number": 240,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are writing the variant selection section of the hardware architecture document for the face recognition terminal. Your product manager asks you to justify the device choice. The terminal must run a deep neural network for face matching in real time and must also encrypt stored biometric templates using AES and PKA-based asymmetric operations. You have reviewed Tables 2–5 of the STM32N6 datasheet.",
+        "question_text": "Which statement accurately describes the architectural tradeoff you must document in your recommendation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N6x7xx provides the Neural-ART NPU for real-time inference but lacks SAES, CRYP, PKA, and MCE, while the STM32N6x5xx provides those crypto engines but has no Neural-ART NPU",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The STM32N6x5xx provides the Neural-ART NPU and full crypto engine, making it the correct choice for a terminal that requires both AI inference and biometric data encryption",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Both STM32N6x5xx and STM32N6x7xx include the Neural-ART NPU, but only the STM32N6x5xx adds the full crypto engine on top of it",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N6x7xx includes the Neural-ART NPU but omits SAES, CRYP, PKA, and MCE. The STM32N6x5xx includes those cryptographic engines but has no Neural-ART NPU. This is the core tradeoff: a terminal needing both capabilities cannot satisfy both requirements with a single variant, and your recommendation must explicitly state this.",
+        "incorrect": "Review the feature tables in the STM32N6 datasheet. The Neural-ART NPU is exclusive to the STM32N6x7xx variant, while SAES, CRYP, PKA, and MCE are exclusive to the STM32N6x5xx variant. Neither variant includes both feature sets simultaneously — this mutual exclusivity is the central tradeoff you must document."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    }
+  ]
+}

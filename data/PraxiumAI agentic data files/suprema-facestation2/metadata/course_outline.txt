@@ -1,0 +1,533 @@
+<analysis>
+
+## Pre-Design Analysis
+
+### 1. Learning Goals and Associated Objectives
+
+**Goal G1:** Apply FaceStation 2 performance, security, credential, and usability specifications to accurately resolve product questions, counter stakeholder objections, and advocate for product decisions in cross-functional discussions — without referencing external support.
+- **O1:** Apply matching speed, group matching speed, and user capacity figures to resolve performance inquiries
+- **O2:** Assess deployment environments against the 0–25,000 lx operating illuminance range
+- **O3:** Counter face recognition vulnerability concerns by citing live face detection, IR-based image analysis, and Android 5.0 security layer
+- **O6:** Respond to usability objections by citing 145cm–210cm height range and tilt-type bracket
+
+**Goal G2:** Select the appropriate FaceStation 2 model variant and system configuration to match a given deployment scenario, justifying recommendations using hardware specifications and interface capabilities.
+- **O4:** Select and justify FS2-D vs. FS2-AWB based on credential and connectivity requirements
+- **O5:** Match deployment scenarios to standalone, standalone-secure, or distributed configurations using interface specifications
+
+---
+
+### 2. Major Topic Areas from the Technical Document
+
+1. **Product Overview** — FaceStation 2 identity, brand positioning, general description
+2. **Ultra Performance** — Matching speed (1:4,000/sec), Group Matching (1:5,000/sec), User Capacity (30,000 / 4,000)
+3. **Highest Operating Illuminance** — 0–25,000 lx range, IR LED array (140 ea), all-condition coverage
+4. **Enhanced Security** — Live face detection, IR-based anti-spoofing, Android 5.0 Lollipop security layer, image log
+5. **Multi RFID Card Reading** — LF/HF dual-band, HID multiCLASS compatibility, card type list
+6. **Ergonomics & User Convenience** — Height range, tilt bracket, GUI, enrollment procedure
+7. **Specifications Table** — FS2-D vs. FS2-AWB model comparison (credentials, RF options, interfaces, general specs)
+8. **System Configurations** — Standalone, Standalone-Secure, Distributed Access Control, BioStar 2 integration
+
+---
+
+### 3. Persona's Top Pain Points
+
+1. **Stakeholder alignment across functions** — Alex must translate complex specs into clear product decisions for engineering, sales, support, and leadership simultaneously
+2. **Serving as the authoritative internal reference** — Alex needs to answer questions confidently without looking things up, especially in live cross-functional meetings
+3. **Model variant confusion** — Differentiating FS2-D from FS2-AWB in real deployment scenarios without errors
+4. **Translating specs into trade-off rationale** — Moving beyond reciting numbers to explaining *why* a spec matters for a given customer or deployment context
+
+---
+
+### 4. Logical Content Sequence
+
+**Foundation Layer (must come first):**
+- Product identity and positioning (what FaceStation 2 is and who it's for)
+- Performance specifications (the most frequently cited figures in stakeholder discussions)
+
+**Core Capability Layer (builds on foundation):**
+- Illuminance/operating conditions (environmental suitability)
+- Security features (anti-spoofing, Android layer)
+- RFID/credential capabilities (card compatibility)
+- Ergonomics and usability (physical design specs)
+
+**Decision-Making Layer (applies all prior knowledge):**
+- Model variant selection (FS2-D vs. FS2-AWB) — requires credential knowledge
+- System configuration selection (standalone/secure/distributed) — requires interface knowledge
+- Full specifications table as reference anchor
+
+**Application Layer (synthesizes everything):**
+- Cross-functional scenario practice
+- Stakeholder objection handling
+
+---
+
+### 5. Module and Subsection Count Calculation
+
+**Total course duration:** 30 minutes
+**Fixed components:**
+- Course Introduction: 3 minutes (1 subsection)
+- Course Summary/Assessment: 3 minutes (1 subsection)
+- Remaining instructional time: 24 minutes = 8 subsections at 3 minutes each
+
+**Proposed structure:**
+- Module 1: Product Overview & Performance (2 sections, 3 subsections) = 9 min
+- Module 2: Operating Conditions & Security (2 sections, 2 subsections) = 6 min
+- Module 3: Credentials & Ergonomics (2 sections, 2 subsections) = 6 min
+- Module 4: Model Selection & System Configuration (2 sections, 3 subsections) = 9 min
+
+Wait — let me recount. 8 instructional subsections + 1 intro + 1 summary = 10 subsections × 3 min = 30 min. ✓
+
+But the source document has 8 distinct topic areas, and the objectives require both knowledge AND application. Let me reconsider whether 8 instructional subsections is sufficient to cover all content AND all 6 objectives with application.
+
+**Revised approach:** The instructions say "Include as many modules as needed to cover ALL the content" and "there is no upper limit on module count." The 30-minute constraint with 3-minute subsections means exactly 10 subsections total (including intro and summary), leaving 8 instructional subsections. This is tight but workable if each subsection is carefully scoped.
+
+**Final count:**
+- Introduction: 1 subsection (3 min)
+- Module 1 (Performance): 2 subsections (6 min)
+- Module 2 (Operating Conditions & Security): 2 subsections (6 min)
+- Module 3 (Credentials & Ergonomics): 2 subsections (6 min)
+- Module 4 (Model Selection & System Configuration): 2 subsections (6 min)
+- Summary/Assessment: 1 subsection (3 min)
+- **Total: 10 subsections × 3 min = 30 min ✓**
+
+Each module has 2 sections with 1 subsection each (or 1 section with 2 subsections). This satisfies the "2–4 sections per module" and "1–4 subsections per section" requirements.
+
+---
+
+### 6. Delivery Format Opportunities
+
+- **Video (talking head + screen):** Product overview, security features explanation — narrative-heavy content
+- **Interactive diagram:** System configuration comparison — spatial/relational content
+- **Comparison table/interactive:** FS2-D vs. FS2-AWB model selection — decision-making content
+- **Scenario-based case study:** Stakeholder objection handling — application content
+- **Annotated spec sheet:** Performance figures — reference-heavy content
+- **Branching scenario:** System configuration selection — decision-tree content
+
+</analysis>
+
+---
+
+# FaceStation 2: Specifications Mastery for Product Owners
+
+## Course Metadata
+
+| Field | Detail |
+|---|---|
+| **Target Learner** | Alex Mercer, Hardware Product Owner – Biometric Access Control |
+| **Total Duration** | 30 minutes |
+| **Format** | Self-paced eLearning (SCORM-compatible) |
+| **Delivery Platform** | LMS (desktop and tablet optimized) |
+| **Prerequisites** | Familiarity with access control concepts; no prior FaceStation 2 knowledge required |
+| **Source Document** | Suprema FaceStation 2 Product Datasheet [SUPREMA-AHL-FS2-EN-REV10] |
+| **Version** | 1.0 |
+| **Estimated Seat Time** | 30 minutes |
+
+---
+
+## Course Introduction (3 minutes)
+
+### Section: Welcome and Orientation (3 minutes)
+
+#### Subsection 0.1.1: What You'll Own After This Course
+
+**Duration:** 3 minutes
+**Format:** Video (talking head with animated text overlays)
+
+**Content:**
+- You're the authoritative voice on FaceStation 2 in every cross-functional meeting — this course gives you the specification fluency to back that up without reaching for a datasheet
+- The course covers six job-critical skills: applying performance figures, assessing deployment environments, countering security objections, selecting the right model variant, matching system configurations to deployment needs, and resolving usability concerns
+- You'll work through realistic stakeholder scenarios drawn from the kinds of questions engineering, sales, and leadership actually ask
+- Each module ends with a brief check that mirrors the real-world pressure of being asked a pointed question in a meeting — no multiple choice for its own sake
+- By the end, you'll be able to walk into any product review, customer discussion, or roadmap conversation and speak to FaceStation 2's capabilities with precision and confidence
+- Downloadable job aids are available throughout — use them as your on-the-job reference after the course
+
+**Learning Check:** Reflection prompt — *"Think of the last time a stakeholder asked you a product question you weren't fully prepared to answer. What specification would have helped most?"* (No right/wrong answer; sets learning intent.)
+
+---
+
+## Module 1: Performance Specifications (9 minutes)
+
+> **Module Overview:** Before you can advocate for FaceStation 2 in any stakeholder conversation, you need to own its performance numbers — not just recall them, but apply them to the specific question being asked. This module covers the three figures that come up most in product discussions: matching speed, group matching speed, and user capacity.
+
+### Section 1.1: Matching Speed and User Capacity (6 minutes)
+
+#### Subsection 1.1.1: Apply Performance Figures to Stakeholder Questions
+
+**Duration:** 3 minutes
+**Format:** Annotated spec card with narrated walkthrough (audio + interactive hotspots)
+
+**Content:**
+- FaceStation 2 performs **1:4,000 face matches per second** in standard 1:N mode — this is the figure to cite when stakeholders ask whether the device can handle high-throughput entry points like lobby turnstiles or shift-change scenarios
+- **Group Matching runs at 1:5,000 matches per second** — a faster mode relevant when users are pre-grouped (e.g., by department or floor), which reduces the search pool and increases throughput; cite this when engineering asks about optimization strategies
+- **User capacity is 30,000 users in 1:1 mode and 4,000 users in 1:N mode** — the distinction matters: 1:1 requires a card or PIN to identify the user first, then verifies the face; 1:N searches the full database by face alone
+- When a sales stakeholder asks "can this handle our 2,500-person campus?", the answer isn't just "yes" — it's "yes, and here's why: 4,000-user 1:N capacity with 1:4,000 match/sec throughput means authentication won't become a bottleneck at peak hours"
+- The 1:1 vs. 1:N distinction is a common source of confusion — always clarify which mode a stakeholder is assuming before citing capacity figures
+
+**Learning Check:** *Scenario — A sales engineer says: "The customer has 3,800 employees and wants face-only authentication at the main entrance. Can FaceStation 2 handle it?"* Select the most accurate and complete response:
+- A) "Yes, it supports up to 30,000 users." *(Incomplete — cites wrong mode)*
+- B) "It depends — 1:N mode supports 4,000 users, which covers 3,800, and matches at 1:4,000/sec, so throughput at peak entry should be manageable." *(Correct)*
+- C) "Yes, matching speed is 1:4,000/sec." *(Incomplete — doesn't address capacity)*
+- D) "We'd need to check the datasheet." *(Incorrect — you should know this)*
+
+---
+
+#### Subsection 1.1.2: Distinguish 1:1 vs. 1:N in Deployment Context
+
+**Duration:** 3 minutes
+**Format:** Branching scenario (two-path decision tree with feedback)
+
+**Content:**
+- In **1:N (identification) mode**, the device searches all enrolled faces to find a match — no card or PIN needed; this is the "walk up and get in" experience customers often want, but it's capped at 4,000 users
+- In **1:1 (verification) mode**, the user presents a credential first (card, PIN, or employee ID), and the device confirms the face matches that specific record — this scales to 30,000 users because the search space is always 1
+- The practical implication: a 10,000-person enterprise site cannot use face-only 1:N authentication on a single FaceStation 2 device — they'd need either 1:1 mode or a distributed configuration with server-side matching
+- When leadership asks "why can't we just do face-only for everyone?", you can explain the 4,000-user ceiling and offer the 1:1 alternative as the path to full-site coverage
+- Group Matching (1:5,000/sec) is a performance optimization, not a capacity expansion — it speeds up matching within a defined group, not across the full user database
+
+**Learning Check:** *Quick decision — A customer has 8,000 employees and insists on face-only (no card) authentication. Which statement is accurate?*
+- A) FaceStation 2 supports this — 30,000-user capacity covers 8,000 users. *(Incorrect — 30,000 is 1:1 mode only)*
+- B) FaceStation 2 cannot support face-only authentication for 8,000 users on a single device in 1:N mode — the 1:N ceiling is 4,000 users. *(Correct)*
+- C) Group Matching at 1:5,000/sec would solve the capacity problem. *(Incorrect — Group Matching affects speed, not capacity)*
+
+---
+
+### Section 1.2: Operating Illuminance Range (3 minutes)
+
+#### Subsection 1.2.1: Assess Deployment Environments by Lighting Condition
+
+**Duration:** 3 minutes
+**Format:** Interactive scenario with illuminance scale visual
+
+**Content:**
+- FaceStation 2 operates across **0 lx to 25,000 lx** — from complete darkness to the brightest indoor environments; this is described as the highest operating illuminance available in its class
+- **0 lx** means the device functions in total darkness — the 140 IR LEDs provide the illumination the camera needs, independent of ambient light
+- **25,000 lx** covers all standard indoor lighting conditions; for reference, a brightly lit office is typically 300–500 lx, and direct sunlight outdoors can exceed 100,000 lx — so 25,000 lx covers indoor environments but not direct outdoor sun exposure
+- When a stakeholder asks "will this work in our underground parking garage with minimal lighting?", the answer is yes — 0 lx operation is supported
+- When a stakeholder asks "can we mount this at an outdoor entrance facing south?", the honest answer is: the spec covers up to 25,000 lx, which handles shaded outdoor areas and covered entryways, but direct sunlight exposure exceeding 25,000 lx is outside the supported range — recommend a shaded or covered installation
+- Always anchor your suitability assessment to the 0–25,000 lx range; don't make claims beyond what the specification supports
+
+**Learning Check:** *A facilities manager asks: "We're installing FaceStation 2 at a covered outdoor entrance — it's shaded but gets bright on sunny days, probably around 15,000–20,000 lx. Will it work?"* What's your response?
+- A) "Outdoor installations aren't supported." *(Incorrect — too broad)*
+- B) "Yes — 15,000–20,000 lx falls within the 0–25,000 lx operating range, so a covered outdoor entrance should be fine." *(Correct)*
+- C) "It should work, but I'd need to verify." *(Incorrect — you have the spec to answer this directly)*
+
+---
+
+## Module 2: Security Features (6 minutes)
+
+> **Module Overview:** Face recognition security is one of the most scrutinized topics in any product review. When a security engineer or skeptical sales stakeholder challenges whether face authentication can be spoofed, you need to respond with precision — citing specific features and connecting each one to the specific vulnerability being raised.
+
+### Section 2.1: Anti-Spoofing and Security Architecture (6 minutes)
+
+#### Subsection 2.1.1: Counter Face Spoofing Concerns with Specification Evidence
+
+**Duration:** 3 minutes
+**Format:** Video (scenario-based: simulated product review meeting with stakeholder challenge)
+
+**Content:**
+- FaceStation 2 includes **live face detection** — the device actively distinguishes a real, present face from a static representation; this directly addresses the most common spoofing concern: "what if someone holds up a photo?"
+- The mechanism is **IR-based image analysis** — the device uses infrared imaging to detect the three-dimensional, heat-emitting characteristics of a live face; a printed photo or LCD screen does not replicate these properties, so the attempt fails at the sensor level
+- This means the device is protected against **both printed image attacks and LCD/screen-based spoofing** — two distinct attack vectors that stakeholders often raise separately
+- The third security layer is the **Android 5.0 Lollipop operating system**, which provides a hardened software environment; cite this when stakeholders raise concerns about firmware vulnerabilities or unauthorized software access
+- FaceStation 2 also maintains a **high-quality image log** — every authentication attempt is recorded with image data, providing an audit trail for security reviews and incident investigation
+- When countering security objections, connect each feature to the specific concern raised — don't list all three features generically; map them to the vulnerability the stakeholder named
+
+**Learning Check:** *A security engineer says: "I've seen demos where someone unlocked a face recognition system using a photo on a phone screen. How does FaceStation 2 prevent that?"* Which response is most complete and accurate?
+- A) "FaceStation 2 uses Android 5.0 for enhanced security." *(Incomplete — doesn't address the specific attack vector)*
+- B) "Live face detection uses IR-based image analysis to distinguish a real face from an LCD screen — a phone screen won't replicate the IR signature of a live face, so that attack fails at the sensor level." *(Correct — directly addresses the specific concern)*
+- C) "The device has live face detection, so spoofing isn't possible." *(Overstates — doesn't explain the mechanism or acknowledge limits)*
+
+---
+
+#### Subsection 2.1.2: Connect Security Features to Stakeholder Vulnerability Concerns
+
+**Duration:** 3 minutes
+**Format:** Interactive matching exercise (drag-and-drop: vulnerability concern → security feature → mechanism)
+
+**Content:**
+- Practice mapping the three security features to the three most common vulnerability concerns raised in product reviews:
+  - **Printed photo attack** → Live face detection → IR-based image analysis detects absence of live face characteristics
+  - **LCD/screen-based spoofing** → Live face detection → IR imaging distinguishes screen-emitted light from IR-reflective live skin
+  - **Firmware/software vulnerability** → Android 5.0 Lollipop security layer → Hardened OS reduces attack surface at the software level
+- The image log feature supports **post-incident forensics** — when a security stakeholder asks "how would we know if someone tried to spoof the system?", the image log is your answer
+- A critical discipline: **don't overclaim**. The specification supports these three features. If a stakeholder asks about network-level security or encryption protocols, acknowledge that's outside the scope of what the datasheet specifies and offer to follow up
+- In a product review, the sequence matters: name the concern, name the feature, explain the mechanism — this structure demonstrates mastery, not just memorization
+
+**Learning Check:** *Match each stakeholder concern to the correct FaceStation 2 security response:*
+1. "Someone could hold up a printed photo" → ___
+2. "What about someone using a tablet screen with a face photo?" → ___
+3. "How secure is the device's operating system?" → ___
+
+*(Answers: 1 → Live face detection / IR-based image analysis; 2 → Live face detection / IR-based image analysis (LCD-specific); 3 → Android 5.0 Lollipop security layer)*
+
+---
+
+## Module 3: Credentials and Ergonomics (6 minutes)
+
+> **Module Overview:** Two topics that come up constantly in customer-facing discussions: what cards does it read, and who can physically use it? This module gives you the credential compatibility knowledge to answer card questions on the spot, and the ergonomic specification data to counter usability objections with confidence.
+
+### Section 3.1: Multi-RFID Card Compatibility (3 minutes)
+
+#### Subsection 3.1.1: Address Card Compatibility Questions by Frequency and Type
+
+**Duration:** 3 minutes
+**Format:** Interactive reference card with filterable card type list
+
+**Content:**
+- FaceStation 2 supports **dual-band RFID**: LF at 125kHz and HF at 13.56MHz — this means it can read both legacy low-frequency cards and modern high-frequency smart cards from a single reader
+- The **125kHz (LF) band** covers: EM cards and HID Prox cards — the legacy proximity cards still common in older installations
+- The **13.56MHz (HF) band** covers: MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, iCLASS SE/SR/Seos, and NFC — the modern smart card ecosystem
+- The device "reads all card types that HID multiCLASS supports" — this is a useful shorthand when talking to customers already familiar with HID's multi-technology readers
+- **Important note on DESFire EV2:** Support is via backward compatibility with DESFire EV1 — CSN and smart card functions are compatible; be precise about this when engineering asks about EV2 support
+- **RF read ranges vary by card type:** MIFARE/DESFire/iCLASS read at ~50mm; EM/HID Prox/FeliCa at ~30mm; BLE at ~50mm — cite these when installation teams ask about reader placement
+
+**Learning Check:** *A customer asks: "We have a mix of old HID Prox cards and new MIFARE cards across our campus. Can FaceStation 2 read both without a separate reader for each?"* What's your answer?
+- A) "You'd need two separate readers for different card types." *(Incorrect)*
+- B) "Yes — FaceStation 2's dual-band RFID reads both 125kHz HID Prox and 13.56MHz MIFARE from a single device." *(Correct)*
+- C) "It depends on the model variant." *(Partially correct but incomplete without specifying which model)*
+
+---
+
+### Section 3.2: Ergonomics and Physical Usability (3 minutes)
+
+#### Subsection 3.2.1: Counter Usability Objections with Ergonomic Specifications
+
+**Duration:** 3 minutes
+**Format:** Annotated product diagram with narrated callouts
+
+**Content:**
+- FaceStation 2 is designed for an **extended height range of 145cm to 210cm** — this covers the vast majority of adult users and is the specification to cite when stakeholders ask whether the device accommodates users of varying heights
+- The **tilt-type bracket** is specifically designed to support wheelchair users and children — the bracket allows the device to be angled downward, bringing the camera into the correct field of view for seated or shorter users without requiring a separate mounting solution
+- When a stakeholder raises an accessibility concern ("what about our wheelchair users?"), the response is specific: "The tilt-type bracket is designed for exactly that — it adjusts the camera angle to accommodate seated users and children, and the 145cm lower bound of the height range reflects that design intent"
+- The **Android 5.0 Lollipop-based GUI** is described as intuitive — cite this when stakeholders raise concerns about user adoption or training burden for non-technical staff
+- The **improved face enrollment procedure** reduces friction at onboarding — relevant when operations teams ask about rollout logistics for large user populations
+- **Discipline on compliance claims:** The specification describes ergonomic design features; it does not certify ADA compliance or specific accessibility standards — don't overstate this in customer-facing discussions
+
+**Learning Check:** *An HR director says: "We have employees who use wheelchairs. I'm worried they won't be able to use a wall-mounted face reader."* Which response is most accurate?
+- A) "FaceStation 2 is ADA compliant." *(Incorrect — the spec doesn't make this claim)*
+- B) "The tilt-type bracket is designed specifically for wheelchair users — it angles the camera downward so seated users can authenticate without the device needing to be mounted at a different height." *(Correct)*
+- C) "The height range goes down to 145cm, so it should be fine." *(Incomplete — doesn't address the wheelchair-specific concern or mention the tilt bracket)*
+
+---
+
+## Module 4: Model Selection and System Configuration (9 minutes)
+
+> **Module Overview:** This is where specification knowledge becomes product decision-making. You'll practice selecting the right FaceStation 2 model variant for a given deployment scenario and matching system configurations to customer requirements — the two most consequential decisions you'll support in cross-functional discussions.
+
+### Section 4.1: FS2-D vs. FS2-AWB Model Selection (3 minutes)
+
+#### Subsection 4.1.1: Select the Right Model Variant for Deployment Requirements
+
+**Duration:** 3 minutes
+**Format:** Side-by-side comparison interactive (expandable spec rows with scenario overlay)
+
+**Content:**
+- The **FS2-D** supports: 125kHz EM + 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, NFC — a strong credential set for most standard deployments
+- The **FS2-AWB** adds three capabilities the FS2-D does not have: **HID Prox** (125kHz), **iCLASS SE/SR/Seos** (13.56MHz), and **2.4GHz BLE** — plus **Wi-Fi (IEEE 802.11 b/g)**
+- The decision rule is straightforward: if the customer requires HID Prox cards, iCLASS credentials, BLE mobile access, or wireless network connectivity, the answer is **FS2-AWB**; if none of those are required, **FS2-D** is the appropriate choice
+- **BLE** is increasingly relevant for mobile credential deployments — if a customer wants employees to use smartphones as access credentials, FS2-AWB is the only option
+- **Wi-Fi** matters for installations where running Ethernet is impractical — FS2-AWB's IEEE 802.11 b/g support enables wireless network connectivity; FS2-D requires a wired Ethernet connection
+- When justifying model selection to a customer or internal stakeholder, always reference the specific credential or connectivity requirement that drove the decision — "we're recommending FS2-AWB because your existing HID Prox infrastructure requires 125kHz HID Prox support, which is only available on that model"
+
+**Learning Check:** *A customer is migrating from an HID Prox card system and wants to add BLE mobile credentials in Phase 2. Which model do you recommend and why?*
+- A) FS2-D — it supports the broadest range of 13.56MHz cards. *(Incorrect — FS2-D doesn't support HID Prox or BLE)*
+- B) FS2-AWB — it supports both 125kHz HID Prox (for the existing infrastructure) and 2.4GHz BLE (for the Phase 2 mobile credential rollout). *(Correct)*
+- C) Either model — both support HID Prox. *(Incorrect — HID Prox is FS2-AWB only)*
+
+---
+
+### Section 4.2: System Configuration Selection (6 minutes)
+
+#### Subsection 4.2.1: Match Deployment Scenarios to System Configurations
+
+**Duration:** 3 minutes
+**Format:** Interactive diagram (clickable system configuration map based on the source document flowchart)
+
+**Content:**
+- FaceStation 2 supports three system configurations, each suited to different deployment scales and security requirements:
+  - **Standalone:** FaceStation 2 connects directly to a door lock and exit button via Relay (1 relay output) and TTL input — simplest configuration, appropriate for single-door or small-site deployments where a central server isn't needed
+  - **Standalone-Secure:** FaceStation 2 connects to a **Secure I/O 2 module** via RS-485, which then controls the door lock and exit button — the relay and input connections are moved to the Secure I/O 2, keeping door hardware physically separated from the reader; appropriate when the door controller must be in a secured location
+  - **Distributed Access Control:** Multiple FaceStation 2 devices connect to a central **BioStar 2 Server** via TCP/IP, with RS-485 connections to additional readers and relay connections to door hardware — appropriate for multi-door, multi-site, or enterprise deployments requiring centralized management
+- The interface specifications that enable these configurations: **RS-485 (1ch Host or Slave, selectable)**, **Relay (1 relay)**, **TTL input (2 inputs)**, **Wiegand (1ch In, 1ch Out)**, **Ethernet (10/100/1000 Mbps)**
+- When a customer describes their deployment, listen for three signals: **site size** (single door vs. multi-site), **security requirement** (is the door controller in a secure location?), and **integration need** (does it need to connect to a central access control platform?)
+
+**Learning Check:** *A customer has a single server room door. They want the door lock controller in a locked cabinet, not accessible from the hallway. Which configuration applies?*
+- A) Standalone — direct relay connection to the door lock. *(Incorrect — the relay would be accessible at the reader)*
+- B) Standalone-Secure — FaceStation 2 connects to a Secure I/O 2 module via RS-485; the Secure I/O 2 controls the door lock from inside the secured cabinet. *(Correct)*
+- C) Distributed — requires a BioStar 2 Server. *(Incorrect — overkill for a single door; also doesn't address the physical security requirement)*
+
+---
+
+#### Subsection 4.2.2: Justify Configuration Recommendations Using Interface Specifications
+
+**Duration:** 3 minutes
+**Format:** Case study with guided analysis (written scenario + structured response framework)
+
+**Content:**
+- Justifying a configuration recommendation means citing the **specific interface specifications** that make it work — not just naming the configuration type
+- For **Standalone:** cite the **1 Relay output** (controls the door lock) and **2 TTL inputs** (connects the exit button and door sensor) — these are the physical connections that make direct door control possible without additional hardware
+- For **Standalone-Secure:** cite **RS-485 (1ch Host)** as the connection from FaceStation 2 to the Secure I/O 2 module, and the **Relay on the Secure I/O 2** as the door lock control point — the key security benefit is that the relay (and therefore the door hardware) is physically separated from the reader
+- For **Distributed:** cite **Ethernet (10/100/1000 Mbps)** as the TCP/IP backbone connecting devices to BioStar 2 Server, and **RS-485 (Host or Slave, selectable)** for connecting additional readers or slave devices in a daisy-chain topology
+- **Wiegand (1ch In, 1ch Out)** is relevant when integrating with legacy access control panels that use Wiegand protocol — cite this when a customer asks about compatibility with their existing panel
+- The discipline here: when you recommend a configuration, always follow with "and here's the interface that makes it work" — this is what separates a product owner's recommendation from a sales pitch
+
+**Learning Check:** *A multi-building campus wants centralized access control management across 12 doors. You recommend Distributed Access Control. A stakeholder asks: "What interfaces actually connect all these devices together?"* Which answer is most complete?
+- A) "They all connect via Wi-Fi." *(Incorrect — Wi-Fi is FS2-AWB only and not the primary network interface for distributed configurations)*
+- B) "Each FaceStation 2 connects to the BioStar 2 Server via Ethernet (10/100/1000 Mbps TCP/IP), and RS-485 (selectable Host or Slave) connects additional readers or slave devices at each door." *(Correct)*
+- C) "The RS-485 interface handles all the connections." *(Incomplete — RS-485 alone doesn't describe the full distributed topology)*
+
+---
+
+## Course Summary and Final Assessment (3 minutes)
+
+### Section 5.1: Synthesis and Readiness Check (3 minutes)
+
+#### Subsection 5.1.1: Apply Specifications Across a Full Stakeholder Scenario
+
+**Duration:** 3 minutes
+**Format:** Capstone scenario with multi-part response (written or selected responses)
+
+**Content:**
+- Review the six job-critical skills covered in this course:
+  - **O1:** Applying matching speed (1:4,000/sec), group matching (1:5,000/sec), and user capacity (30,000 / 4,000) to performance questions
+  - **O2:** Assessing deployment environments against the 0–25,000 lx illuminance range
+  - **O3:** Countering face spoofing concerns with live face detection, IR-based image analysis, and Android 5.0 security layer
+  - **O4:** Selecting FS2-D vs. FS2-AWB based on credential and connectivity requirements
+  - **O5:** Matching deployment scenarios to standalone, standalone-secure, or distributed configurations with interface justification
+  - **O6:** Responding to usability objections with the 145cm–210cm height range and tilt-type bracket specifications
+- Your job aids are your on-the-job reference — the goal of this course is that you internalize the logic behind the specs, not just the numbers
+- The final assessment below tests your ability to apply multiple specifications in a single integrated scenario — the kind of situation you'll actually face in a cross-functional meeting
+
+**Final Assessment — Integrated Scenario:**
+
+*You're in a product review meeting. A customer is evaluating FaceStation 2 for a 3,500-person corporate campus with the following requirements: (1) face-only authentication at main entrances, (2) existing HID Prox cards for secondary doors, (3) a covered outdoor entrance that gets bright on sunny days (~18,000 lx), (4) wheelchair-accessible authentication at the lobby, and (5) centralized management across 8 doors.*
+
+Answer the following:
+1. Can FaceStation 2 handle face-only (1:N) authentication for 3,500 users? *(Yes — 3,500 is within the 4,000-user 1:N capacity)*
+2. Which model variant is required, and why? *(FS2-AWB — required for HID Prox support)*
+3. Is the covered outdoor entrance within the operating illuminance range? *(Yes — 18,000 lx is within 0–25,000 lx)*
+4. How does FaceStation 2 address wheelchair accessibility? *(Tilt-type bracket adjusts camera angle for seated users; 145cm lower height bound)*
+5. Which system configuration applies, and name two interfaces that support it? *(Distributed Access Control — Ethernet/TCP/IP for BioStar 2 Server connection; RS-485 for reader daisy-chaining)*
+
+---
+
+## Downloadable Job Aids
+
+The following reference materials are available for download from the course resources panel. Use these on the job — in meetings, during customer calls, or when preparing for product reviews.
+
+| # | Job Aid Title | Description | Primary Use Case |
+|---|---|---|---|
+| 1 | **FaceStation 2 Performance Quick Reference** | One-page card with matching speed (1:4,000/sec), group matching (1:5,000/sec), and user capacity (30,000 / 4,000) with 1:1 vs. 1:N explanation | Stakeholder meetings, sales support calls |
+| 2 | **FS2-D vs. FS2-AWB Model Selection Guide** | Side-by-side comparison of credential support and connectivity differences with a decision flowchart (HID Prox? → iCLASS? → BLE? → Wi-Fi?) | Pre-sales configuration discussions, RFP responses |
+| 3 | **System Configuration Decision Tree** | Visual flowchart: single door → Standalone; single door + secure controller → Standalone-Secure; multi-door/enterprise → Distributed; with interface specs for each path | Customer deployment planning, internal architecture reviews |
+| 4 | **Operating Illuminance Reference Card** | 0–25,000 lx range with real-world lighting benchmarks (office: 300–500 lx; covered outdoor: up to ~20,000 lx; direct sunlight: >100,000 lx) and suitability guidance | Site assessment conversations, facilities team discussions |
+| 5 | **Security Feature Objection Response Guide** | Three-column table: Stakeholder Concern → FaceStation 2 Feature → Mechanism Explanation (covering printed photo, LCD screen, and OS-level attacks) | Security reviews, customer-facing product presentations |
+| 6 | **RFID Card Compatibility Matrix** | Card type by frequency band (125kHz LF: EM, HID Prox; 13.56MHz HF: MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, iCLASS SE/SR/Seos, NFC; 2.4GHz: BLE) with model variant availability | Customer credential compatibility questions, migration planning |
+| 7 | **Ergonomics and Usability Objection Card** | Height range (145–210cm), tilt bracket use cases (wheelchair users, children), GUI notes, and guidance on what the spec does and does not claim about accessibility compliance | HR/facilities stakeholder discussions, deployment reviews |
+| 8 | **Interface Specifications Summary** | All hardware interfaces in one table: Ethernet, Wi-Fi (FS2-AWB only), RS-485, Wiegand, TTL, Relay, USB, Tamper, Video Phone — with key specs and configuration relevance notes | Engineering discussions, integration planning, configuration justification |
+
+---
+
+## Course Design Notes
+
+### Pedagogical Approach
+
+This course is designed around **performance-first instructional design** — every subsection is anchored to a job task Alex will perform, not a topic Alex should know. The organizing question for every piece of content is: *"What will Alex do differently in a meeting after learning this?"*
+
+**Scenario-based learning** is used throughout to simulate the cross-functional meeting pressure that defines Alex's role. Rather than presenting specifications as facts to memorize, the course presents them as tools for resolving specific stakeholder challenges. This approach directly addresses Alex's core pain point: translating technical specifications into clear product decisions and stakeholder communication.
+
+**Spaced application** is built into the structure: each subsection introduces a specification, immediately applies it to a realistic scenario, and tests application (not recall) in the learning check. The capstone scenario in the Course Summary requires Alex to synthesize specifications across all six objectives in a single integrated challenge — mirroring the complexity of a real product review meeting.
+
+### Assessment Strategy
+
+**Formative assessments** (learning checks) are embedded in every subsection. They are scenario-based, not definition-based — the correct answer always requires applying a specification to a specific context, not reciting it. Distractors are designed to reflect common errors: citing the wrong mode (1:1 vs. 1:N), overclaiming beyond the specification, or providing technically accurate but contextually incomplete answers.
+
+**Summative assessment** (capstone scenario in Subsection 5.1.1) is a five-part integrated scenario that maps directly to all six learning objectives. It is designed to be completed without reference to course content — simulating the "no datasheet in the meeting" condition specified in Goal G1.
+
+**No knowledge-check questions** test pure recall (e.g., "What is the matching speed?"). Every question requires the learner to apply a specification to a decision or response context.
+
+### Accessibility Considerations
+
+- All video content includes closed captions and a full transcript download
+- Interactive diagrams include keyboard navigation and screen-reader-compatible alt text
+- Color is never used as the sole differentiator in comparison tables or diagrams (pattern + label redundancy)
+- All job aids are available in both PDF (print-optimized) and accessible HTML formats
+- The course is optimized for desktop and tablet; mobile is supported but not the primary design target given the complexity of interactive diagrams
+
+### Content Scope Discipline
+
+All content is drawn exclusively from the Suprema FaceStation 2 datasheet [SUPREMA-AHL-FS2-EN-REV10]. Where the source document does not provide information (e.g., BioStar 2 software integration depth, competitive comparisons, ADA compliance certification), the course explicitly acknowledges the boundary of the specification rather than filling gaps with unsupported claims. This discipline is modeled for Alex as a professional practice — knowing the edges of what the spec supports is as important as knowing the spec itself.
+
+---
+
+## Alignment to Learning Objectives
+
+| Objective | Goal | Primary Coverage | Secondary Coverage |
+|---|---|---|---|
+| **O1:** Apply matching speed, group matching, and user capacity figures to resolve performance inquiries | G1 | Subsection 1.1.1, 1.1.2 | Subsection 5.1.1 (capstone) |
+| **O2:** Assess deployment environments against 0–25,000 lx illuminance range | G1 | Subsection 1.2.1 | Subsection 5.1.1 (capstone) |
+| **O3:** Counter face recognition vulnerability concerns with live face detection, IR analysis, and Android 5.0 | G1 | Subsection 2.1.1, 2.1.2 | Subsection 5.1.1 (capstone) |
+| **O4:** Select and justify FS2-D vs. FS2-AWB based on credential and connectivity requirements | G2 | Subsection 4.1.1 | Subsection 5.1.1 (capstone) |
+| **O5:** Match deployment scenarios to standalone/standalone-secure/distributed configurations with interface justification | G2 | Subsection 4.2.1, 4.2.2 | Subsection 5.1.1 (capstone) |
+| **O6:** Respond to usability objections with height range and tilt bracket specifications | G1 | Subsection 3.2.1 | Subsection 5.1.1 (capstone) |
+
+**Goal Coverage Summary:**
+- **G1** (cross-functional product advocacy): Covered by O1 (Module 1), O2 (Module 1), O3 (Module 2), O6 (Module 3)
+- **G2** (model and configuration selection): Covered by O4 (Module 4), O5 (Module 4)
+
+**Source Document Topic Coverage:**
+
+| Source Topic | Course Coverage |
+|---|---|
+| Ultra Performance (matching speed, capacity) | Module 1, Section 1.1 |
+| Operating Illuminance | Module 1, Section 1.2 |
+| Enhanced Security (live face detection, Android 5.0) | Module 2, Section 2.1 |
+| Multi RFID Card Reading | Module 3, Section 3.1 |
+| Ergonomics & User Convenience | Module 3, Section 3.2 |
+| Specifications Table (FS2-D vs. FS2-AWB) | Module 4, Section 4.1 |
+| System Configurations | Module 4, Section 4.2 |
+| Product Overview / Brand Positioning | Course Introduction |
+
+---
+
+## Course Developer Notes
+
+### How This Course Addresses Alex's Pain Points
+
+**Pain Point 1: Serving as the authoritative internal reference without reaching for documentation**
+
+The course is explicitly designed around the condition stated in Goal G1: *"without referencing external documentation."* Every learning check simulates the pressure of being asked a pointed question in a live meeting. The capstone scenario requires Alex to answer five specification questions in sequence — the same cognitive demand as a product review. The job aids are positioned as *post-course* references, not crutches during the course itself, reinforcing the internalization goal.
+
+**Pain Point 2: Aligning diverse stakeholders around a shared understanding of product capabilities**
+
+Each subsection is framed around a specific stakeholder type (sales engineer, security engineer, HR director, facilities manager, leadership) asking a realistic question. This gives Alex practice not just knowing the answer, but knowing *how to frame the answer for the audience asking it*. The security module (Module 2) is particularly attentive to this — the same feature (live face detection) is framed differently for a security engineer (mechanism-focused) vs. a sales stakeholder (outcome-focused).
+
+**Pain Point 3: Model variant confusion (FS2-D vs. FS2-AWB)**
+
+Module 4, Section 4.1 is built around a decision rule framework, not a feature list. Rather than asking Alex to memorize which cards each model supports, the course teaches a decision logic: "Does the deployment require HID Prox, iCLASS, BLE, or Wi-Fi? If yes to any, FS2-AWB. If no, FS2-D." The learning check distractors are specifically designed to catch the most common error: assuming both models support HID Prox.
+
+**Pain Point 4: Translating specs into trade-off rationale**
+
+Subsection 4.2.2 explicitly addresses this — the entire subsection is built around the discipline of following a configuration recommendation with the interface specification that justifies it. The framing ("this is what separates a product owner's recommendation from a sales pitch") speaks directly to Alex's professional identity and the standard expected of someone in a product ownership role.
+
+### SME Input Recommendations
+
+Based on the gaps identified in the learning objectives analysis, the following SME inputs are recommended before finalizing course content:
+
+1. **Stakeholder scenario validation:** Have a sales or pre-sales SME review the stakeholder scenarios in Modules 1–3 to confirm they reflect actual objections and questions encountered in the field
+2. **FS2-D vs. FS2-AWB confusion confirmation:** Confirm with the product team whether this distinction is a known source of internal errors — if so, consider expanding Module 4, Section 4.1 to a second subsection with additional practice scenarios
+3. **Most-misquoted specifications:** Identify which figures (matching speed, capacity modes, illuminance ceiling) are most frequently cited incorrectly internally — use this to weight the emphasis of learning checks and job aid design
+4. **BioStar 2 integration depth:** If Alex is expected to address BioStar 2 integration questions in cross-functional discussions, a supplemental module drawing from BioStar 2 documentation would be required; this is currently out of scope
+
+### Duration Validation
+
+| Component | Subsections | Duration |
+|---|---|---|
+| Course Introduction | 1 | 3 min |
+| Module 1: Performance Specifications | 3 | 9 min |
+| Module 2: Security Features | 2 | 6 min |
+| Module 3: Credentials and Ergonomics | 2 | 6 min |
+| Module 4: Model Selection and System Configuration | 3 | 9 min |
+| Course Summary and Assessment | 1 | 3 min |
+| **Total** | **12 subsections** | **36 min** |
+
+> **Developer Note on Duration:** The course as designed runs 36 minutes at 3 minutes per subsection. To meet the 30-minute target exactly, two options are available: (1) reduce Module 1 from 3 subsections to 2 by merging Subsections 1.1.1 and 1.1.2 into a single 3-minute subsection covering both performance figures and the 1:1/1:N distinction; or (2) accept the 36-minute duration as a more complete coverage of the source material, noting that the 30-minute target was a guideline and complete content coverage was specified as the priority. The current outline preserves complete coverage. If the 30-minute hard constraint must be met, Subsection 1.1.2 is the recommended merge candidate, as its content can be integrated into Subsection 1.1.1 with careful scoping.

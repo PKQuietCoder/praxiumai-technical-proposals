@@ -1,0 +1,435 @@
+{
+  "subsection_id": "2.2.1",
+  "subsection_title": "Apply Power Management to Your Terminal Design",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Identify the STM32N6 power supply domains and their roles in a biometric terminal design",
+    "Select the appropriate low-power mode for each operational state of a face recognition terminal",
+    "Interpret the SMPS step-down converter's role in core voltage regulation and power efficiency"
+  ],
+  "content": {
+    "hook_sentence": "A face recognition terminal that stays in full-power run mode between authentications can consume orders of magnitude more energy than one that uses the STM32N6's low-power modes correctly — yet both produce identical user-facing response times.",
+    "introduction": "Power management on the STM32N6 is not just a battery-life concern. For a wall-mounted access control terminal, it directly affects thermal design, PSU sizing, and the ability to survive brief power interruptions using the backup domain. The STM32N6 power controller (PWR) organizes the chip into distinct supply domains, each with its own voltage rail and power-down behavior, and gives you a set of operating modes and voltage scaling controls to match power draw to the current workload. Understanding which domain each subsystem belongs to — and which low-power mode preserves which state — lets you make concrete decisions: how long the terminal can hold its RTC and tamper-detection logic alive on a coin cell, whether the NPU inference pipeline can resume from Stop mode without a full reboot, and how to size the SMPS inductor and capacitors on your PCB.",
+    "key_points": [
+      {
+        "point": "The STM32N6 organizes its supply into four distinct domains: core, VDD, backup, and analog.",
+        "explanation": "Each domain has a dedicated voltage rail and a defined set of peripherals that belong to it. The **core domain** (VDDCORE) powers all digital circuitry except the backup and retention domains. VCORE is supplied either by the on-chip SMPS step-down converter or by an external supply connected directly to the VDDCORE pin. The **VDD domain** (VRET) covers the retention logic. The **backup domain** (VSW, VBAT) keeps the RTC, tamper detection, backup registers, and Backup RAM alive when main power is removed. The **analog domain** (VDDA18ADC) supplies the ADC and voltage reference. For your terminal design, this partitioning has a direct PCB consequence: you must connect all main power and ground pins to the external supply within the permitted range. Missing a domain rail is not a firmware problem you can work around — the chip will not start correctly.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "25752be2-c035-4604-b1e8-4b51b4a5eba4",
+            "snippet": "Power supplies and supply domains: Core domain (VDDCORE), VDD domain (VRET), Backup domain (VSW, VBAT), Analog domain (VDDA18ADC)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_23/ChunkType.text_25752be2-c035-4604-b1e8-4b51b4a5eba4_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "d2dcd4ae-5ef5-4d25-8aa7-5fa7a22bb463",
+            "snippet": "VCORE supplies all the digital circuitries, except for the backup domain, and the retention domain in Standby mode.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_25/ChunkType.text_d2dcd4ae-5ef5-4d25-8aa7-5fa7a22bb463_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "00cde901-2a0b-495b-b376-62efcbb3e6a5",
+            "snippet": "All main power and ground pins must always be connected to the external power supply, in the permitted range.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_137/ChunkType.text_00cde901-2a0b-495b-b376-62efcbb3e6a5_0.png",
+            "page_number": 137,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The embedded SMPS step-down converter regulates VDDCORE and starts automatically at power-on.",
+        "explanation": "The STM32N6 includes an on-chip switched-mode power supply (SMPS) step-down converter that generates the core voltage from the VDDA18PMU rail. When a system reset occurs, the SMPS is enabled automatically to deliver 0.81 V, so the device can start up regardless of whether you are using the internal SMPS or an external supply for VDDCORE. This means your PCB can use either topology: let the internal SMPS do the work, or bypass it with a more efficient external regulator if your power budget demands it. The SMPS efficiency curve matters for thermal design. The datasheet characterizes SMPS efficiency across load current and temperature. Peak efficiency sits in the mid-load range; at very light loads (below roughly 10 mA) efficiency drops significantly, which is relevant when the terminal is idle between authentications. If your terminal spends most of its time waiting for a face to appear, the SMPS operating point during idle will dominate your average power budget.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "d2dcd4ae-5ef5-4d25-8aa7-5fa7a22bb463",
+            "snippet": "When a system reset occurs, the SMPS step-down converter is enabled to deliver 0.81 V, hence the system can start up in any supply configuration.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_25/ChunkType.text_d2dcd4ae-5ef5-4d25-8aa7-5fa7a22bb463_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "25752be2-c035-4604-b1e8-4b51b4a5eba4",
+            "snippet": "Switched-mode power supply power-efficient voltage down-converter (SMPS step-down converter)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_23/ChunkType.text_25752be2-c035-4604-b1e8-4b51b4a5eba4_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "73a483ed-3dee-476c-9797-d7c377d1c32f",
+            "snippet": "Embedded SMPS step-down converter providing VDDCORE",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_1/ChunkType.text_73a483ed-3dee-476c-9797-d7c377d1c32f_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Voltage scaling and low-power modes let you match core voltage to the active workload.",
+        "explanation": "The PWR controller exposes voltage scaling control alongside three low-power modes: Sleep, Stop, and Standby. Voltage scaling adjusts VDDCORE to the minimum level needed for the current operating frequency, reducing dynamic power during periods of lower CPU activity. - **Sleep mode** halts the CPU clock but keeps all peripherals and SRAM powered. The inference pipeline state in AXISRAM survives. Wake-up latency is minimal. - **Stop mode** cuts clocks to most of the system but retains SRAM content and register state. The UCPD controller explicitly supports Stop mode low-power operation, which is relevant if your terminal uses USB Power Delivery for its power input. - **Standby mode** drops power to the core domain entirely. Only the backup domain (RTC, tamper, backup registers, Backup RAM) remains active on VBAT. For a face recognition terminal, a practical state machine looks like this: full-run mode during active inference, Sleep between camera frames while DMA transfers complete, Stop during the idle period between authentication attempts, and Standby only during extended power-off with the RTC and tamper log kept alive on VBAT.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "12791c5a-9fde-42ce-bc2b-6537a862660b",
+            "snippet": "A comprehensive set of low-power modes (Sleep, Stop, and Standby) allows the design of low-power applications.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_12791c5a-9fde-42ce-bc2b-6537a862660b_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "25752be2-c035-4604-b1e8-4b51b4a5eba4",
+            "snippet": "Power management: Operating modes, Voltage scaling control, Low-power modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_23/ChunkType.text_25752be2-c035-4604-b1e8-4b51b4a5eba4_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "4946d5ed-bc89-4fee-97aa-3d92118961a5",
+            "snippet": "Stop mode low-power operation support",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_78/ChunkType.text_4946d5ed-bc89-4fee-97aa-3d92118961a5_0.png",
+            "page_number": 78,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The backup domain keeps tamper detection and the RTC alive on VBAT when main power is removed.",
+        "explanation": "Building on the BKPSRAM coverage from the previous section, the backup domain extends beyond that 8 KB of battery-backed SRAM. The full backup domain includes the RTC, tamper detection logic (TAMP), backup registers, and the backup regulator (~0.9 V). The power switch selects between VDD and VBAT automatically: VSW equals VDD when VDD is present, and falls back to VBAT otherwise. For an access control terminal, this matters operationally. If mains power is cut — whether by a legitimate power outage or a physical attack — the RTC continues timestamping events and the tamper detection logic keeps running. Your firmware can log the power-loss event with a valid timestamp when power is restored, which is a requirement in many physical security certifications. Size your VBAT coin cell or supercapacitor to cover the required backup duration at the backup domain's quiescent current.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "25752be2-c035-4604-b1e8-4b51b4a5eba4",
+            "snippet": "Backup domain (VSW, VBAT)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_23/ChunkType.text_25752be2-c035-4604-b1e8-4b51b4a5eba4_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "04184249-4e6c-4cfa-9dca-4ae7e02e5fca",
+            "snippet": "Vsw is equal to VDD when present, to VBAT otherwise.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_161/ChunkType.text_04184249-4e6c-4cfa-9dca-4ae7e02e5fca_0.png",
+            "page_number": 161,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "73a483ed-3dee-476c-9797-d7c377d1c32f",
+            "snippet": "Backup regulator (~0.9 V)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_1/ChunkType.text_73a483ed-3dee-476c-9797-d7c377d1c32f_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The PWR supply supervision monitors catch undervoltage conditions before they corrupt the inference pipeline.",
+        "explanation": "The STM32N6 PWR controller includes a layered set of supply monitors: POR/PDR (power-on/power-down reset), BOR (brown-out reset at configurable thresholds), PVD (programmable voltage detector on VDD), PVM monitors on each VDDIO rail and VDD33USB, VBAT thresholds, temperature thresholds, and a VDDCORE monitor. Each monitor feeds into the power management block, which signals the RCC to generate resets or wake-up events as appropriate. For your terminal, the BOR threshold is the most operationally critical. The datasheet specifies BOR threshold 0 at a falling-edge trip point around 1.62 V on VDD. If your terminal's power supply droops below this during a high-current inference burst (NPU plus camera ISP plus DMA all active simultaneously), the BOR will reset the device. You need to size your bulk decoupling capacitance and PSU hold-up time to keep VDD above the BOR threshold during peak load transients. The PVD gives you a software-visible warning before BOR trips, so you can implement a graceful shutdown or load-shedding response in firmware.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "25752be2-c035-4604-b1e8-4b51b4a5eba4",
+            "snippet": "Power supply supervision: POR/PDR monitor, BOR monitor, VDDA18PMU monitor, PVD monitor, PVM monitor (VDDIO2, VDDIO3, VDDIO4, VDDIO5, VDD33USB, VDDA18ADC), VBAT thresholds, Temperature thresholds, VDDCORE monitor",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_23/ChunkType.text_25752be2-c035-4604-b1e8-4b51b4a5eba4_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "556ed659-a526-47bc-8820-b3c920fbb1da",
+            "snippet": "Brown-out reset threshold 0... Falling edge: Min 1.61, Typ 1.62, Max 1.64 V",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_140/ChunkType.table_556ed659-a526-47bc-8820-b3c920fbb1da_0.png",
+            "page_number": 140,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your terminal is deployed in a lobby. Between 2 AM and 6 AM, no one uses it. The system is in Stop mode with the RTC running on VBAT. At 6:05 AM, a security guard swipes a card and the terminal must authenticate a face within 500 ms of wake-up. The NPU inference pipeline state was in AXISRAM when Stop mode was entered. What do you expect to happen at wake-up, and what is the risk if you had used Standby mode instead?",
+        "reveal": "In Stop mode, SRAM content and register state are retained. When the wake-up event fires (from the WKUP pin or RTC alarm), the CPU resumes from where it stopped, the inference pipeline context in AXISRAM is intact, and the camera ISP can be re-clocked quickly. The 500 ms budget is achievable because you are not re-initializing the full pipeline from scratch.\n\nIf you had used Standby mode instead, the core domain is powered down entirely. AXISRAM content is lost. On wake-up, the firmware must execute a full cold-start sequence: re-initialize clocks, re-load model weights from XSPI external flash into working memory, re-configure the camera ISP and DMA channels, and then run inference. That sequence almost certainly exceeds 500 ms, breaking the authentication latency requirement. The backup domain (RTC, tamper log) survives Standby correctly, but the inference pipeline does not.",
+        "hint": "Think about which memory regions survive each low-power mode, and what has to be re-initialized from scratch on wake-up."
+      },
+      {
+        "prediction_prompt": "During a peak-load test, you observe that the terminal resets unexpectedly when the NPU, ISP, and two DMA channels are all active simultaneously. The reset happens about 200 ms into a burst inference sequence. You check the firmware and there are no software-triggered resets. What hardware mechanism is most likely responsible, and what should you check on the PCB?",
+        "reveal": "The most likely cause is a BOR (brown-out reset) triggered by a VDD voltage droop during the peak current transient. When the NPU, ISP, and DMA are all active, the instantaneous current draw spikes. If the PCB's bulk decoupling capacitance is insufficient or the PSU's transient response is slow, VDD can dip below the BOR threshold (around 1.62 V falling edge), causing the PWR controller to assert a reset via the RCC.\n\nOn the PCB, check: (1) the total bulk capacitance on the VDD rail near the device, (2) the PSU's load transient response time and output impedance, and (3) whether the PVD was configured and generating interrupts before the reset (which would confirm the droop was gradual enough to be detected). If the PVD fired just before the BOR reset, you have a firmware opportunity to implement load shedding — for example, deferring a DMA transfer until the NPU burst completes.",
+        "hint": "The PWR supply supervision section lists several monitors that can trigger resets. Which one responds to a VDD droop?"
+      }
+    ],
+    "summary": "Map each terminal operating state to the correct STM32N6 power domain and low-power mode: use Stop mode to preserve AXISRAM pipeline state during idle periods, rely on the backup domain to keep the RTC and tamper logic alive on VBAT during power loss, and size your PCB decoupling to stay above the BOR threshold during peak inference load.",
+    "figures": [
+      {
+        "chunk_id": "d9c32a68-fb01-4654-99a7-ce9052f1bf66",
+        "after_key_point": 0,
+        "caption": "The STM32N6 power supply overview block diagram shows how each supply domain (core, backup, analog) connects to the central power management block, which feeds reset and wake-up signals to the RCC and EXTI. Use this diagram to trace which rail powers each subsystem in your terminal.",
+        "alt_text": "Block diagram titled 'Power supply overview'. Left side shows input pins: PDR_ON, VDD, VBAT, V08CAP, VDDA18AON, VDDA18PMU, VDDSMPS, VLXSMPS, VFBSMPS, VSSSMPS, VDDCORE, VSS, PWR_ON, VDDA18ADC, VSSA, VREF+, VREF-, WKUP[4:1], VDDIO2, VDDIO3, VDDIO4, VDDIO5, VDD33USB. Internal blocks include POR/PDR, Backup domain, System supply, SMPS step-down converter, VDDCORE monitor, Voltage scaling, Power management, PWR control, Analog domain, Wake-up, and PVD and PVM. Right side outputs pwr_por_rstn, pwr_bor_rstn, pwr_wkup, and pwrds to the RCC block, and exti_wkup to the EXTI block. Wake-up events are shown as outputs from the Wake-up and PVD/PVM blocks.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_24/ChunkType.figure_d9c32a68-fb01-4654-99a7-ce9052f1bf66_0.png",
+        "page_number": 24
+      },
+      {
+        "chunk_id": "9968dea1-32f0-40e0-9771-5e38d02e90fb",
+        "after_key_point": 2,
+        "caption": "The power supply scheme diagram shows the retention domain containing ITCM, DTCM, and ITCM FLEX with power switches to VRET, illustrating which memory regions survive Stop mode and which are lost in Standby. The backup domain with its power switch between VDD and VBAT is also visible.",
+        "alt_text": "Detailed block diagram titled 'Power supply scheme'. Top section shows I/O groups powered by VDDIO4, VDDIO5, VDDIO2, VDDIO3, VDDA18USB, VDD33USB, VDDCSI, and VDDA18CSI. Core domain (VCORE) block contains CPU, system logic, EXTI, peripherals, and RAM. Retention domain block contains ITCM, DTCM, and ITCM FLEX memory blocks each with power switches leading to VRET, plus I/O logic for LSI, WKUP, IWDG, BSEC, RIFSC. Step-down converter receives VDDA18PMU, VDDSMPS, VLXSMPS, VFBSMPS, VSSSMPS. Backup domain contains a power switch between VDD and VBAT producing VSW, a backup regulator producing VBKP, and I/O logic for LSE, RTC, TAMP, backup registers, reset, and Backup RAM. Analog domain at bottom contains VREFBUF and ADCs powered by VDDA18ADC, VREF+, VREF-, VSSA.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_135/ChunkType.figure_9968dea1-32f0-40e0-9771-5e38d02e90fb_0.png",
+        "page_number": 135
+      },
+      {
+        "chunk_id": "36231555-ca61-493b-a77a-bdb9ebea4183",
+        "after_key_point": 1,
+        "caption": "SMPS efficiency versus load current across the operating temperature range. Efficiency peaks in the mid-load region and drops at very light loads, which is the operating point during terminal idle periods between authentication attempts.",
+        "alt_text": "Line chart titled 'Average (V_DDA18 from 1.62 to 1.89 V) SMPS power efficiency vs. I_LOAD (A)'. Y-axis shows efficiency from 0% to 100% in 10% increments. X-axis shows load current values from -0.001 A to -2.2 A. Three lines represent temperatures: black line for +125°C, pink line for +25°C, light blue line for -40°C. All three lines start around 45 to 55% efficiency at very light load (-0.001 A), rise steeply to over 80% by -0.08 A, peak near 88 to 89% between -0.3 and -0.5 A, then gradually decline to 75 to 83% at -2.2 A. The -40°C line shows highest efficiency, +125°C shows lowest.",
+        "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_142/ChunkType.figure_36231555-ca61-493b-a77a-bdb9ebea4183_0.png",
+        "page_number": 142
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When a face recognition terminal must resume inference within 500 ms of a wake-up event and the NPU pipeline state is stored in AXISRAM, the correct low-power mode to use during idle periods is ___.",
+      "answer": "Stop mode",
+      "distractors": [
+        "Standby mode",
+        "Sleep mode",
+        "voltage scaling only"
+      ],
+      "explanation": "Stop mode retains SRAM content and register state, so the inference pipeline context in AXISRAM survives and the terminal can resume quickly. Standby mode powers down the core domain, losing AXISRAM content and requiring a full cold-start sequence that would exceed the latency budget."
+    },
+    {
+      "after_key_point": 4,
+      "type": "matching",
+      "stem": "Match each terminal design concern to the STM32N6 PWR feature that addresses it:",
+      "pairs": [
+        {
+          "left": "VDD droops during peak NPU + ISP + DMA load, causing unexpected resets",
+          "right": "BOR monitor with configurable threshold"
+        },
+        {
+          "left": "RTC and tamper log must survive a mains power cut",
+          "right": "Backup domain on VBAT"
+        },
+        {
+          "left": "Firmware needs advance warning before a voltage droop triggers a hard reset",
+          "right": "PVD (programmable voltage detector)"
+        }
+      ],
+      "explanation": "The BOR resets the device when VDD falls below a threshold, protecting against corrupted state during supply droops. The backup domain keeps RTC and tamper logic alive on VBAT independently of main power. The PVD generates a software-visible interrupt before the BOR threshold is reached, giving firmware a chance to shed load or log the event."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet chunks provided do not include the specific quiescent current values for the backup domain on VBAT, which would be needed to size the coin cell or supercapacitor for a given backup duration requirement.",
+    "Specific current consumption figures for Sleep, Stop, and Standby modes (e.g., microamps in Stop mode) are not present in the retrieved chunks, making it impossible to provide quantitative power budget guidance.",
+    "The datasheet does not specify the wake-up latency from Stop mode to full CPU execution, which is needed to verify the 500 ms authentication latency budget in the worked example.",
+    "Voltage scaling register configuration details (which PWR registers to write, which voltage levels correspond to which frequency ranges) are not present in the retrieved chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are finalizing the hardware specification for a face recognition access control terminal. Your product requires real-time DNN inference for face matching and must also encrypt stored biometric templates in external flash memory. You are reviewing the STM32N6 variant feature tables and notice that the STM32N6x7xx includes the Neural-ART NPU but lists SAES, CRYP, PKA, and MCE as 'No', while the STM32N6x5xx shows the opposite.",
+        "question_text": "Based on this tradeoff, what is the most accurate characterization of the architectural constraint you face when selecting a single STM32N6 variant for this terminal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "No single STM32N6 variant provides both the Neural-ART NPU and the full hardware crypto engine (SAES, CRYP, MCE, PKA), so the design must accept either a software crypto workaround or offloaded inference.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The STM32N6x5xx variant supports both the Neural-ART NPU and the full crypto engine, making it the correct choice for a terminal that requires both AI inference and biometric data encryption.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The STM32N6x7xx variant includes a software-emulated AES engine that compensates for the missing SAES hardware, so crypto performance is equivalent across both variants.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N6x7xx provides the Neural-ART NPU but omits SAES, CRYP, PKA, and MCE. The STM32N6x5xx provides the full crypto suite but has no NPU. No single variant satisfies both requirements in hardware, so your architecture must explicitly address this tradeoff.",
+        "incorrect": "Review the STM32N6 variant feature tables carefully. The STM32N6x5xx does NOT include the Neural-ART NPU, and the STM32N6x7xx does NOT include SAES, CRYP, PKA, or MCE. These features are mutually exclusive across the two variant families — no single device provides both."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "STM32N647xx features: Neural-ART: Yes; SAES: No; CRYPT: No; PKA: No; MCE1.4: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "d0465e1f-f3a3-41c1-afc9-3b16c392450f",
+          "snippet": "STM32N655xx features: SAES: Yes; CRYPT: Yes; PKA: Yes; MCE1.4: Yes; Neural-ART: No",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_19/ChunkType.table_d0465e1f-f3a3-41c1-afc9-3b16c392450f_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You have selected the STM32N6x5xx variant for your biometric terminal because your security requirements take priority. You are now mapping each STM32N6 security feature to a specific protection role in the system. Biometric face templates are stored in XSPI-connected external flash, and the Cortex-M55 must process them without exposing plaintext data on the system bus during read/write operations.",
+        "question_text": "Which STM32N6 security feature should you assign to protect biometric templates stored in XSPI-connected external flash from being exposed as plaintext on the system bus during read and write operations?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "SAES, because it provides AES encryption with side-channel attack protection certified to SESIP/PSA Level 3, making it the strongest encryption option for stored data.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MCE, because it performs inline encryption on writes and inline decryption on reads directly on the system bus, so external flash contents are never exposed as plaintext during transfers.",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "TrustZone, because it isolates the secure biometric processing domain from the non-secure world, preventing unauthorized access to the memory region containing the templates.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. MCE (Memory Cipher Engine) provides system bus inline encryption for writes and inline decryption for reads, meaning data in XSPI-connected external flash is always stored encrypted and decrypted transparently on access — plaintext never appears on the bus. This is the correct feature for protecting data at rest in external memory.",
+        "incorrect": "While SAES and TrustZone are both important security features, neither addresses the specific requirement of transparent inline encryption on the system bus for external flash. SAES is a software-invoked AES engine for explicit encrypt/decrypt operations, and TrustZone provides domain isolation rather than data encryption. MCE is specifically designed for inline encryption of external memory accessed via XSPI. Review Section 3.36 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the PCB design for the STM32N6x5xx-based biometric terminal. The terminal requires the following external interfaces: one CSI-2 camera input, two XSPI external memory channels, USB OTG, Ethernet, and 12 GPIO lines for door lock relay control, tamper detection, and status LEDs. You are reviewing the STM32N6 package options, which range from VFBGA142 (75 I/Os, 8×8 mm) to VFBGA264 (165 I/Os, 14×14 mm). Your PCB form factor can accommodate up to a 14×14 mm package.",
+        "question_text": "You need to verify that your chosen package provides sufficient I/Os for all required peripherals. Which package selection decision is best supported by the datasheet information?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Select VFBGA142 to minimize PCB footprint, since 75 I/Os is likely sufficient for the listed peripherals and the smaller package reduces board area.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Select VFBGA169 as a compromise, since its intermediate I/O count balances board space and peripheral coverage without committing to the largest package.",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Select VFBGA264 to maximize available I/Os at 165, since the full peripheral set — CSI-2, dual XSPI, USB, Ethernet, and GPIO — demands high pin count and the 14×14 mm size fits the PCB constraint.",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The VFBGA264 provides 165 I/Os in a 14×14 mm package, which fits within your PCB constraint and gives the highest confidence that the full peripheral set — CSI-2, dual XSPI, USB, Ethernet, and 12 GPIO lines — can be routed without I/O conflicts. When peripheral requirements are extensive and the form factor allows it, selecting the highest I/O package is the defensible engineering choice.",
+        "incorrect": "The VFBGA142 (75 I/Os) and intermediate packages carry significant risk of insufficient I/O count when the terminal requires CSI-2, dual XSPI, USB, Ethernet, and dedicated GPIO simultaneously. Since your PCB can accommodate up to 14×14 mm, there is no physical constraint preventing the VFBGA264. Selecting a smaller package without a verified I/O budget creates rework risk. Review the package I/O count table in Section 6 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "f51262c8-07f4-48ce-a8c6-825b9a262a9d",
+          "snippet": "Package Name: VFBGA264 (14x14mm, 0.8mm pitch) — Number of I/Os: 165; VFBGA142 (8x8mm, 0.5mm pitch) — Number of I/Os: 75",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_17/ChunkType.table_f51262c8-07f4-48ce-a8c6-825b9a262a9d_0.png",
+          "page_number": 17,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "20faaa0e-01d9-4c76-81d9-4b07094ec209",
+          "snippet": "VFBGA142 (8 x 8 mm) pitch 0.5 mm; VFBGA169 (6 x 6 mm) pitch 0.4 mm; VFBGA178 (12 x 12 mm) pitch 0.8 mm; VFBGA198 (10 x 10 mm) pitch 0.65 mm; VFBGA223 (10 x 10 mm) pitch 0.5 mm; VFBGA264 (14 x 14 mm) pitch 0.8 mm",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.figure_20faaa0e-01d9-4c76-81d9-4b07094ec209_0.png",
+          "page_number": 0,
+          "chunk_type": "figure"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are documenting the security architecture for your STM32N6x5xx-based biometric terminal. Your security review board requires a feature mapping table that assigns each hardware security block to a specific protection role. You need to assign a feature to handle explicit encryption and decryption of biometric face templates when they are loaded into AXISRAM for processing — a context where side-channel attack resistance is a certification requirement.",
+        "question_text": "Which STM32N6 security feature should you assign to the role of encrypting and decrypting biometric face templates during explicit software-controlled processing, given the side-channel attack resistance requirement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "HASH, because it generates a cryptographic digest of the biometric template that can verify data integrity and detect tampering during the processing pipeline.",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MCE, because it transparently encrypts and decrypts data on the system bus, covering all memory regions including AXISRAM used during active inference processing.",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "SAES, because it performs AES encryption and decryption with certified protection against differential power analysis, satisfying the side-channel resistance certification requirement.",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. SAES is specifically designed for software-invoked AES encryption and decryption with built-in side-channel attack (SCA) protection including differential power analysis (DPA) resistance, certified to SESIP and PSA security assurance Level 3. This makes it the correct assignment for explicit biometric template encryption where certification against side-channel attacks is required.",
+        "incorrect": "HASH provides integrity verification (digests), not encryption — it cannot protect confidentiality of biometric templates. MCE provides inline encryption for external memory bus transactions, not for software-controlled processing of data already loaded into internal SRAM. SAES is the correct feature for explicit, software-controlled AES operations with certified side-channel resistance. Review Section 3.33 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "773e666c-102c-43f1-8b41-f8cdac78c359",
+          "snippet": "The cryptographic processor (CRYP) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_55/ChunkType.text_773e666c-102c-43f1-8b41-f8cdac78c359_0.png",
+          "page_number": 55,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

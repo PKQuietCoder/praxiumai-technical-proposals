@@ -1,0 +1,358 @@
+{
+  "subsection_id": "5.1.2",
+  "subsection_title": "Apply MCE Inline Encryption to External Memory",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Distinguish MCE's inline encryption role from SAES's software-driven encryption role when protecting XSPI-connected external flash",
+    "Select the correct MCE cipher mode and region configuration for a biometric template storage use case",
+    "Identify the variant constraint that makes MCE unavailable on the STM32N6x7xx and explain the architectural consequence for the terminal design"
+  ],
+  "content": {
+    "hook_sentence": "Your biometric templates can sit in plaintext on external NOR flash — readable by anyone with a logic analyzer on the XSPI bus — unless you configure MCE before the first write ever reaches that memory.",
+    "introduction": "Building on the MCE variant constraint established in §5.1.1, this subsection focuses on what MCE actually does at the bus level and how you configure it to protect the XSPI-connected external flash region storing biometric templates. Getting this right means the CPU and NPU read and write plaintext as normal, while every byte crossing the XSPI bus is automatically encrypted or decrypted in hardware — with zero firmware overhead per transaction.",
+    "key_points": [
+      {
+        "point": "MCE intercepts all system bus traffic to a defined XSPI address region and encrypts writes and decrypts reads transparently.",
+        "explanation": "When you enable MCE on a region, the hardware sits inline between the AXI system bus and the XSPI interface. Every write to that region is encrypted before it leaves the SoC; every read is decrypted before it reaches the CPU or DMA. Your firmware code, the RTOS, and any DMA transfer all see plaintext — the encryption is completely invisible to software. This is the key architectural distinction from SAES: SAES requires your firmware to explicitly call an encrypt or decrypt operation and manage the data flow. MCE requires no per-transaction firmware involvement after initial configuration. For a biometric template store that may be read hundreds of times per authentication session, that difference in overhead is significant. MCE supports up to four encrypted regions (regions 1 through 4), each with start and end addresses defined at 4-Kbyte granularity. Region 0 is a default bypass region — any access is granted without encryption. You define your XSPI flash address range for biometric templates as one of regions 1 to 4 and assign a cipher mode to it.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Start and end of regions defined with 4-Kbytes granularity — Default filtering (region 0): any access granted",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "MCE offers four cipher modes per region; your choice between stream and block cipher affects both security posture and XSPI prefetch performance.",
+        "explanation": "For each encrypted region, you select one of four modes: - **Bypass (no encryption):** Traffic passes through unmodified. Use this for non-sensitive code regions you want to keep readable for debugging. - **Stream cipher (CTR-based):** Compliant with NIST SP800-38A CTR mode. MCE includes an optimization for XSPI data prefetching in stream mode, which reduces read latency when the CPU or DMA is sequentially reading large blocks — relevant when streaming model weights or frame data. - **Block cipher (AES ECB-compatible):** Compliant with NIST FIPS 197. Suitable for random-access patterns where you need per-block confidentiality. - **Fast block cipher:** A higher-throughput variant of block cipher mode, trading some latency for increased throughput on write-heavy workloads. For biometric template storage, where templates are written once and read on each authentication attempt, stream cipher mode with its prefetch optimization is a strong default. The MCE also includes a leakage resilient mode of operation as a defense against side-channel attacks, which you should enable when the threat model includes physical access to the board. The supported block ciphers are AES-128, AES-256, and Noekeon (12-round version), selected at boot time. AES-256 in stream (CTR) mode gives you the strongest confidentiality for biometric data at rest.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Stream mode with AES cipher is compliant with CTR mode specified in NIST SP800-38A Recommendation for Block Cipher Modes of Operation.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Includes a leakage resilient mode of operation as defense against side channel attacks (SCA).",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Supported block ciphers: AES-128, AES-256 or Noekeon (12 round version), selected at boot",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2d539271-6758-468d-9e73-d8b38f39b6ef",
+            "snippet": "Optimization for XSPI data pre-fetching mechanism (stream cipher only)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_58/ChunkType.text_2d539271-6758-468d-9e73-d8b38f39b6ef_0.png",
+            "page_number": 58,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "MCE uses lockable per-region key registers; once locked, the key cannot be read back, which is the correct configuration for production firmware.",
+        "explanation": "MCE provides one set of write-only, lockable 256-bit key registers per block cipher mode (normal and fast), plus two sets of lockable cipher contexts (128-bit key plus initialization vector) for stream and block ciphers. Write-only means the key material can be loaded into the register but never read back by software — not even by secure-world code. Once you lock the register, the configuration is frozen until the next reset. In your production firmware flow, you load the MCE region key during secure boot, immediately after TrustZone partitioning is established and before any non-secure code executes. The key itself should be derived from SAES using the hardware-bound DHUK (derived hardware unique key), so it is device-specific and never appears in plaintext in firmware images. The MCE also supports two sets of cipher contexts, which lets you configure independent keys for two different XSPI regions — for example, one key for biometric templates and a separate key for encrypted firmware images stored in the same external flash device.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "2d539271-6758-468d-9e73-d8b38f39b6ef",
+            "snippet": "One set of write-only and lockable 256-bit controller key registers per block cipher (normal, fast) — Two sets of lockable cipher contexts (128-bit key, IV), usable for stream and block ciphers",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_58/ChunkType.text_2d539271-6758-468d-9e73-d8b38f39b6ef_0.png",
+            "page_number": 58,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "2d539271-6758-468d-9e73-d8b38f39b6ef",
+            "snippet": "AXI system bus controller/target interfaces (64-bit) — Support for any AXI-64bit read transactions — When encryption is enabled, support for AXI-64bit INCRx (x = 1 to 8) and WRAPx (x = 4) write transactions",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_58/ChunkType.text_2d539271-6758-468d-9e73-d8b38f39b6ef_0.png",
+            "page_number": 58,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "MCE is absent on the STM32N6x7xx variant — a design using the NPU for face matching has no hardware inline encryption for external flash, and you must flag this gap before architecture sign-off.",
+        "explanation": "Building on the variant constraint from §5.1.1: MCE is available only on STM32N6x5xx devices (STM32N655xx and STM32N657xx). The STM32N6x7xx variant, which carries the Neural-ART NPU, does not include MCE, SAES, or CRYP. This means a design that selects the STM32N6x7xx for its 600 Gops inference throughput has no hardware path for inline encryption of XSPI-connected external flash. Any biometric templates stored in external NOR flash on that variant are unprotected at the bus level unless you implement a software encryption layer — which reintroduces CPU overhead on every read and write, and eliminates the transparency benefit that makes MCE valuable. When you review a colleague's architecture that proposes using the STM32N6x7xx with MCE for external flash protection, this is the critical flaw to flag: the peripheral simply does not exist on that variant. The XSPI interface itself is present on both variants, but the cipher engine that sits inline with it is not.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "This function is available only on STM32N655xx and STM32N657xx devices.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+            "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+            "page_number": 42,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "You are reviewing a security architecture document for a face recognition terminal. The selected SoC is the STM32N647xx (an STM32N6x7xx variant chosen for its Neural-ART NPU). The document states: 'Biometric templates are stored in external NOR flash via XSPI. MCE is configured on region 2 with AES-256 stream cipher to protect template confidentiality.' What is wrong with this architecture, and what is the consequence if it ships as described?",
+        "reveal": "The STM32N647xx is an STM32N6x7xx variant, and MCE is available only on STM32N6x5xx devices (STM32N655xx and STM32N657xx). The MCE peripheral does not exist on the STM32N647xx, so the configuration described in the document cannot be implemented — the registers do not exist. If this ships, the biometric templates in external NOR flash are stored in plaintext. Anyone with physical access and a logic analyzer on the XSPI bus can capture every template read during an authentication attempt. The fix requires either switching to an STM32N6x5xx variant (losing the NPU) or implementing a software AES layer using a general-purpose crypto peripheral — but neither option is a drop-in replacement, and both require architectural rework.",
+        "hint": "Check which STM32N6 variants actually include the MCE peripheral before evaluating whether the configuration is valid."
+      },
+      {
+        "prediction_prompt": "You are configuring MCE on an STM32N655xx for a biometric terminal. The external NOR flash holds two data types: (1) encrypted biometric templates in the address range 0x9000_0000 to 0x9003_FFFF, and (2) non-sensitive UI assets in the range 0x9004_0000 to 0x900F_FFFF. You want maximum confidentiality for templates and no encryption overhead for UI assets. How do you configure the MCE regions, and which cipher mode do you assign to the template region?",
+        "reveal": "Configure MCE region 1 to cover 0x9000_0000 to 0x9003_FFFF (the biometric template range) with AES-256 stream cipher mode. This gives CTR-mode encryption compliant with NIST SP800-38A, and the stream cipher's XSPI prefetch optimization reduces read latency during authentication. Configure MCE region 2 (or leave it as region 0 default bypass) to cover the UI asset range with no encryption (bypass mode). The 4-Kbyte granularity of MCE region boundaries means both ranges align cleanly. Load the region 1 key during secure boot using a key derived from SAES/DHUK, then lock the key register before non-secure code executes. The CPU and any DMA reading UI assets see plaintext with no cipher overhead; the CPU reading biometric templates also sees plaintext, but the XSPI bus carries only ciphertext.",
+        "hint": "MCE supports up to four independent encrypted regions, each with its own cipher mode — bypass is a valid mode for regions you want unencrypted."
+      }
+    ],
+    "summary": "MCE provides zero-overhead inline AES encryption of XSPI external flash by intercepting system bus traffic at the hardware level, requiring only a one-time region and key configuration during secure boot. It is available exclusively on STM32N6x5xx variants — any design that selects the STM32N6x7xx for NPU inference must account for the complete absence of MCE and plan an alternative protection strategy for external flash.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When a DMA controller reads biometric template data from an MCE-protected XSPI region, the data the DMA receives is ___.",
+      "answer": "plaintext (decrypted by MCE transparently)",
+      "distractors": [
+        "ciphertext",
+        "compressed",
+        "hashed"
+      ],
+      "explanation": "MCE decrypts reads automatically before the data reaches the system bus, so the CPU, DMA, and any other bus master always see plaintext — the encryption is invisible to all software and hardware above the MCE layer."
+    },
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each MCE cipher mode to the scenario where it is the best fit for the biometric terminal design:",
+      "pairs": [
+        {
+          "left": "Sequential reads of large biometric template blocks with lowest read latency",
+          "right": "Stream cipher mode (CTR-based, with XSPI prefetch optimization)"
+        },
+        {
+          "left": "Non-sensitive UI asset region that must not incur any cipher overhead",
+          "right": "Bypass mode (no encryption)"
+        },
+        {
+          "left": "Random-access writes to individual encrypted records where per-block confidentiality is required",
+          "right": "Block cipher mode (AES ECB-compatible)"
+        }
+      ],
+      "explanation": "Stream cipher mode's XSPI prefetch optimization makes it the best choice for sequential reads; bypass eliminates all overhead for non-sensitive regions; block cipher mode suits random-access patterns where CTR's sequential counter assumption does not apply."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the exact register names or HAL API calls (e.g., STM32Cube MCE driver functions) needed to configure MCE regions in firmware — a reference to the STM32N6 reference manual or STM32CubeN6 HAL documentation would be needed to complete a firmware implementation guide.",
+    "The datasheet does not describe the precise interaction between MCE key loading and the SAES DHUK derivation flow — the secure boot sequence for loading an MCE key from a hardware-bound source requires the STM32N6 security reference manual or application note.",
+    "No datasheet information is available on MCE behavior during DMA burst transfers beyond the AXI transaction types listed (INCRx up to x=8, WRAPx=4) — edge cases for large DMA transfers exceeding these burst sizes are not documented in the provided chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are specifying the security architecture for the STM32N6-based face recognition terminal. The design stores encrypted biometric templates in external NOR flash connected via XSPI. You need to select the right STM32N6 feature to protect that external flash region so that all reads and writes are automatically encrypted and decrypted without CPU intervention.",
+        "question_text": "Which STM32N6 feature should you assign to handle inline encryption and decryption of the XSPI-connected external flash region storing biometric templates?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "SAES — it provides AES encryption with DPA resistance and SESIP/PSA Level 3 certification for protecting sensitive data",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MCE — it performs system bus inline encryption for writes and decryption for reads across defined address regions, operating transparently on XSPI traffic",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "CRYP — it supports AES with multiple chaining modes including GCM and CCM, and uses DMA channels for high-throughput data processing",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. MCE is specifically designed for system bus inline encryption and decryption, automatically handling all traffic to and from defined address regions — including XSPI-mapped external flash — without CPU involvement. SAES and CRYP require explicit software-driven encryption operations and are better suited for encrypting data blocks such as biometric templates before storage.",
+        "incorrect": "SAES and CRYP both require software to explicitly invoke encryption operations on data blocks. Neither operates inline on the system bus. MCE is the feature designed for transparent, on-the-fly encryption and decryption of all reads and writes to a defined address region, making it the correct choice for protecting XSPI-connected external flash. Review Section 3.36 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O4",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the security feature mapping for the face recognition terminal. A colleague proposes using the STM32N6x7xx variant because it includes the Neural-ART NPU needed for face matching. They plan to use MCE for inline encryption of the external flash storing biometric templates.",
+        "question_text": "What is the critical flaw in your colleague's proposed design that you must flag before the architecture is finalized?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N6x7xx variant does not include MCE, SAES, or CRYP — so the design has no hardware inline encryption for the external flash biometric storage",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The MCE on the STM32N6x7xx only supports stream cipher mode, which is insufficient for protecting biometric templates at rest",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The XSPI interface on the STM32N6x7xx does not support memory-mapped mode, so MCE cannot intercept reads and writes to external flash",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. MCE, SAES, and CRYP are available only on STM32N655xx and STM32N657xx devices (the STM32N6x5xx security variants). The STM32N6x7xx NPU variant does not include these cryptographic features, making it unsuitable for a design that requires hardware inline encryption of external flash. This is the core variant selection tradeoff for the face recognition terminal.",
+        "incorrect": "The issue is not a limitation of MCE's cipher modes or the XSPI interface. MCE and CRYP are simply absent on the STM32N6x7xx variant entirely — they are available only on STM32N655xx and STM32N657xx devices. A design that requires both NPU inference and hardware inline encryption cannot be satisfied by a single STM32N6x7xx device. Review the variant differentiation in the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "773e666c-102c-43f1-8b41-f8cdac78c359",
+          "snippet": "The cryptographic processor (CRYP) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_55/ChunkType.text_773e666c-102c-43f1-8b41-f8cdac78c359_0.png",
+          "page_number": 55,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the security feature mapping table for the STM32N6x5xx-based face recognition terminal. You need to assign each security feature to its correct protection role: MCE, SAES, HASH, and TrustZone are all available on the selected variant. The terminal must protect biometric templates stored in external flash, verify data integrity during firmware updates, encrypt templates during processing, and isolate the secure biometric domain from non-secure application code.",
+        "question_text": "Which assignment correctly maps each STM32N6 security feature to its intended protection role in the terminal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "MCE → inline encryption of XSPI external flash; SAES → biometric template encryption during processing; HASH → data integrity verification; TrustZone → isolation of the secure biometric processing domain",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MCE → biometric template encryption during processing; SAES → inline encryption of XSPI external flash; HASH → isolation of the secure biometric processing domain; TrustZone → data integrity verification",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "MCE → data integrity verification of firmware updates; SAES → isolation of the secure biometric processing domain; HASH → inline encryption of XSPI external flash; TrustZone → biometric template encryption during processing",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. MCE is the inline encryption engine for system bus traffic to XSPI-mapped external flash. SAES provides software-driven AES encryption with DPA resistance for processing sensitive biometric data. HASH provides cryptographic integrity verification. TrustZone enforces hardware-level isolation between the secure biometric domain and non-secure application code. Each feature is matched to the protection role it is architecturally designed to fulfill.",
+        "incorrect": "Each STM32N6 security feature has a specific architectural role. MCE operates inline on the system bus for external memory regions — it is not a general-purpose encryption coprocessor. SAES is a software-invoked AES coprocessor, not an inline memory encryption engine. HASH computes message digests for integrity checks, not domain isolation. TrustZone enforces secure/non-secure domain separation at the hardware level. Review Sections 3.1, 3.33, 3.35, and 3.36 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "bc84a890-cfc5-48e4-89b4-5d552f1c1579",
+          "snippet": "These microcontrollers have TrustZone-aware support and a memory protection unit (MPU) for enhanced application security.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_bc84a890-cfc5-48e4-89b4-5d552f1c1579_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    }
+  ]
+}

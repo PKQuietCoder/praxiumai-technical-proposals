@@ -1,0 +1,63 @@
+[
+  {
+    "index": 0,
+    "name": "Priya Nair",
+    "role": "Embedded Firmware Engineer - Industrial IoT",
+    "description": "Develops firmware and middleware for industrial IoT devices using ARM Cortex-M based microcontrollers, responsible for peripheral initialization, power management, and communication stack integration.",
+    "experience": "3-7 years in embedded systems firmware development",
+    "background": "Bachelor's or Master's degree in Electrical Engineering or Computer Engineering; proficient in C/C++, RTOS concepts, and ARM architecture",
+    "needs": "Understand the PSOC Edge E8 peripheral architecture, memory map, power modes, clock configuration, and how to use the ModusToolbox SDK and PDL to initialize and drive peripherals such as SCB, TCPWM, ADC, DMA, and USB; understand how to configure TrustZone security and integrate TF-M for PSA-compliant applications",
+    "pain_points": "Navigating a complex multi-domain power architecture with multiple CPU cores and co-processors; understanding wait states and latency trade-offs when accessing different memory regions; configuring GPIO alternate functions correctly across a large pin matrix; managing power consumption across multiple power modes while keeping required peripherals active",
+    "key_job_tasks": [
+      "Initialize and configure peripherals (SCB, TCPWM, ADC, DMA, USB, CAN FD) using the PDL",
+      "Implement and optimize power management strategies using active, sleep, deep sleep, and hibernate modes",
+      "Configure clock sources, PLLs, and clock dividers for required peripheral frequencies",
+      "Integrate TF-M and mbedTLS for PSA-compliant secure boot and cryptographic services",
+      "Debug firmware using SWD/JTAG interfaces and trace capabilities"
+    ],
+    "context": "Works in a product development team building industrial automation controllers, robotics systems, or medical devices; uses ModusToolbox IDE with Visual Studio Code or Eclipse; references the datasheet and architecture reference manual daily during bring-up and feature development"
+  },
+  {
+    "index": 1,
+    "name": "Marcus Hoffmann",
+    "role": "Hardware Design Engineer - Embedded Systems",
+    "description": "Designs PCBs and hardware subsystems incorporating microcontrollers and SoCs for industrial-grade products, responsible for schematic capture, power supply design, signal integrity, and component selection.",
+    "experience": "5-10 years in PCB and hardware design for industrial or medical electronics",
+    "background": "Bachelor's degree in Electrical Engineering; experienced with BGA component placement, power supply design, decoupling strategies, and high-speed signal integrity",
+    "needs": "Understand the PSOC Edge E8 package pinout (BGA-220), power supply topology (supply-powered vs. battery-powered configurations), bypass capacitor requirements, GPIO voltage domains and OVT pin behavior, external oscillator circuit design, XRES pin configuration, and SMIF/DSI/USB interface hardware requirements",
+    "pain_points": "Correctly routing and decoupling a 220-ball BGA with multiple independent voltage domains (VDDD, VDDA, VDDIO0-8, VDD.USB, VBAT); ensuring power sequencing meets device requirements; selecting appropriate bypass capacitors for LDO outputs and switching regulators; understanding which GPIO ports support 3.3V operation vs. 1.8V only; meeting PCB layout guidelines for high-speed interfaces like SMIF and USB",
+    "key_job_tasks": [
+      "Design power supply circuits for supply-powered and battery-powered PSOC Edge configurations",
+      "Select and place bypass capacitors for all voltage domains per datasheet recommendations",
+      "Route BGA-220 package with correct assignment of GPIO ports to voltage domains",
+      "Design external crystal oscillator circuits (ECO and WCO) with correct load capacitor values",
+      "Verify GPIO alternate function assignments and HSIOM routing for required interfaces"
+    ],
+    "context": "Works in hardware engineering team at an industrial automation or medical device company; collaborates closely with firmware engineers during board bring-up; references the datasheet pinout tables, electrical specifications, and package information sections extensively during schematic and layout phases"
+  },
+  {
+    "index": 2,
+    "name": "Aisha Okonkwo",
+    "role": "Edge AI/ML Application Engineer - Embedded Intelligence",
+    "description": "Develops and deploys machine learning models on resource-constrained edge devices for applications such as voice recognition, anomaly detection, and human activity recognition in industrial and consumer products.",
+    "experience": "2-5 years in embedded ML or TinyML development",
+    "background": "Background in machine learning or data science combined with embedded systems knowledge; familiar with TensorFlow Lite for Microcontrollers, quantization techniques, and neural network architectures such as MobileNet, RNNoise, and keyword spotting models",
+    "needs": "Understand the capabilities and constraints of the Arm Ethos-U55 NPU and NNLite coprocessor, including supported neural network kernels, data precisions, memory requirements, and performance benchmarks; understand how to partition ML workloads between the M55/U55 high-performance domain and the M33/NNLite low-power always-on domain; understand audio input pipeline (PDM/PCM, AAD) for voice-triggered ML applications; learn to use DEEPCRAFT Studio for model development and deployment",
+    "pain_points": "Balancing ML model complexity against available SRAM (up to 5 MB system SRAM) and inference latency requirements; choosing between the high-performance Ethos-U55 and the low-power NNLite for always-on use cases; understanding memory bandwidth constraints when loading model weights from external flash via SMIF; optimizing power consumption for battery-powered edge AI devices that must run inference continuously",
+    "key_job_tasks": [
+      "Select and configure the appropriate neural network accelerator (Ethos-U55 vs. NNLite) based on model complexity and power budget",
+      "Optimize ML model quantization and weight compression for deployment on the Ethos-U55 with 8-bit weights",
+      "Design always-on audio pipelines using PDM/PCM input with acoustic activity detection (AAD) to trigger ML inference",
+      "Profile and benchmark neural network inference performance using DEEPCRAFT Studio and ModusToolbox ML library",
+      "Manage SRAM allocation between ML model weights, activations, and application data across the multi-domain memory architecture"
+    ],
+    "context": "Works at a company developing smart industrial sensors, voice-controlled HMI panels, or predictive maintenance systems; bridges the gap between data science teams and embedded hardware teams; evaluates the PSOC Edge E8 as a platform for deploying production ML models at the edge"
+  },
+  {
+    "name": "Alex Kim",
+    "role": "Firmware Engineer - Biometric Access Control",
+    "description": "Evaluates and develops firmware for the PSOC Edge E8 as a platform for an advanced face recognition terminal (similar to Suprema FaceStation 2), requiring high-performance vision processing, ML-based facial biometrics, and robust access control integration. Responsible for peripheral bring-up, power management, and integrating ML inference with camera and display pipelines.",
+    "needs": "Understand the full PSOC Edge E8 peripheral architecture, memory map, power modes, clock configuration, and ModusToolbox SDK/PDL usage; understand how to configure and use ML accelerators (Ethos-U55 and NNLite) for face recognition workloads; understand camera/image input pipelines, display controller, and MIPI-DSI interface; integrate TrustZone/TF-M for secure boot and PSA-compliant security in an access control context",
+    "pain_points": "Peripheral bring-up complexity across a multi-core, multi-domain architecture; balancing ML model performance and accuracy against SRAM and latency constraints for real-time face recognition; configuring GPIO, power domains, and clock trees correctly for a feature-rich product; ensuring security compliance (PSA) for an access control device operating in diverse lighting and environmental conditions"
+  }
+]

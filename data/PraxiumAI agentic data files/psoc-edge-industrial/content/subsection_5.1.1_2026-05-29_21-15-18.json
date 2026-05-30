@@ -1,0 +1,413 @@
+{
+  "subsection_id": "5.1.1",
+  "subsection_title": "Configure the MIPI-DSI Display Pipeline",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Trace the data path a rendered frame takes from the GPU through the display controller to the MIPI-DSI host controller",
+    "Select the correct display interface (MIPI-DSI vs MIPI-DBI) based on pin count and power constraints",
+    "Identify the hardware design requirements for DSI PHY calibration, including the DSI.REXT termination resistor",
+    "Recognize the SCB0 deep-sleep mode limitation and its impact on sensor bus assignment"
+  ],
+  "content": {
+    "hook_sentence": "A missing 200 Ω resistor on a single pin can prevent the entire MIPI-DSI PHY from calibrating — and your display will never initialize, no matter how correct your firmware is.",
+    "introduction": "For the face recognition terminal, the display pipeline is the final link between the GPU's rendered output and the panel showing access granted or denied. Getting the hardware design right before PCB fabrication — and understanding the data path before you write a line of ModusToolbox PDL code — saves you from board respins and hours of bring-up debugging. This subsection covers the display pipeline data path, interface selection trade-offs, the mandatory DSI PHY hardware constraint, and the SCB0 deep-sleep limitation that affects your sensor bus assignment.",
+    "key_points": [
+      {
+        "point": "The display pipeline data path runs: GPU renders the frame, the display controller (DC) transfers it to the MIPI-DSI host controller, and the host controller drives the panel.",
+        "explanation": "When you configure the graphics subsystem in ModusToolbox, you need to understand which blocks are in the chain so you know which drivers to initialize and in what order. The GPU (a 2.5D graphics processing unit) renders the frame. The display controller then picks up that rendered output and hands it off to the MIPI-DSI host controller, which drives the physical differential lanes to the panel. The graphics block supports displays up to 1024 x 768 at up to 60 frames per second, with up to 24 bits per pixel. It also supports up to 4-layer alpha blending in the display controller, which is useful when you need to overlay a status badge or icon on top of the camera preview in your terminal UI. For memory efficiency, the block supports 2x frame buffer compression: it stores pixels in YUV 4:2:0 format (12 bits per pixel) and performs on-the-fly color space conversion to 24-bit RGB on output. This halves the frame buffer memory footprint, which matters when you are working within the PSOC Edge E8's SRAM budget.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+            "snippet": "Frames rendered by the GPU are transferred to the MIPI display serial interface (DSI) host controller by the display controller (DC). Both DBI (command mode) and DPI (video mode) standards are supported over the DSI interface.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_601897f0-c9fa-42e6-944f-c64de37b76d6_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "298884e5-2156-4c9a-a1db-97c5a653dc94",
+            "snippet": "This product line has a 2.5D graphics processing unit (GPU) with a display controller. It supports displays up to 1024 x 768 with a maximum of 60 frames/second rate. It supports up to 24 bits-per-pixel resolution and provides frame buffer compression.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_298884e5-2156-4c9a-a1db-97c5a653dc94_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "9241a416-b004-4112-8b6a-df653886ca5c",
+            "snippet": "The graphics block supports 2x frame buffer compression for 24-bit RGB pixels via on-the-fly color space conversion from pixels stored in YUV 4:2:0 (12 bits per pixel) format. Up to 4-layer alpha blending is supported by the display controller.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_9241a416-b004-4112-8b6a-df653886ca5c_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "MIPI-DSI is the lowest pin count and lowest energy display interface on the PSOC Edge E8 — choose it when both PCB pin budget and power are constrained.",
+        "explanation": "The PSOC Edge E8 supports three display interface families: MIPI-DSI, and MIPI-DBI Types A, B, and C (the DBI types are provided in their standard parallel/serial forms, not over DSI). When your hardware team is debating which interface to route on the PCB, the key differentiator is this: MIPI-DSI uses only 2 differential data lanes plus a differential clock lane — 7 dedicated fixed-function IO pins total — and delivers up to 1500 Mbps per lane. That combination of low pin count and high bandwidth at low power makes it the right choice for a display-equipped terminal where PCB real estate and battery life both matter. MIPI-DBI, by contrast, uses parallel GPIO lines (up to 8 data bits plus control signals routed through P16 and P17) and is capped at 50 MHz GPIO frequency. DBI is appropriate when the display panel has its own internal frame buffer and you only need to push command updates rather than streaming full video frames — but it costs more pins and more power per bit transferred. The DSI interface lives in the high-performance domain. The display controller outputting frames via MIPI-DSI is explicitly listed as a high-speed communication channel (greater than 100 MHz) that belongs in the high-performance domain, which can be selectively powered down between recognition events to save energy.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "2bca2357-55a5-4f07-ae53-5c26a3d96fbc",
+            "snippet": "The output is 2-lane MIPI DSI; or MIPI DBI type A, B, or C; depending on the type of display. MIPI DSI is the lowest pin count and the lowest energy; it provides two lanes at up to 1500 Mbps per lane.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_2bca2357-55a5-4f07-ae53-5c26a3d96fbc_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+            "snippet": "Both DBI (command mode) and DPI (video mode) standards are supported over the DSI interface as per the MIPI standards specification. In addition, MIPI DBI Types A, B, and C modes are also provided in their standard forms (i.e. not using DSI).",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_601897f0-c9fa-42e6-944f-c64de37b76d6_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "4882384e-ff69-4e82-a2e0-32d7a9ce59c9",
+            "snippet": "the high-performance domain is used for high-speed communication channels (>100 MHz, display controller outputting frames via MIPI DSI), and DSP and neural network processing, where work is done as fast as possible to reduce real time constraints for applications.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_4882384e-ff69-4e82-a2e0-32d7a9ce59c9_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "32d40518-2d04-4bfa-a7e8-0dfe9e42f3f1",
+            "snippet": "GPIO frequency for DBI Type C interface: max 50 MHz. GPIO frequency for DBI Type A and B interfaces: max 50 MHz.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_121/ChunkType.table_32d40518-2d04-4bfa-a7e8-0dfe9e42f3f1_0.png",
+            "page_number": 121,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "DSI PHY calibration requires a 200 Ω resistor from DSI.REXT to ground — this is a mandatory hardware design constraint, not a firmware setting.",
+        "explanation": "Before you send your schematic to fabrication, verify that `DSI.REXT` (BGA-220 ball J6) is connected to ground through a 200 Ω resistor. This is a PHY calibration requirement: the DSI D-PHY uses this external reference resistor to calibrate its internal impedance. Without it, the PHY will not calibrate correctly and the DSI interface will not function regardless of your firmware configuration. If your design does not use the graphics feature at all, tie `DSI.REXT` directly to ground instead. The rule is simple: graphics feature in use → 200 Ω to ground; graphics feature not used → tie directly to ground. There is no firmware workaround for a missing or incorrectly valued resistor. The seven DSI fixed-function IO pins (`DSI.CLKN`, `DSI.CLKP`, `DSI.DATA0N`, `DSI.DATA0P`, `DSI.DATA1N`, `DSI.DATA1P`, and `DSI.REXT`) are all powered by `VDD.DSI`. The analog supply `VCCA.DSI` feeds `VLDO.DSI`, which in turn powers the DSI PHY analog circuitry. Confirm both supply rails are present in your power tree before bring-up.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "a47e5741-5daf-402c-a912-e8481ede5a52",
+            "snippet": "DSI PHY calibration requires that the DSI.REXT pin be connected to a 200 Ω resistor to ground.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_a47e5741-5daf-402c-a912-e8481ede5a52_0.png",
+            "page_number": 39,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a795bb27-bc8e-402e-a5e4-771426c1aa89",
+            "snippet": "If the graphics feature is used, connect the DSI.REXT pin to a 200 Ω resistor to ground. If not, tied to ground.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_41/ChunkType.text_a795bb27-bc8e-402e-a5e4-771426c1aa89_0.png",
+            "page_number": 41,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "adb9a015-71ee-4177-8c3a-769179c35e3d",
+            "snippet": "Graphics pins: VDD.DSI: DSI.CLKN, DSI.CLKP, DSI.DATA0N, DSI.DATA0P, DSI.DATA1N, DSI.DATA1P, DSI.REXT. VCCA.DSI: VLDO.DSI",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_41/ChunkType.text_adb9a015-71ee-4177-8c3a-769179c35e3d_0.png",
+            "page_number": 41,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e8c2507f-97dd-4aea-8a9b-bae087dc2323",
+            "snippet": "DSI.REXT: J6",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_42/ChunkType.table_e8c2507f-97dd-4aea-8a9b-bae087dc2323_0.png",
+            "page_number": 42,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "SCB0 supports only I2C slave and SPI slave modes in deep sleep — it cannot act as an I2C master to poll a sensor, so assign master-mode sensor buses to SCB1 through SCB11.",
+        "explanation": "When you are assigning the terminal's peripheral interfaces to SCB instances, the deep-sleep capability of SCB0 is a common source of confusion. SCB0 can operate in System Deep Sleep mode (with an external clock), which makes it attractive for always-on sensor communication. However, SCB0 only supports I2C slave mode and SPI slave mode — it cannot initiate transactions as a master. For the face recognition terminal's proximity sensor bus, where the PSOC Edge E8 must act as the I2C master to poll the sensor and trigger a wakeup, SCB0 is the wrong choice. Assign that bus to any of SCB1 through SCB11, which support full master and slave roles for I2C, SPI, and UART. Reserve SCB0 for scenarios where an external master (such as a host processor or a test fixture) needs to communicate with the PSOC Edge E8 while it is in deep sleep. This constraint also affects your GPIO HSIOM routing plan: the DBI parallel interface signals (`gfx.dbi.*`) route through P16 and P17, while SCB instances route through their own port assignments. Verify there are no conflicts in your pin assignment before finalizing the schematic.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "61c3d775-87bf-4945-a9dc-9a73df8c7411",
+            "snippet": "I²C, SPI, and UART via serial communication blocks (SCB). SCB0 supports only I²C and SPI",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_61c3d775-87bf-4945-a9dc-9a73df8c7411_0.png",
+            "page_number": 9,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "c49d9cf1-f8ae-4bdd-97eb-c275eaefdca1",
+            "snippet": "gfx.dbi.csx: P16.0, gfx.dbi.dcx: P16.2, gfx.dbi.d0: P16.3, gfx.dbi.d1: P16.4, gfx.dbi.d2: P16.5, gfx.dbi.d3: P16.6, gfx.dbi.d4: P16.7, gfx.dbi.d5: P17.0",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_60/ChunkType.table_c49d9cf1-f8ae-4bdd-97eb-c275eaefdca1_0.png",
+            "page_number": 60,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your hardware team has completed the schematic for the face recognition terminal. The DSI differential pairs are routed correctly, VDD.DSI and VCCA.DSI are present, and the firmware display driver initializes without errors in simulation. During first board bring-up, the MIPI-DSI panel shows nothing — no backlight response, no data. A colleague suggests the issue might be in the DSI PHY. You pull up the schematic and find DSI.REXT is connected directly to ground with no resistor. What is the root cause, and what is the fix?",
+        "reveal": "The root cause is a missing PHY calibration reference. DSI PHY calibration requires DSI.REXT to be connected to ground through a 200 Ω resistor. With DSI.REXT tied directly to ground (0 Ω), the PHY cannot calibrate its internal impedance correctly, so the high-speed differential signaling never comes up — the panel receives no valid data regardless of firmware state. The fix is a PCB respin (or a rework on the prototype) to add a 200 Ω resistor in series between DSI.REXT (ball J6 on BGA-220) and ground. This is a hardware constraint with no firmware workaround.",
+        "hint": "The DSI PHY calibration requirement is a hardware design rule, not a register setting."
+      },
+      {
+        "prediction_prompt": "A junior engineer proposes assigning the proximity sensor I2C bus to SCB0 because 'it needs to stay active during deep sleep to detect motion and wake the system.' The proximity sensor requires the PSOC Edge E8 to act as the I2C master and poll the sensor at 400 kHz. Is SCB0 the right choice? What should you assign instead?",
+        "reveal": "SCB0 is the wrong choice here. While SCB0 does operate in System Deep Sleep mode, it only supports I2C slave mode and SPI slave mode — it cannot initiate transactions as an I2C master. Polling a sensor requires master-mode operation. The correct assignment is any SCB from SCB1 through SCB11, which support full I2C master mode. If deep-sleep sensor polling is a hard requirement, the architecture needs a different wakeup strategy (for example, using a GPIO interrupt from the sensor's INT pin to wake the system, then polling via a master-capable SCB after wakeup).",
+        "hint": "Think about the direction of the I2C transaction: who initiates it?"
+      }
+    ],
+    "summary": "For the face recognition terminal display bring-up, confirm the GPU-to-DC-to-DSI-host data path in your driver initialization sequence, choose MIPI-DSI over DBI when pin count and power are constrained, place a 200 Ω resistor on DSI.REXT before fabrication, and assign master-mode sensor buses to SCB1 through SCB11 rather than SCB0.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 0,
+        "caption": "The PSOC Edge E8 block diagram showing the Graphics Subsystem (2.5D Rendering, Multi-plane Composition, MIPI DSI, MIPI DBI) in the high-performance domain, connected to the 7x DSI I/O pins in the I/O subsystem. Use this to orient the display pipeline within the full chip architecture.",
+        "alt_text": "Detailed block diagram of the PSOC Edge E8 showing three power domains. The high-performance domain contains the Graphics Subsystem block with sub-blocks labeled 2.5D Rendering, Multi-plane Composition, MIPI DSI, and MIPI DBI. The I/O subsystem on the right lists 7x DSI I/O among the available pin types. The Cortex-M55 and Ethos-U55 at 320 MHz are also in the high-performance domain. The low-power domain contains the Cortex-M33 and NNLite. The deep sleep domain contains autonomous analog and the single SCB deep sleep block.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      },
+      {
+        "chunk_id": "c86d33e2-31d3-4b2f-8e99-4f4c329831c8",
+        "after_key_point": 2,
+        "caption": "Power distribution diagram showing that VCCD supplies the MIPI D-PHY VDD, and VLDO.DSI is a separate supply rail for the DSI PHY analog circuitry. Note that VLDO.DSI pins are NC (no connect) on E81 and E83 series devices.",
+        "alt_text": "Power distribution block diagram showing four LDO supply rails on the left: VCCD, VLDO.RET, VLDO.SRAM, and VLDO.DSI. VCCD connects to ROM, RRAM, MIPI D-PHY VDD, and USB DVDD. VLDO.RET connects to M55/U55 retention flops (M55 CORE, U-55 CORE, DSI Controller) and CM33 retention flops (M33 CORE, GPIO, TCPWM, SCB, I3C, I2C, TDM, PDWMPCM, LPCOMP, 1x SCB Deep Sleep, NNLite). VLDO.SRAM connects through a PWR MUX to SRAM and MIPI VP Analog. VLDO.DSI is shown at the bottom with a footnote that these pins are NC for E81 and E83 series devices.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.figure_c86d33e2-31d3-4b2f-8e99-4f4c329831c8_0.png",
+        "page_number": 17
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When both PCB pin count and power consumption are the primary constraints for a display interface decision, the correct interface to select is ___.",
+      "answer": "MIPI-DSI",
+      "distractors": [
+        "MIPI-DBI Type A",
+        "MIPI-DBI Type C",
+        "parallel DPI"
+      ],
+      "explanation": "MIPI-DSI is documented as the lowest pin count and lowest energy option, providing two lanes at up to 1500 Mbps per lane. DBI types use parallel GPIO lines and are capped at 50 MHz, costing more pins and more power per bit."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each design scenario to the correct SCB assignment decision:",
+      "pairs": [
+        {
+          "left": "I2C master polling a proximity sensor at 400 kHz",
+          "right": "Assign to SCB1–SCB11 (master mode required)"
+        },
+        {
+          "left": "I2C slave receiving commands from an external host during deep sleep",
+          "right": "SCB0 is a valid option (slave mode, deep sleep capable)"
+        },
+        {
+          "left": "UART debug port active only during CPU active mode",
+          "right": "Assign to SCB1–SCB11 (UART not supported on SCB0)"
+        }
+      ],
+      "explanation": "SCB0 supports only I2C slave and SPI slave modes in deep sleep. Any master-mode or UART requirement must use SCB1 through SCB11, which support full master/slave roles across I2C, SPI, and UART."
+    }
+  ],
+  "content_gaps": [
+    "ModusToolbox PDL API specifics for display controller and DSI host controller initialization (register names, initialization sequence, configuration wizard steps) are not available in the datasheet source material. Hands-on configuration steps require the Architecture Reference Manual and PDL API documentation.",
+    "The datasheet does not specify the exact CLK_HF[12] frequency required for a given DSI lane rate target, beyond documenting the max of 51 MHz for the MIPI DSI D-PHY PLL reference clock. A worked clock configuration example for a specific panel resolution and refresh rate would require SME input or the Architecture Reference Manual."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are bringing up the display subsystem for a PSOC Edge E8-based face recognition terminal. The terminal uses a MIPI-DSI panel to render the access control UI. You have routed the DSI differential pairs on the PCB and are now reviewing the hardware design checklist before sending the board to fabrication.",
+        "question_text": "You notice that the DSI.REXT pin has been left unconnected in the current schematic. What should you do to ensure correct DSI PHY operation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Leave DSI.REXT unconnected — it is only required when using MIPI DBI mode, not DSI mode",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Connect DSI.REXT to ground through a 200 Ω resistor, because DSI PHY calibration requires this termination",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Connect DSI.REXT directly to VDD.DSI to bias the PHY reference circuit for high-speed operation",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The datasheet explicitly states that DSI PHY calibration requires DSI.REXT to be connected to a 200 Ω resistor to ground whenever the graphics feature is used. Omitting this will cause PHY calibration to fail and the display pipeline will not operate correctly.",
+        "incorrect": "DSI.REXT is not optional and is not related to DBI mode. The datasheet states: 'DSI PHY calibration requires that the DSI.REXT pin be connected to a 200 Ω resistor to ground.' If the graphics feature is not used, the pin should be tied to ground — but when DSI is active, the resistor is mandatory. Review the Graphics functions and Pin sections of the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "a47e5741-5daf-402c-a912-e8481ede5a52",
+          "snippet": "DSI PHY calibration requires that the DSI.REXT pin be connected to a 200 Ω resistor to ground.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_a47e5741-5daf-402c-a912-e8481ede5a52_0.png",
+          "page_number": 39,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "a795bb27-bc8e-402e-a5e4-771426c1aa89",
+          "snippet": "If the graphics feature is used, connect the DSI.REXT pin to a 200 Ω resistor to ground. If not, tied to ground.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_41/ChunkType.text_a795bb27-bc8e-402e-a5e4-771426c1aa89_0.png",
+          "page_number": 41,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O6",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are configuring the display pipeline for the PSOC Edge E8 face recognition terminal. The panel vendor has provided two display options: a MIPI-DSI panel and a legacy parallel-bus panel. Your hardware team is debating which interface to use, and the project has strict constraints on PCB pin count and power budget.",
+        "question_text": "Based on the PSOC Edge E8 display interface capabilities, which statement best describes the trade-off that should guide your interface selection decision?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "MIPI DBI offers the lowest pin count and lowest energy consumption, making it the preferred choice when pin budget is the primary constraint",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MIPI DSI offers the lowest pin count and lowest energy, providing two lanes at up to 1500 Mbps per lane, making it the preferred choice when both pin budget and power are constrained",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "MIPI DSI and MIPI DBI have equivalent pin counts, so the selection should be based solely on whether the display panel has an internal frame buffer",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The datasheet states that MIPI DSI 'is the lowest pin count and the lowest energy' interface, providing two lanes at up to 1500 Mbps per lane. When both pin budget and power consumption are constrained — as is typical in a compact access control terminal — MIPI DSI is the correct choice.",
+        "incorrect": "MIPI DSI is specifically documented as the lowest pin count and lowest energy option among the supported display interfaces. While DBI mode is relevant when the display has an internal frame buffer (command mode), it does not offer the same pin count or energy advantages as DSI. Review the display interface section of the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "2bca2357-55a5-4f07-ae53-5c26a3d96fbc",
+          "snippet": "MIPI DSI is the lowest pin count and the lowest energy; it provides two lanes at up to 1500 Mbps per lane.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_2bca2357-55a5-4f07-ae53-5c26a3d96fbc_0.png",
+          "page_number": 39,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+          "snippet": "Both DBI (command mode) and DPI (video mode) standards are supported over the DSI interface as per the MIPI standards specification. DBI assumes that there is memory in the display.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_601897f0-c9fa-42e6-944f-c64de37b76d6_0.png",
+          "page_number": 39,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring the PSOC Edge E8 display pipeline for the face recognition terminal. The GPU has finished rendering a UI frame showing the access granted/denied status. You need to understand the correct data path so you can configure the relevant blocks in ModusToolbox.",
+        "question_text": "In the PSOC Edge E8 display pipeline, what is the correct sequence of blocks that a rendered frame passes through before reaching the MIPI-DSI panel?",
+        "question_note": "Select the option that correctly describes the pipeline order."
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "GPU renders the frame → Display Controller (DC) transfers it to the MIPI-DSI host controller → MIPI-DSI host controller drives the panel",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "GPU renders the frame → MIPI-DSI host controller buffers it → Display Controller (DC) drives the panel",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Cortex-M55 writes frame data directly to the MIPI-DSI host controller → Display Controller (DC) applies alpha blending → panel receives the output",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The datasheet describes the pipeline as: frames rendered by the GPU are transferred to the MIPI-DSI host controller by the Display Controller (DC). The DC sits between the GPU and the DSI host controller — this is the sequence you need to configure in ModusToolbox.",
+        "incorrect": "The correct pipeline order is GPU → Display Controller (DC) → MIPI-DSI host controller → panel. The Display Controller is responsible for transferring rendered frames from the GPU to the DSI host controller, not the other way around. The Cortex-M55 does not write directly to the DSI host controller. Review the Graphics functions section of the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "601897f0-c9fa-42e6-944f-c64de37b76d6",
+          "snippet": "Frames rendered by the GPU are transferred to the MIPI display serial interface (DSI) host controller by the display controller (DC).",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_601897f0-c9fa-42e6-944f-c64de37b76d6_0.png",
+          "page_number": 39,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "298884e5-2156-4c9a-a1db-97c5a653dc94",
+          "snippet": "This product line has a 2.5D graphics processing unit (GPU) with a display controller. It supports displays up to 1024 x 768 with a maximum of 60 frames/second rate.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_39/ChunkType.text_298884e5-2156-4c9a-a1db-97c5a653dc94_0.png",
+          "page_number": 39,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O6",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the peripheral assignment plan for the PSOC Edge E8 face recognition terminal. The terminal requires four external interfaces: a MIPI-DSI display, an I2C sensor bus for a proximity sensor, a SPI connection to an external NOR flash, and a UART debug port. A junior engineer on your team proposes assigning the I2C sensor bus to SCB0 because 'it needs to stay active during deep sleep to detect motion and wake the system.'",
+        "question_text": "You need to evaluate whether SCB0 is the correct choice for the I2C sensor bus in this design. What is the most accurate assessment of the junior engineer's proposal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The proposal is incorrect — SCB0 supports only I2C slave mode and SPI slave mode in deep sleep, so it cannot act as an I2C master to poll the proximity sensor",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The proposal is correct — SCB0 is the only SCB that operates in System Deep Sleep, and it supports both I2C master and slave modes for sensor polling",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The proposal is partially correct — SCB0 supports deep sleep operation, but only if an external clock is provided and the sensor bus speed is reduced below 100 kHz",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The datasheet states that SCB0 'only supports I2C slave mode and SPI slave mode' in System Deep Sleep. Since the terminal needs to act as an I2C master to poll the proximity sensor, SCB0 is not suitable for this role. You should assign the I2C sensor bus to SCB1–SCB11, which support master mode, and use a different wake mechanism (such as a GPIO interrupt from the sensor) if deep sleep wake-up is required.",
+        "incorrect": "SCB0 does support System Deep Sleep operation (with an external clock), but it is restricted to I2C slave mode and SPI slave mode only — it cannot operate as an I2C master. The junior engineer's reasoning about deep sleep is partially right, but the mode limitation makes SCB0 unsuitable for a master-mode sensor bus. Review the SCB section of the PSOC Edge E8 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b54ca438-c4ac-40ab-9dfa-4f45f76422db",
+          "snippet": "SCB0 can operate in the System Deep Sleep power mode with an external clock; and it only supports I2C slave mode and SPI slave mode.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_32/ChunkType.text_b54ca438-c4ac-40ab-9dfa-4f45f76422db_0.png",
+          "page_number": 32,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "d8d71563-9d11-4593-be32-fadf6923bb40",
+          "snippet": "SCB: Y [CPU Active], Y [CPU Sleep], N, SCB0 is supported in System Deep Sleep power mode [System Deep Sleep], N [System Hibernate]",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_19/ChunkType.table_d8d71563-9d11-4593-be32-fadf6923bb40_0.png",
+          "page_number": 19,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    }
+  ]
+}

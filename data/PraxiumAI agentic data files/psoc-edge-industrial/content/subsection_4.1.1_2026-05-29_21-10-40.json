@@ -1,0 +1,314 @@
+{
+  "subsection_id": "4.1.1",
+  "subsection_title": "Select EPC2 vs EPC4 security level",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Distinguish the security capabilities of EPC2 (PSA Level 2) from EPC4 (PSA Level 3 + secure enclave) to select the correct part number for a PSA-compliant access control device",
+    "Identify a valid EPC4 part number with the Ethos-U55 accelerator from the PSOC Edge E8 ordering information table"
+  ],
+  "content": {
+    "hook_sentence": "Two PSOC Edge E8 part numbers can look nearly identical on a BOM — same package, same SRAM, same Ethos-U55 — yet one cannot legally claim PSA Level 3 certification no matter how you configure the firmware.",
+    "introduction": "When you specify a PSOC Edge E8 for an access control terminal, the security level is locked at the silicon level by the part number you order. EPC2 and EPC4 are not firmware configurations or license keys — they are distinct hardware variants with different certified security feature sets. Getting this wrong at the BOM stage means a respin, not a firmware patch.",
+    "key_points": [
+      {
+        "point": "EPC2 targets PSA Level 2; EPC4 targets PSA Level 3 and adds a hardware-isolated secure enclave",
+        "explanation": "Both EPC2 and EPC4 share a common security foundation: Arm TrustZone isolation, a hardware crypto accelerator, Infineon-proprietary MPU/MPC/PPC protection units, and secure boot with a hardware root of trust. The critical difference is certification level and the presence of a secure enclave. - **EPC2** supports SESIP/PSA Level 2. It gives you TrustZone-based SPE/NSPE partitioning and hardware crypto, but it does not include the secure enclave hardware block. - **EPC4** supports SESIP/PSA Level 3 and adds a lock-step secure enclave. That enclave provides runtime services — PSA-compliant cryptographic operations, key management, device attestation via DICE, and secure storage — that are unavailable on EPC2 parts. For an access control terminal that must achieve PSA Level 3 certification, EPC4 is the only valid choice. EPC2 cannot be upgraded to Level 3 in firmware because the secure enclave is a hardware block absent from EPC2 silicon.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+            "snippet": "Infineon Edge Protect Category 2 (EPC 2) supporting SESIP/PSA level 2 or Edge Protect Category 4 (EPC 4) supporting SESIP/PSA level 3 + secure enclave, depending on part number",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+            "page_number": 20,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+            "snippet": "Lock-step secure enclave with the following features: Secure boot with hardware-based root of trust (RoT) enabled; Device identifier composition engine (DICE) mechanisms for device attestation; Cryptography services",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+            "page_number": 20,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f",
+            "snippet": "For EPC 4 part numbers only (see Ordering information): secure enclave runtime services provide access to PSA compliant cryptographic services, key management, attestation, and secure storage services.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f_0.png",
+            "page_number": 20,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Shared security features do not close the EPC2/EPC4 gap — the secure enclave is the deciding factor",
+        "explanation": "A common mistake when reviewing part options is to conclude that EPC2 is sufficient because both variants share TrustZone, hardware crypto acceleration, and secure boot. Your security architect may list those three features as mandatory, and both parts deliver them. The flaw in that reasoning is that PSA Level 3 specifically requires the isolated secure enclave for runtime key management, attestation, and secure storage services. On an EPC2 part, TF-M runs in the Cortex-M33 SPE and provides software-based isolation, but there is no dedicated hardware enclave. On an EPC4 part, the secure enclave is a separate lock-step hardware block that provides those services independently of the application CPUs. If your product security requirements include any of the following, EPC4 is mandatory: - Hardware-isolated key management at runtime - PSA-compliant attestation (DICE-based device identity) - Secure storage services backed by hardware isolation - PSA Level 3 / SESIP Level 3 certification on the final product",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "53785560-8bc8-4bf4-88e8-d6f2272a6479",
+            "snippet": "EPC 4 part numbers only (see Ordering information): secure enclave runtime services; Tamper detection, side channel attack (SCA) mitigation, and protection against fault injection attacks",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_21/ChunkType.text_53785560-8bc8-4bf4-88e8-d6f2272a6479_0.png",
+            "page_number": 21,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f",
+            "snippet": "This product line is fully compliant with Arm TrustZone at hardware and software levels. An extra layer of security is implemented with the help of Infineon-proprietary protection units.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f_0.png",
+            "page_number": 20,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+            "snippet": "Hardware crypto accelerator with comprehensive support of cryptographic algorithms; Secure isolation of processing environments via Arm TrustZone; Infineon proprietary MPU, MPC and PPCs for memory and peripheral access control",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+            "page_number": 20,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "EPC4 also adds tamper detection and physical attack mitigations absent from EPC2",
+        "explanation": "Beyond the PSA certification level, EPC4 parts include hardware countermeasures against physical attacks that are not present in EPC2. These include tamper detection, side-channel attack (SCA) mitigation, and protection against fault injection attacks. For an access control terminal deployed in a public or semi-public environment — where an attacker may have physical access to the device — these protections are directly relevant to your threat model. EPC2 does not document equivalent physical attack mitigations, so if your security review includes physical attack scenarios, EPC4 is the appropriate selection independent of the PSA level requirement.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "53785560-8bc8-4bf4-88e8-d6f2272a6479",
+            "snippet": "EPC 4 part numbers only (see Ordering information): secure enclave runtime services; Tamper detection, side channel attack (SCA) mitigation, and protection against fault injection attacks; Off-the-shelf secure isolation using Trusted Firmware-M (TF-M); and mbedTLS crypto acceleration package",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_21/ChunkType.text_53785560-8bc8-4bf4-88e8-d6f2272a6479_0.png",
+            "page_number": 21,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Read the ordering table to identify a valid EPC4 part with the features your design requires",
+        "explanation": "The security level is encoded directly in the part number. In the product nomenclature, the `SX` field encodes security: `S2` = EPC2, `S4` = EPC4. You can verify this against the ordering information table, which lists each part number with its package, SRAM size, Ethos-U55 presence (Y/N), graphics (Y/N), and security level. For a face recognition terminal requiring EPC4 security and the Ethos-U55 ML accelerator, the relevant rows in the E84 family (which includes both Ethos-U55 and graphics) are: - `PSE846GPS4DBZQ3` — BGA-220, 5120 KB SRAM, U55: Y, GFX: Y, **EPC4** - `PSE846GOS4DBZQ3` — BGA-220, 4096 KB SRAM, U55: Y, GFX: Y, **EPC4** The corresponding EPC2 variants (`PSE846GPS2DBZQ3`, `PSE846GOS2DBZQ3`) are identical in every other column — same package, same accelerators — but carry `S2` in the part number and support only PSA Level 2. Ordering the wrong variant is a one-character mistake with significant project consequences.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "1704d613-a482-4c5b-8ae5-b0c95b45b166",
+            "snippet": "PSE846GPS4DBZQ3 | BGA-220 | 5120 | Y | Y | EPC4 | 147 | 0xED92",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_123/ChunkType.table_1704d613-a482-4c5b-8ae5-b0c95b45b166_0.png",
+            "page_number": 123,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "1704d613-a482-4c5b-8ae5-b0c95b45b166",
+            "snippet": "PSE846GOS4DBZQ3 | BGA-220 | 4096 | Y | Y | EPC4 | 147 | 0xED98",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_123/ChunkType.table_1704d613-a482-4c5b-8ae5-b0c95b45b166_0.png",
+            "page_number": 123,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "c4bae9f3-e2c1-4049-a994-fb3428ad7d7b",
+            "snippet": "SX Security features (optional): Blank = Non security; S1 = EPC 1 security; S2 = EPC 2 security; S4 = EPC 4 security",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_124/ChunkType.table_c4bae9f3-e2c1-4049-a994-fb3428ad7d7b_0.png",
+            "page_number": 124,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your security architect hands you a requirements document for the face recognition terminal. It lists three mandatory security features: (1) hardware crypto acceleration, (2) TrustZone-based SPE/NSPE isolation, and (3) PSA Level 3 certification. A colleague reviews the EPC2 datasheet entries and says both EPC2 and EPC4 satisfy all three requirements, so you should order the cheaper EPC2 part. Before you approve the BOM, what is the flaw in this reasoning?",
+        "reveal": "Your colleague is correct that both EPC2 and EPC4 provide hardware crypto acceleration and TrustZone-based SPE/NSPE isolation. The flaw is in requirement (3): PSA Level 3 certification requires the hardware-isolated secure enclave, which is present only on EPC4 parts. EPC2 supports SESIP/PSA Level 2, not Level 3. The secure enclave is a hardware block — it cannot be added via firmware or middleware on an EPC2 part. Approving the EPC2 BOM means your device cannot achieve PSA Level 3 certification regardless of how TF-M is configured, and you will need a hardware respin to correct it.",
+        "hint": "Check what PSA Level 3 specifically requires beyond TrustZone and crypto acceleration."
+      },
+      {
+        "prediction_prompt": "You are placing a production order for PSOC Edge E8 devices. Your design requires EPC4 security, the Ethos-U55 ML accelerator, graphics support, and the BGA-220 package. You open the ordering table and see four E84 part numbers. Two end in `S4` and two end in `S2`. The `S4` variants differ only in SRAM size: 5120 KB vs 4096 KB. Your SRAM budget analysis shows 4096 KB is sufficient. Which part number do you select, and how do you confirm it is correct before submitting the order?",
+        "reveal": "You select `PSE846GOS4DBZQ3`. Confirming correctness: the `S4` field in the part number encodes EPC4 security. The ordering table row shows BGA-220 package, 4096 KB SRAM, U55: Y (Ethos-U55 present), GFX: Y (graphics present), and Security: EPC4. All four design requirements are satisfied. The `PSE846GOS2DBZQ3` part number is identical except for `S2` (EPC2) — ordering it by mistake would pass a visual BOM review but fail PSA Level 3 certification.",
+        "hint": "Use the SX field in the part number nomenclature as your first check, then verify against the ordering table columns."
+      }
+    ],
+    "summary": "When your access control terminal requires PSA Level 3 certification or hardware-isolated key management, attestation, and secure storage at runtime, you must specify an EPC4 part number — EPC2 cannot be upgraded to meet these requirements because the secure enclave is a hardware block. Confirm your selection by cross-referencing the `S4` field in the part number against the ordering table columns for U55, package, and SRAM size before finalizing the BOM.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When a product requires PSA Level 3 certification with hardware-isolated runtime key management and attestation, you must select the ___ security level.",
+      "answer": "EPC4",
+      "distractors": [
+        "EPC2",
+        "TrustZone SPE",
+        "TF-M"
+      ],
+      "explanation": "PSA Level 3 and the associated secure enclave runtime services (key management, attestation, secure storage) are available only on EPC4 parts. EPC2 supports PSA Level 2 and lacks the hardware secure enclave block entirely."
+    },
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each security requirement to the EPC level that satisfies it:",
+      "pairs": [
+        {
+          "left": "TrustZone SPE/NSPE isolation and hardware crypto acceleration",
+          "right": "EPC2 or EPC4 (both provide this)"
+        },
+        {
+          "left": "PSA Level 3 certification with hardware-isolated secure enclave",
+          "right": "EPC4 only"
+        },
+        {
+          "left": "Tamper detection and side-channel attack mitigation",
+          "right": "EPC4 only"
+        }
+      ],
+      "explanation": "TrustZone and hardware crypto are shared across both EPC levels. The secure enclave, PSA Level 3 certification, and physical attack mitigations (tamper detection, SCA mitigation, fault injection protection) are exclusive to EPC4 silicon."
+    }
+  ],
+  "content_gaps": [
+    "EPC2 vs EPC4 provisioning workflow: The datasheet references AN238041 for the provisioning specification but does not include provisioning steps. If the training needs to cover how to provision a device for production deployment, this content is not available in the provided source material.",
+    "Pricing or availability differences between EPC2 and EPC4 variants are not documented in the source material and cannot be addressed in this lesson."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are selecting a PSOC Edge E8 part number for a face recognition access control terminal. Your security team has reviewed the product requirements and determined that the device must achieve PSA Level 3 certification and requires hardware-isolated cryptographic key management, attestation, and secure storage services at runtime.",
+        "question_text": "Based on these security requirements, which EPC security level should you specify when ordering the PSOC Edge E8?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "EPC2, because it supports SESIP/PSA Level 2 and provides TrustZone-based secure isolation sufficient for most access control deployments",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "EPC4, because it supports SESIP/PSA Level 3 and includes a secure enclave providing runtime cryptographic, attestation, and secure storage services",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Either EPC2 or EPC4, because both levels include hardware crypto acceleration and TrustZone isolation meeting PSA Level 3 requirements",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. EPC4 is the only level that supports SESIP/PSA Level 3 and provides the secure enclave runtime services — including PSA-compliant cryptographic services, key management, attestation, and secure storage — required by your security specification.",
+        "incorrect": "EPC2 only reaches PSA Level 2, which does not satisfy a PSA Level 3 requirement. EPC4 and EPC2 are not interchangeable for PSA Level 3: only EPC4 part numbers include the secure enclave runtime services needed for that certification level. Review the EPC2 vs EPC4 feature comparison in section 4.2.1."
+      },
+      "references": [
+        {
+          "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+          "snippet": "Infineon Edge Protect Category 2 (EPC 2) supporting SESIP/PSA level 2 or Edge Protect Category 4 (EPC 4) supporting SESIP/PSA level 3 + secure enclave, depending on part number",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+          "page_number": 20,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f",
+          "snippet": "For EPC 4 part numbers only (see Ordering information): secure enclave runtime services provide access to PSA compliant cryptographic services, key management, attestation, and secure storage services.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_fe60f800-0ed4-4bb1-9ed6-5f5e9f0ec54f_0.png",
+          "page_number": 20,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O5",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing two candidate PSOC Edge E8 part numbers for your access control terminal project. Your colleague argues that the EPC2 part is sufficient because both EPC2 and EPC4 include TrustZone, a hardware crypto accelerator, and secure boot with a hardware root of trust — features your security architect listed as mandatory.",
+        "question_text": "What is the critical flaw in your colleague's reasoning that you should raise before finalizing the part selection?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "EPC2 does not include TrustZone or hardware crypto acceleration, so it cannot meet any of the mandatory security features listed",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "EPC2 lacks the isolated secure enclave present in EPC4, so runtime services such as key management, attestation, and secure storage are unavailable on EPC2 parts",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "EPC2 supports a higher PSA certification level than EPC4, making it the stronger choice for access control applications requiring PSA compliance",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. While both EPC2 and EPC4 share TrustZone, hardware crypto, and secure boot, only EPC4 includes the isolated secure enclave that provides runtime key management, attestation, and secure storage services. Your colleague's list of shared features does not capture this critical differentiator.",
+        "incorrect": "Both EPC2 and EPC4 do include TrustZone and hardware crypto acceleration, so option A is factually wrong. EPC4 — not EPC2 — supports the higher PSA level (Level 3 vs Level 2), making option C incorrect. The key distinction is the secure enclave present only in EPC4 parts. Review section 4.2.1 for the full feature comparison."
+      },
+      "references": [
+        {
+          "chunk_id": "3d9451f5-53ba-4cf6-9ba0-8ad90386408e",
+          "snippet": "Infineon Edge Protect Category 2 (EPC 2) supporting SESIP/PSA level 2 or Edge Protect Category 4 (EPC 4) supporting SESIP/PSA level 3 + secure enclave, depending on part number... Lock-step secure enclave with the following features: Secure boot with hardware-based root of trust (RoT) enabled, Device identifier composition engine (DICE) mechanisms for device attestation, Cryptography services",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.text_3d9451f5-53ba-4cf6-9ba0-8ad90386408e_0.png",
+          "page_number": 20,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "53785560-8bc8-4bf4-88e8-d6f2272a6479",
+          "snippet": "EPC 4 part numbers only (see Ordering information): secure enclave runtime services... Tamper detection, side channel attack (SCA) mitigation, and protection against fault injection attacks",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_21/ChunkType.text_53785560-8bc8-4bf4-88e8-d6f2272a6479_0.png",
+          "page_number": 21,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are placing a production order for PSOC Edge E8 devices for your access control terminal. You have confirmed that EPC4 security is required. Consulting the ordering information table, you need to identify a valid EPC4 part number in the BGA-220 package with the Ethos-U55 ML accelerator included.",
+        "question_text": "Which of the following part numbers correctly identifies an EPC4-secured PSOC Edge E8 device in BGA-220 with the Ethos-U55 accelerator?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "PSE846GOS2DBZQ3 — BGA-220, 4096 KB SRAM, Ethos-U55 included, EPC2 security",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "PSE833GOS2DBZQ3 — BGA-220, 4096 KB SRAM, Ethos-U55 included, EPC2 security",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "PSE846GOS4DBZQ3 — BGA-220, 4096 KB SRAM, Ethos-U55 included, EPC4 security",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. PSE846GOS4DBZQ3 is listed in the ordering table as a BGA-220 part with 4096 KB SRAM, Ethos-U55 (U55 = Y), and EPC4 security — matching all your selection criteria.",
+        "incorrect": "PSE846GOS2DBZQ3 and PSE833GOS2DBZQ3 are both EPC2 parts, which do not meet the EPC4 security requirement. When reading the ordering table, the Security column must show EPC4, not EPC2. Review Table 50 in the ordering information section."
+      },
+      "references": [
+        {
+          "chunk_id": "1704d613-a482-4c5b-8ae5-b0c95b45b166",
+          "snippet": "PSE846GOS4DBZQ3 | BGA-220 | 4096 | Y | Y | EPC4 | 147 | 0xED98 ... PSE846GOS2DBZQ3 | BGA-220 | 4096 | Y | Y | EPC2 | 147 | 0xED9B",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_123/ChunkType.table_1704d613-a482-4c5b-8ae5-b0c95b45b166_0.png",
+          "page_number": 123,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    }
+  ]
+}

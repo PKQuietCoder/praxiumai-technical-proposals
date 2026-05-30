@@ -1,0 +1,375 @@
+{
+  "subsection_id": "5.1.1",
+  "subsection_title": "Map Security Features to Protection Roles",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Assign each STM32N6 security feature (TrustZone, SAES, CRYP, HASH, MCE, PKA) to its specific protection role in a biometric access control terminal",
+    "Identify which security features are restricted to STM32N6x5xx variants and explain the architectural consequence for a design that requires both NPU inference and hardware crypto"
+  ],
+  "content": {
+    "hook_sentence": "A colleague's hardware selection looks solid on paper — Neural-ART NPU for face recognition, SAES for biometric template encryption — until you check the variant table and realize those two features have never coexisted on the same STM32N6 die.",
+    "introduction": "Building a security architecture for a biometric terminal is not just about picking the strongest crypto primitives. You need to map each threat to the specific hardware feature that neutralizes it, then verify that feature actually exists on the variant you selected. On the STM32N6, the security feature set is split across variants in a way that directly affects your architecture — so getting this mapping wrong at the design stage means a costly respin later.",
+    "key_points": [
+      {
+        "point": "TrustZone partitions the system into secure and non-secure domains, isolating biometric processing from general application code.",
+        "explanation": "TrustZone is available on all STM32N6 variants and is your primary tool for domain isolation. In a face recognition terminal, you use it to place the biometric matching engine, enrolled template access, and cryptographic key operations in the secure world, while the UI, network stack, and access control relay logic run non-secure. Any non-secure code attempting to read secure memory or call secure peripherals is blocked at the hardware level — no software firewall required. The STM32N6 extends TrustZone down to individual I/O pins and peripherals. You can restrict each GPIO to secure-only and privileged-only access, which matters when you are controlling a door strike relay or a tamper-detection input that must not be reachable from a compromised non-secure application.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "081e534f-9363-4e8e-88ca-351441af7382",
+            "snippet": "Arm TrustZone and securable I/O memories and peripherals — SESIP Level 3 (security evaluation standard for IoT platforms), Arm PSA (platform security architecture) certified",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_081e534f-9363-4e8e-88ca-351441af7382_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a18a5bae-bd6d-419b-bceb-482f72704980",
+            "snippet": "Possibility to restrict each I/O control to secure-only and/or privileged-only",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_33/ChunkType.text_a18a5bae-bd6d-419b-bceb-482f72704980_0.png",
+            "page_number": 33,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "bc84a890-cfc5-48e4-89b4-5d552f1c1579",
+            "snippet": "These microcontrollers have TrustZone-aware support and a memory protection unit (MPU) for enhanced application security.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_bc84a890-cfc5-48e4-89b4-5d552f1c1579_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "MCE (Memory Cipher Engine) is the correct feature for protecting biometric templates stored in XSPI-connected external flash — and it is only available on STM32N6x5xx variants.",
+        "explanation": "When a device is physically stolen, an attacker can desolder the external flash and read it directly with a programmer. TrustZone cannot help here because the attacker bypasses the SoC entirely. MCE solves this by performing inline AES encryption on every write to a designated address region and inline decryption on every read — transparently, with no CPU involvement and no latency penalty visible to your firmware. You define up to four encrypted regions with 4-Kbyte granularity. For the biometric terminal, you assign one region to the enrolled face template store in XSPI flash. All bus traffic to that region is automatically encrypted (AES-128 or AES-256, or Noekeon) before it leaves the SoC. An attacker reading the flash chips sees only ciphertext. **Critical constraint:** MCE is available only on STM32N655xx and STM32N657xx devices — the same variants that lack the Neural-ART NPU. If you select the STM32N6x7xx for its NPU, you lose MCE entirely.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized. This function is available only on STM32N655xx and STM32N657xx devices.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Start and end of regions defined with 4-Kbytes granularity — Supported block ciphers: AES-128, AES-256 or Noekeon (12 round version), selected at boot",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "SAES handles biometric template encryption with certified side-channel attack resistance — also restricted to STM32N6x5xx variants.",
+        "explanation": "Where MCE protects data at rest in external memory transparently, SAES (Secure AES coprocessor) is the right tool when your firmware needs to explicitly encrypt or decrypt a biometric feature vector — for example, before transmitting it over a network interface or before writing it to a non-MCE-protected buffer. SAES is not just a standard AES block — it incorporates hardware countermeasures against differential power analysis (DPA) and other side-channel attacks, certified to SESIP and PSA security assurance level 3. This matters in a physical access control terminal where an attacker with an oscilloscope and physical access to the board could attempt to extract keys by correlating power traces with encryption operations. SAES also supports hardware secret key loading: it can use the boot hardware key (BHK) and derived hardware unique key (DHUK) — keys that are usable by the hardware but never readable by application code. This means your biometric encryption keys never appear in firmware memory, eliminating a whole class of software extraction attacks.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+            "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+            "page_number": 54,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+            "snippet": "SAES has the possibility to load STM32 hardware secret controller keys (boot hardware key BHK and derived hardware unique key DHUK), usable but not readable by application.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+            "page_number": 54,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "56f316b5-69ac-4cd4-8c01-f6be28a6eb81",
+            "snippet": "Protection against side-channel attacks (SCA), incl. differential power analysis (DPA), certified SESIP and PSA security assurance level 3 — Hardware secret key encryption/decryption (Wrapped-key mode)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_55/ChunkType.text_56f316b5-69ac-4cd4-8c01-f6be28a6eb81_0.png",
+            "page_number": 55,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "HASH provides data integrity verification for firmware images and stored biometric data — a distinct role from encryption.",
+        "explanation": "Encryption protects confidentiality; it does not tell you whether data has been tampered with. For a biometric terminal, you need both. The HASH peripheral computes cryptographic digests (SHA-family algorithms) that let you verify that a firmware image has not been modified since it was signed, and that a stored biometric template has not been corrupted or substituted. In your security architecture, assign HASH to integrity verification roles: checking the signature on a firmware update before flashing it, and optionally computing a digest over the enrolled template database on each boot to detect offline tampering. This is a separate concern from the confidentiality protection that SAES and MCE provide — you need both layers working together.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "081e534f-9363-4e8e-88ca-351441af7382",
+            "snippet": "Secure boot code in ROM, decrypting and authenticating customer uRoT (updatable root-of-trust) — Secure data storage with hardware-unique key (HUK)",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_081e534f-9363-4e8e-88ca-351441af7382_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "ffc674af-e3cf-43b7-9267-7d402a146147",
+            "snippet": "Boot hardware key for secure AES, stored in backup registers, protected against read and write access — Tamper configuration and backup registers privilege protection — Monotonic counter",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_66/ChunkType.text_ffc674af-e3cf-43b7-9267-7d402a146147_0.png",
+            "page_number": 66,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "TAMP (Tamper and Backup Registers) adds physical attack detection, erasing device secrets when intrusion is detected.",
+        "explanation": "For a terminal mounted in a public space, physical tamper resistance is a real requirement. The TAMP peripheral monitors up to seven external tamper pins and ten internal tamper events. When a tamper event fires, it can immediately erase backup registers, backup SRAM, and cryptographic peripherals — the 'device secrets' — before an attacker can extract them. In confirmed mode, the erase is immediate and hardware-driven, requiring no software response. This is the right mode for a deployed terminal: even if an attacker freezes the CPU or exploits a firmware vulnerability, the hardware erases keys the moment a tamper pin triggers. You configure the tamper pins to detect case opening, voltage glitching, or active mesh attacks. TAMP also integrates with TrustZone: backup registers can be partitioned into secure read/write, write-secure/read-non-secure, and non-secure areas, giving you fine-grained control over which secrets are accessible from which security domain.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "1cb370b1-df61-4117-b42b-8a2848a85b87",
+            "snippet": "A tamper detection can erase the backup registers, backup SRAM, SRAM2, cryptographic peripherals. The protected resources are named 'device secrets'.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_65/ChunkType.text_1cb370b1-df61-4117-b42b-8a2848a85b87_0.png",
+            "page_number": 65,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "1cb370b1-df61-4117-b42b-8a2848a85b87",
+            "snippet": "Confirmed mode: immediate erase of secrets on tamper detection, including backup registers erase — Active tamper mode: continuous comparison between tamper output and input to protect from physical open-short attacks.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_65/ChunkType.text_1cb370b1-df61-4117-b42b-8a2848a85b87_0.png",
+            "page_number": 65,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "1cb370b1-df61-4117-b42b-8a2848a85b87",
+            "snippet": "TrustZone support: Tamper secure or non-secure configuration — Backup registers configuration in three configurable-size areas: One read/write secure area; One write secure/read non-secure area; One read/write non-secure area",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_65/ChunkType.text_1cb370b1-df61-4117-b42b-8a2848a85b87_0.png",
+            "page_number": 65,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your team selects the STM32N6x7xx for its Neural-ART NPU. A security review requires that enrolled biometric templates in external XSPI flash be protected against offline extraction if the device is stolen. Your colleague proposes using SAES to encrypt templates before writing them to flash, and MCE for inline protection of the XSPI region. Before the review meeting, you check the variant datasheet. What problem do you find?",
+        "reveal": "Both SAES and MCE are available only on STM32N655xx and STM32N657xx devices — the STM32N6x5xx variants. The STM32N6x7xx, which carries the Neural-ART NPU, does not include either feature. Your colleague's proposal is architecturally invalid on the selected variant. The security review will reject it. The team faces a hard choice: switch to the STM32N6x5xx (losing the NPU) or redesign the system to use a two-chip architecture where a separate secure element handles biometric template storage. This is exactly the NPU/crypto tradeoff that must be resolved at variant selection, not at the security review stage.",
+        "hint": "Check which device families each security feature is restricted to before assuming they are universally available."
+      },
+      {
+        "prediction_prompt": "You are completing the security feature mapping table for the design review. Three protection roles need to be filled: (1) isolate the secure biometric processing domain from non-secure application code, (2) encrypt biometric template data blocks with side-channel attack resistance, (3) verify the integrity of firmware images and stored data. You have TrustZone, SAES, and HASH available. How do you assign them?",
+        "reveal": "TrustZone maps to role 1 (domain isolation): it partitions the SoC into secure and non-secure worlds at the hardware level, preventing non-secure code from accessing the biometric processing domain regardless of software state. SAES maps to role 2 (biometric template encryption with SCA protection): it provides AES encryption certified to SESIP and PSA level 3 with DPA countermeasures, and can use hardware-bound keys that are never readable by application code. HASH maps to role 3 (integrity verification): it computes cryptographic digests over firmware images and template databases, detecting tampering that encryption alone cannot reveal. Each feature addresses a distinct threat — isolation, confidentiality, and integrity — and all three are needed together for a complete security architecture.",
+        "hint": "Encryption and integrity verification solve different problems. Think about what each feature actually prevents an attacker from doing."
+      }
+    ],
+    "summary": "Map each STM32N6 security feature to a specific threat: TrustZone for domain isolation, MCE for inline external flash encryption, SAES for explicit biometric data encryption with SCA resistance, HASH for integrity verification, and TAMP for physical intrusion response. Before finalizing this mapping, confirm your selected variant — SAES, MCE, and PKA are available only on STM32N6x5xx devices, not on the STM32N6x7xx NPU variant.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When a biometric terminal's external flash is read directly by an attacker who has desoldered the chip, the STM32N6 security feature that still protects the stored data is ___.",
+      "answer": "MCE (Memory Cipher Engine)",
+      "distractors": [
+        "TrustZone",
+        "SAES",
+        "MPU"
+      ],
+      "explanation": "TrustZone and the MPU only enforce access control within the SoC. Once the flash chip is removed and read externally, those controls are bypassed. MCE encrypts data inline before it leaves the SoC bus, so the flash chip contains only ciphertext regardless of how it is accessed."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each protection role in the biometric terminal to the STM32N6 security feature that addresses it:",
+      "pairs": [
+        {
+          "left": "Prevent non-secure application code from accessing the biometric matching engine",
+          "right": "TrustZone"
+        },
+        {
+          "left": "Protect enrolled face templates in external flash against offline extraction",
+          "right": "MCE"
+        },
+        {
+          "left": "Encrypt a biometric feature vector with resistance to power analysis attacks",
+          "right": "SAES"
+        },
+        {
+          "left": "Detect whether a stored firmware image has been modified since signing",
+          "right": "HASH"
+        }
+      ],
+      "explanation": "Each feature addresses a distinct threat category: isolation (TrustZone), data-at-rest confidentiality in external memory (MCE), explicit encryption with SCA protection (SAES), and integrity verification (HASH). A complete security architecture requires all four roles to be covered."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not describe the HASH peripheral's supported algorithm list (e.g., SHA-256, SHA-3) in the chunks provided, preventing a complete specification of the integrity verification capability.",
+    "The datasheet does not specify whether MCE key provisioning integrates with the SAES hardware key bus or requires separate key management, which is relevant for designing a unified key hierarchy.",
+    "No reference design or application note describing a complete TrustZone partition configuration for a biometric terminal is available in the provided chunks — learners will need AN5347 or equivalent ST application notes to implement the partition in firmware."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are specifying the security architecture for the STM32N6-based face recognition terminal. Enrolled biometric templates (face feature vectors) are stored in external XSPI-connected flash and must be protected against offline extraction if the device is physically stolen.",
+        "question_text": "Which STM32N6 security feature should you assign to protect the biometric templates stored in XSPI-connected external flash, and on which device variant is it available?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TrustZone, available on all STM32N6 variants — isolates the secure processing domain so the external flash region is inaccessible to non-secure code",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MCE (Memory Cipher Engine), available only on STM32N6x5xx variants — performs inline encryption and decryption of all bus traffic to and from the designated XSPI address region",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "SAES, available only on STM32N6x5xx variants — encrypts biometric template data blocks using AES with side-channel attack protection before they are written to external flash",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. MCE is specifically designed for inline encryption of external memory regions: it automatically encrypts writes and decrypts reads on the system bus for up to four configurable address regions, making it the right tool for transparent protection of XSPI-mapped flash. It is available only on STM32N655xx and STM32N657xx devices.",
+        "incorrect": "TrustZone controls access privileges but does not encrypt data at rest in external flash — a physical attacker can still read the flash contents directly. SAES is a software-invoked block cipher coprocessor suited for encrypting data payloads in firmware, not for transparent inline protection of a memory-mapped region. MCE is the correct assignment for at-rest protection of XSPI-connected external memory. Review Section 3.36 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O4",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the security feature mapping table for the biometric terminal. A colleague proposes using the STM32N6x7xx variant because it includes the Neural-ART NPU needed for face recognition inference, and suggests pairing it with SAES for biometric template encryption and MCE for inline flash protection.",
+        "question_text": "You need to evaluate whether this proposal is architecturally valid before it goes to the hardware selection review. What is the critical flaw in your colleague's proposal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N6x7xx variant does not include SAES or MCE — both features are available only on STM32N6x5xx variants, so the proposed security architecture cannot be implemented on the NPU variant",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "MCE cannot protect XSPI-mapped external flash because it only supports internal SRAM regions, making the inline encryption approach invalid regardless of variant",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "SAES and MCE cannot be used together on the same device because they share the same AES key bus, creating a key management conflict that prevents simultaneous operation",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. SAES and MCE are both available only on STM32N655xx and STM32N657xx (the STM32N6x5xx crypto variants). The STM32N6x7xx variant provides the Neural-ART NPU but omits these cryptographic peripherals entirely, making the proposed security architecture impossible on that variant.",
+        "incorrect": "MCE is designed precisely for external memory regions accessed via the system bus, including XSPI-mapped flash — that is its primary use case. SAES and MCE can coexist; SAES even supports a Shared-key mode with CRYP. The actual flaw is simpler and more fundamental: the STM32N6x7xx variant does not include SAES or MCE at all. Review the variant differentiation in the STM32N6 datasheet Sections 3.33 and 3.36."
+      },
+      "references": [
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "743b912e-741a-4fd6-a01d-78a3e23988d5",
+          "snippet": "This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_58/ChunkType.text_743b912e-741a-4fd6-a01d-78a3e23988d5_0.png",
+          "page_number": 58,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are completing the security feature mapping table for the biometric terminal's design review. You need to assign each STM32N6 security feature to its correct protection role: (1) isolating the secure biometric processing domain from non-secure application code, (2) encrypting biometric template data blocks with side-channel attack resistance, and (3) verifying the integrity of firmware images and stored data.",
+        "question_text": "Which assignment correctly maps TrustZone, SAES, and HASH to their respective protection roles in the access control terminal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "TrustZone → domain isolation; SAES → biometric template encryption with SCA protection; HASH → data integrity verification",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "TrustZone → biometric template encryption; SAES → domain isolation; HASH → data integrity verification",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "TrustZone → domain isolation; SAES → data integrity verification; HASH → biometric template encryption with SCA protection",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. TrustZone provides hardware-enforced isolation between secure and non-secure processing domains. SAES is an AES coprocessor certified at SESIP/PSA Level 3 with differential power analysis (DPA) protection, making it the right choice for encrypting sensitive biometric templates. HASH provides cryptographic digest computation for integrity verification of firmware and stored data.",
+        "incorrect": "TrustZone is an Arm architecture feature for domain isolation — it does not perform encryption. SAES is specifically an AES encryption coprocessor with side-channel attack protection, not an integrity or isolation mechanism. HASH computes message digests for integrity checking, not encryption. Review the security feature descriptions in Sections 3.1, 3.33, and 3.35 of the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "bc84a890-cfc5-48e4-89b4-5d552f1c1579",
+          "snippet": "These microcontrollers have TrustZone-aware support and a memory protection unit (MPU) for enhanced application security.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_bc84a890-cfc5-48e4-89b4-5d552f1c1579_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "56f316b5-69ac-4cd4-8c01-f6be28a6eb81",
+          "snippet": "Protection against side-channel attacks (SCA), incl. differential power analysis (DPA), certified SESIP and PSA security assurance level 3",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_55/ChunkType.text_56f316b5-69ac-4cd4-8c01-f6be28a6eb81_0.png",
+          "page_number": 55,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    }
+  ]
+}

@@ -1,0 +1,332 @@
+{
+  "subsection_id": "2.1.2",
+  "subsection_title": "Connect Security Features to Stakeholder Vulnerability Concerns",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Apply the feature-to-vulnerability mapping process to counter multi-layered security objections in cross-functional discussions",
+    "Distinguish between specification-supported security claims and overstatements when preparing or reviewing stakeholder-facing materials",
+    "Address ergonomic usability objections for diverse user populations using FaceStation 2's documented design specifications"
+  ],
+  "content": {
+    "hook_sentence": "A stakeholder who walks away with an unanswered objection doesn't just stay skeptical — they become the loudest voice against your recommendation in the next meeting.",
+    "introduction": "Building on the feature-to-vulnerability mapping process from the previous section, this lesson extends that skill to two additional objection types you'll encounter in cross-functional discussions: security claims that exceed what the specification supports, and physical usability concerns for diverse user populations. Both require the same discipline — match the specific concern to the specific specification, and never claim more than the documentation backs up.",
+    "key_points": [
+      {
+        "point": "Staying within specification boundaries is as important as citing the right feature.",
+        "explanation": "When a sales stakeholder asks you to validate security claims for a proposal or customer-facing document, your job isn't just to confirm what FaceStation 2 does — it's to flag what the specification does not say. The documented security features are: - IR-based live face detection that prevents spoofing by printed images and LCDs - The Android 5.0 Lollipop security layer - A high-quality image log What the specification does not say: that FaceStation 2 is immune to all spoofing attacks, or that it meets any specific government biometric certification standard. If a draft proposal includes either of those claims, you need to pull them back. A defensible position is one that cites exactly what the spec supports — no more. The safe, accurate framing is: FaceStation 2 uses IR-based live face detection to prevent spoofing by printed images and LCDs, with additional security provided by the Android 5.0 Lollipop platform.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Ergonomic design specifications directly counter usability objections for diverse user populations.",
+        "explanation": "When a facilities manager or procurement stakeholder raises concerns about whether a fixed-height terminal can serve wheelchair users, children, or staff with a wide range of heights, you have two specification-grounded responses. First, FaceStation 2 supports an **extended height range of 145cm to 210cm** — a span wide enough to cover most adult and adolescent users without repositioning the device. Second, the device includes a **tilt-type bracket specifically designed for wheelchair users and children**, which means the accommodation is built into the hardware, not handled through a separate accessible terminal or workaround. These two features work together: the height range addresses the standing-user population, and the tilt bracket addresses seated or shorter users. When you cite both, you're showing that the design accounts for the full range of users at a single installation point.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+            "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Accessibility compliance questions require a clear boundary between specification evidence and compliance determination.",
+        "explanation": "A procurement committee or accessibility advocate may ask whether FaceStation 2 is compliant with accessibility standards — ADA, for example — for public-facing installations. This is a question you need to handle carefully. What you can confirm from the specification: FaceStation 2 includes a tilt-type bracket designed for wheelchair users and an extended height range of 145cm to 210cm. These are documented design features. What you cannot confirm: whether those features satisfy any specific regulatory or certification standard. Compliance determinations depend on the jurisdiction, the installation context, and the applicable standard — none of which the product specification addresses. The defensible response is to present the features accurately and recommend the customer verify whether they satisfy their specific compliance requirements. Claiming ADA compliance or certification status that the specification does not substantiate exposes both you and the customer to risk.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+            "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The dual-camera array visible on the device is the hardware foundation for both live face detection and high-illuminance performance.",
+        "explanation": "When stakeholders ask how IR-based live face detection actually works at the hardware level, you can point to the physical device. The FaceStation 2 has two camera lenses in a single housing below the display — this dual-camera array is what enables the IR imaging that distinguishes live faces from flat representations. The specification also confirms 140 IR LEDs, which drive both the anti-spoofing capability and the device's ability to operate across an illuminance range of 0 lx to 25,000 lx. These aren't separate systems — the same IR hardware that enables live face detection also enables reliable recognition in complete darkness or bright indoor lighting. Knowing this connection helps you answer follow-up questions that combine security and environmental performance in a single objection.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "IR LED: 140 ea",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A sales colleague sends you a draft proposal for a government facility. It includes this line: 'FaceStation 2 is immune to spoofing attacks due to its multi-layered biometric security architecture.' They ask you to approve it before it goes to the client. What do you do?",
+        "reveal": "You flag the line and replace it. 'Immune to spoofing attacks' is not a claim the specification supports — the documented capability is that IR-based live face detection prevents spoofing by printed images and LCDs, with additional security from the Android 5.0 Lollipop platform. 'Immune' implies no attack vector can succeed, which goes well beyond what the spec says. The corrected line would read: 'FaceStation 2 uses IR-based live face detection to prevent spoofing by printed images and LCDs, with additional security provided by the Android 5.0 Lollipop platform.' That's accurate, defensible, and still compelling.",
+        "hint": "Ask yourself: does the specification use the word 'immune' or make any claim about all possible attack vectors?"
+      },
+      {
+        "prediction_prompt": "During a hospital deployment review, a facilities manager says: 'Our staff includes wheelchair users and pediatric personnel. A fixed-height terminal won't work for everyone — we'd need a separate accessible unit.' How do you respond using FaceStation 2's documented specifications?",
+        "reveal": "You counter the assumption directly: FaceStation 2 is not a fixed-height terminal in the way the manager is imagining. The device supports an extended height range of 145cm to 210cm, covering most standing users without repositioning. More directly relevant to their concern, it includes a tilt-type bracket specifically designed for wheelchair users and children — so the accommodation is built into the hardware at a single installation point, not handled through a separate unit. You present both features together because they address different parts of the same concern: height range for standing users, tilt bracket for seated or shorter users.",
+        "hint": "Which two features work together to address the full range of users the manager described?"
+      },
+      {
+        "prediction_prompt": "An accessibility advocate on a procurement committee asks: 'Can you confirm FaceStation 2 is ADA-compliant for our public-facing lobby installation?' What is the most accurate and defensible response?",
+        "reveal": "You confirm what the specification documents — a tilt-type bracket designed for wheelchair users and an extended height range of 145cm to 210cm — and then draw a clear boundary: whether those features satisfy ADA requirements for their specific installation is a compliance determination that depends on jurisdiction and applicable standards, which the product specification does not address. You recommend they verify with their compliance team or legal counsel. This response is accurate, protects both parties, and doesn't leave the advocate without useful information.",
+        "hint": "Separate what the specification says from what a compliance standard requires."
+      }
+    ],
+    "summary": "When countering security or usability objections, cite the specific FaceStation 2 feature that addresses the concern raised — and hold the line at what the specification actually supports, never beyond it.",
+    "figures": [
+      {
+        "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db",
+        "after_key_point": 3,
+        "caption": "The dual-camera array below the FaceStation 2 display houses the IR imaging hardware — 140 IR LEDs — that enables both live face detection and high-illuminance performance across 0 to 25,000 lx.",
+        "alt_text": "Front view of the FaceStation 2 device, a black rectangular terminal with a 4-inch color TFT LCD display showing the FaceStation 2 branding and a colorful human head silhouette on the left, and time and date information with icons on the right. Below the display, two camera lenses are visible side by side in a single housing. The Suprema brand name appears near the bottom of the device.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When reviewing a customer-facing proposal that claims FaceStation 2 is 'immune to all spoofing attacks,' the correct action is to ___ the claim.",
+      "answer": "replace with specification-supported language",
+      "distractors": [
+        "approve if the customer requests it",
+        "add a footnote qualifying the claim",
+        "escalate to engineering for confirmation"
+      ],
+      "explanation": "The specification documents that IR-based live face detection prevents spoofing by printed images and LCDs — it does not support a claim of immunity to all attack vectors. Overstating the specification creates risk for both the product owner and the customer."
+    },
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each stakeholder concern about user population to the FaceStation 2 design feature that directly addresses it:",
+      "pairs": [
+        {
+          "left": "Staff of widely varying heights cannot all use the same terminal",
+          "right": "Extended height range of 145cm to 210cm"
+        },
+        {
+          "left": "Wheelchair users cannot reach or align with a standard fixed-height terminal",
+          "right": "Tilt-type bracket designed for wheelchair users and children"
+        },
+        {
+          "left": "A separate accessible terminal would be needed for seated users",
+          "right": "Both features combined at a single installation point"
+        }
+      ],
+      "explanation": "The height range and tilt bracket address different parts of the same usability concern — standing users with height variation versus seated or shorter users — and together eliminate the need for a separate accessible unit."
+    }
+  ],
+  "content_gaps": [
+    "The specification does not address which specific government biometric security certifications, if any, FaceStation 2 has obtained — SME input is needed to determine whether any certification claims can be made in customer-facing materials.",
+    "The specification does not clarify whether the tilt-type bracket meets any specific accessibility standard (e.g., ADA, ISO) — SME or legal input is needed before making compliance claims in proposals.",
+    "No source document addresses how to handle escalation scenarios where a stakeholder demands deeper technical justification beyond the specification — SME-developed escalation guidance would strengthen this section."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a product review meeting, a security engineer raises a concern: 'Face recognition systems are trivially defeated by holding up a printed photo or an LCD screen showing someone's face. We can't recommend this for high-security deployments.'",
+        "question_text": "How should you respond to directly counter this specific vulnerability concern using FaceStation 2's documented security features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Acknowledge the risk and recommend pairing FaceStation 2 with a PIN or card credential to compensate for the face recognition vulnerability in high-security sites.",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Explain that FaceStation 2 uses IR-based image analysis for live face detection, which distinguishes real faces from printed images and LCD displays, and that the Android 5.0 security layer adds an additional protection tier.",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Cite FaceStation 2's matching speed of 1:4,000 match/sec and user capacity of up to 30,000 users as evidence that the system is engineered for high-security, enterprise-grade deployments.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The engineer's concern is specifically about spoofing via printed images and LCD screens. IR-based live face detection directly addresses this by analyzing whether the presented face is real, and the Android 5.0 security layer provides an additional protection tier. These are the features that map to the stated vulnerability.",
+        "incorrect": "The concern raised is about spoofing attacks — not about multi-factor options or system throughput. Recommending credential pairing concedes the vulnerability rather than countering it, and citing matching speed or capacity does not address spoofing resistance at all. The correct response cites the IR-based live face detection and Android 5.0 security layer, which are the features specifically designed to prevent this type of attack."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales stakeholder is preparing a proposal for a government facility and asks you to confirm which security claims they can make about FaceStation 2's face recognition system. They draft three statements to include in the proposal.",
+        "question_text": "Which of the following statements is fully supported by FaceStation 2's documented specifications and safe to include in the proposal without overstating the product's capabilities?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 is immune to all spoofing attacks due to its multi-layered biometric security architecture.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FaceStation 2 meets government biometric security certification standards through its Android 5.0 platform and IR detection system.",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 uses IR-based live face detection to prevent spoofing by printed images and LCDs, with additional security provided by the Android 5.0 Lollipop platform.",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. This statement accurately reflects what the specification states — IR-based live face detection prevents spoofing by printed images and LCDs, and Android 5.0 Lollipop provides enhanced security. It makes no claims beyond what the documentation supports.",
+        "incorrect": "Claims of immunity to 'all spoofing attacks' or assertions of government certification standards are not substantiated by the FaceStation 2 specification. Including unsupported claims in a customer proposal creates legal and credibility risk. Only statements that directly reflect documented features — such as IR-based live face detection and the Android 5.0 security layer — are safe to use."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a deployment review for a hospital access control project, a facilities manager raises a concern: 'Our staff includes wheelchair users and pediatric personnel of varying heights. We're worried a fixed-height face recognition terminal won't work for everyone without requiring awkward repositioning or special accommodations.'",
+        "question_text": "Which response most accurately addresses this concern using FaceStation 2's documented ergonomic design features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Explain that FaceStation 2's compact dimensions and lightweight design make it straightforward to reposition the unit at different mounting heights for different user groups during installation.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Confirm that FaceStation 2 supports an extended height range of 145cm to 210cm and includes a tilt-type bracket specifically designed to accommodate wheelchair users and children without requiring separate hardware.",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Note that FaceStation 2's Android 5.0-based intuitive GUI and improved face enrollment procedure reduce the time needed to onboard users of all physical profiles, minimizing the impact of any height limitations.",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The facilities manager's concern is specifically about physical usability for wheelchair users and users of varying heights. The 145cm–210cm height range and tilt-type bracket are the documented features that directly address this — the bracket is explicitly designed for wheelchair users and children.",
+        "incorrect": "The concern is about physical accessibility for diverse user heights and mobility needs — not about installation flexibility, GUI usability, or enrollment speed. Only the 145cm–210cm height range and tilt-type bracket directly address the stated concern, as these are the features Suprema specifically designed for wheelchair users and children."
+      },
+      "references": [
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O6",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. An accessibility advocate on a customer's procurement committee asks whether FaceStation 2 is compliant with accessibility standards for public-facing installations. They specifically want to know if the device can accommodate wheelchair users without requiring a separate accessible terminal.",
+        "question_text": "What is the most accurate and defensible response you can give based on FaceStation 2's documented specifications?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Confirm that FaceStation 2 is ADA-compliant and certified for accessible installations, supported by its tilt-type bracket and extended height range of 145cm to 210cm.",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Explain that FaceStation 2 includes a tilt-type bracket designed for wheelchair users and an extended height range of 145cm to 210cm, and recommend the customer verify whether these features satisfy their specific accessibility compliance requirements.",
+          "is_correct": true,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Decline to address accessibility compliance and redirect the committee to Suprema's regional sales team, since compliance determinations fall outside the product owner's scope.",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The specification documents the tilt-type bracket for wheelchair users and the 145cm–210cm height range as ergonomic design features. However, the specification does not claim ADA compliance or any specific accessibility certification. The accurate response cites what is documented and appropriately defers the compliance determination to the customer's own assessment.",
+        "incorrect": "Claiming ADA compliance or specific accessibility certification goes beyond what the FaceStation 2 specification supports and creates legal exposure. Deflecting the question entirely fails to use the documented ergonomic features that are directly relevant. The correct approach is to accurately cite the tilt-type bracket and height range while noting that compliance verification is the customer's responsibility."
+      },
+      "references": [
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_2"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "courseId": "cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b",
+  "courseName": "",
+  "createdAt": "2026-05-30T03:54:31.990283",
+  "sections": {
+    "1": {
+      "title": "Performance Specifications",
+      "subsections": {
+        "1": "Matching Speed and User Capacity",
+        "2": "Operating Illuminance Range"
+      }
+    },
+    "2": {
+      "title": "Security Features",
+      "subsections": {
+        "1": "Anti-Spoofing and Security Architecture"
+      }
+    },
+    "3": {
+      "title": "Credentials and Ergonomics",
+      "subsections": {
+        "1": "Multi-RFID Card Compatibility",
+        "2": "Ergonomics and Physical Usability"
+      }
+    },
+    "4": {
+      "title": "Model Selection and System Configuration",
+      "subsections": {
+        "1": "FS2-D vs. FS2-AWB Model Selection",
+        "2": "System Configuration Selection"
+      }
+    }
+  }
+}

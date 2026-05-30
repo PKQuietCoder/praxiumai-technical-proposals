@@ -1,0 +1,302 @@
+{
+  "subsection_id": "1.1.2",
+  "subsection_title": "Distinguish 1:1 vs. 1:N in Deployment Context",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Apply the correct user capacity ceiling (30,000 for 1:1 or 4,000 for 1:N) to a described deployment workflow without confusing the two modes",
+    "Diagnose whether a stakeholder's deployment scenario requires 1:1 verification or 1:N identification based on the workflow described, and cite the matching speed figure that is relevant to that mode"
+  ],
+  "content": {
+    "hook_sentence": "A deployment that looks like it needs 1:N identification — because it involves thousands of users — may actually be a 1:1 verification scenario, and confusing the two cuts your stated capacity ceiling by 87%.",
+    "introduction": "Building on the capacity figures from §1.1.1, the real skill is not reciting 30,000 or 4,000 — it is reading a stakeholder's workflow description and instantly knowing which number applies. The distinction between 1:1 and 1:N is determined entirely by whether the user presents an identity claim before the face scan, not by the size of the enrolled population. Getting this wrong in a cross-functional meeting means either underselling the device's capacity or, worse, committing to a deployment that will fail at scale.",
+    "key_points": [
+      {
+        "point": "The workflow trigger — not the user count — determines whether a deployment is 1:1 or 1:N.",
+        "explanation": "When a user presents a card, PIN, or any other identity claim before the face scan, the device only needs to compare the captured face against that single user's stored template. This is **1:1 verification**, and the relevant capacity ceiling is 30,000 users. When no identity claim is made — the user simply walks up and the device searches the entire enrolled database to find a match — that is **1:N identification**, and the ceiling drops to 4,000 users. The question to ask when reading any deployment scenario: does the user tell the device who they are before the scan? If yes, it is 1:1. If no, it is 1:N. The enrolled population size is irrelevant to this classification.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Max. User: 30,000 (1:1), 4,000(1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Misclassifying the mode is the most consequential error you can make when scoping a deployment.",
+        "explanation": "If a stakeholder describes a hospital with 20,000 staff who badge in before scanning their face, and you apply the 1:N ceiling of 4,000, you will incorrectly tell them the device cannot support the deployment. The actual answer is that 1:1 verification supports up to 30,000 users — the hospital's 20,000-person requirement fits comfortably. The reverse error is equally damaging. If a lobby deployment requires face-only identification (no card, no PIN) for 3,500 people, and you cite the 1:1 ceiling of 30,000, you are applying the wrong figure. The correct ceiling for that workflow is 4,000 users under 1:N — which still covers 3,500, but the reasoning and the number you cite must match the actual mode. In both cases, the error is not arithmetic — it is misreading the workflow.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Max. User: 30,000 (1:1), 4,000(1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Pair the capacity figure with the matching speed figure that fits the same mode.",
+        "explanation": "When you answer a capacity question, stakeholders often follow up immediately with a throughput question. The standard matching speed of 1:4,000 match/sec applies to routine operations including 1:1 verification and general identification. For high-throughput scenarios where the device is identifying faces against a large enrolled group simultaneously, the group matching speed of 1:5,000 match/sec is the relevant figure. In practice: if an engineering lead asks whether the device can keep up during peak lobby traffic in a face-only 1:N deployment with 3,500 enrolled users, your answer combines both figures — the 1:N ceiling of 4,000 covers the database size, and the 1:4,000 match/sec speed addresses the throughput concern. Citing the group matching speed (1:5,000) in a standard 1:N scenario, or vice versa, introduces the same credibility risk as misquoting the capacity ceiling.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "Matching Speed: 1:4,000 match/sec\n*   *Group Matching: 1:5,000 match/sec\n*   User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A sales director tells you: 'We have a hospital client who needs to enroll up to 20,000 staff members. They want the device to verify each person against their own stored template — not against the full database.' Which capacity ceiling applies, and does the FaceStation 2 support this deployment?",
+        "reveal": "The workflow description is the key: staff verify against their own stored template, which means they are presenting an identity claim (implicitly, via their badge or PIN) before the face scan. That is 1:1 verification. The relevant ceiling is 30,000 users — not 4,000. The hospital's 20,000-person requirement falls well within that limit, so the FaceStation 2 supports this deployment. If you had applied the 1:N ceiling of 4,000, you would have incorrectly told the sales director the device cannot handle the volume.",
+        "hint": "Focus on whether the user is matched against one template or the full database."
+      },
+      {
+        "prediction_prompt": "An engineering lead says: 'We're scoping a lobby deployment for a 3,500-person office. Security wants the device to identify anyone who walks up — no card, no PIN, just face — by searching the full enrolled database. I'm worried the device won't keep up during peak entry times.' Which capacity ceiling and which matching speed figure do you cite?",
+        "reveal": "No card, no PIN, face-only search against the full database — this is 1:N identification. The relevant capacity ceiling is 4,000 users, which covers the 3,500-person database. For the throughput concern, you cite the standard matching speed of 1:4,000 match/sec, which applies to this type of identification operation. Citing the group matching speed of 1:5,000 match/sec here would be technically adjacent but imprecise — that figure applies specifically to high-throughput group matching scenarios, not standard 1:N lobby identification. Pairing the right capacity figure with the right speed figure is what makes the answer credible.",
+        "hint": "Ask yourself: does the user claim an identity before the scan? Then decide which speed figure fits the described scenario."
+      }
+    ],
+    "summary": "When a stakeholder describes a deployment, your first move is to identify whether the workflow requires an identity claim before the face scan — that single question determines whether you cite 30,000 (1:1) or 4,000 (1:N), and which matching speed figure supports your answer.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "matching",
+      "stem": "Match each deployment workflow to the correct matching mode:",
+      "pairs": [
+        {
+          "left": "User taps badge, then scans face to confirm identity",
+          "right": "1:1 verification (up to 30,000 users)"
+        },
+        {
+          "left": "User walks up and device searches full enrolled database by face alone",
+          "right": "1:N identification (up to 4,000 users)"
+        },
+        {
+          "left": "User enters PIN, then scans face to confirm identity",
+          "right": "1:1 verification (up to 30,000 users)"
+        }
+      ],
+      "explanation": "The mode is determined by whether the user presents an identity claim before the face scan. A card or PIN tap means 1:1; face-only database search means 1:N."
+    },
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When an engineering lead asks about throughput for a face-only lobby deployment with 3,500 enrolled users, the capacity ceiling you cite is the ___ limit.",
+      "answer": "1:N",
+      "distractors": [
+        "1:1",
+        "group matching",
+        "standard matching"
+      ],
+      "explanation": "Face-only database search with no prior identity claim is 1:N identification, so the 4,000-user 1:N ceiling — not the 30,000-user 1:1 ceiling — is the figure that applies to this deployment."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not describe the specific mechanism by which a user presents an identity claim in 1:1 mode (e.g., card tap vs. PIN entry vs. employee ID input) — SME input would help ground workflow examples more precisely.",
+    "The document does not clarify whether group matching speed (1:5,000 match/sec) applies exclusively to a named 'group matching' feature or also to standard 1:N identification at scale — SME confirmation is needed to avoid overclaiming in stakeholder discussions."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a sprint review, your sales director asks: 'We have a hospital client who needs to enroll up to 20,000 staff members and wants the device to verify each person against their own stored template — not against the full database. Can the FaceStation 2 handle that volume?'",
+        "question_text": "How do you respond to accurately address the sales director's question about user capacity for this deployment?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Yes — in 1:1 mode, the device supports up to 4,000 users, which falls short of the 20,000 requirement, so a different solution is needed.",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Yes — in 1:1 mode, the device supports up to 30,000 users, which comfortably covers the 20,000 staff requirement for this deployment.",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Yes — the device supports up to 30,000 users regardless of matching mode, so either 1:1 or 1:N would work for this deployment.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FaceStation 2 supports a maximum of 30,000 users in 1:1 mode, where each person is verified against their own stored template. This comfortably covers the 20,000-user requirement. The 4,000-user limit applies only to 1:N mode, where the device searches the full database.",
+        "incorrect": "The FaceStation 2 has two distinct user capacity limits depending on matching mode: 30,000 users in 1:1 mode and 4,000 users in 1:N mode. Since the hospital wants each person verified against their own template, this is a 1:1 deployment — and 30,000 users is well above the 20,000 needed. Review the Ultra Performance specifications for matching mode distinctions."
+      },
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. An engineering lead raises a concern in a cross-functional meeting: 'We're scoping a lobby deployment for a 3,500-person office. Security wants the device to identify anyone who walks up — no card, no PIN, just face — by searching the full enrolled database. I'm worried the device won't keep up during peak entry times.'",
+        "question_text": "Which response most accurately addresses the engineering lead's concern about throughput in this specific deployment scenario?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The 1:N capacity limit of 4,000 users covers the 3,500-person database, and at 1:4,000 matches per second, the device can process identifications fast enough to handle peak lobby traffic.",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The 1:1 capacity of 30,000 users far exceeds the requirement, and the 1:4,000 match/sec speed ensures the device will handle peak traffic without issue.",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The 1:N capacity limit of 4,000 users covers the 3,500-person database, but the matching speed of 1:5,000 match/sec applies here and should be cited to address the throughput concern.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. This is a 1:N scenario — the device must search the full database to identify an unknown person. The 1:N capacity of 4,000 users covers the 3,500-person database, and the standard matching speed of 1:4,000 match/sec applies to this identification workload. Both figures directly address the engineering lead's concern.",
+        "incorrect": "This scenario describes 1:N matching — identifying a person by searching the full enrolled database with no card or PIN. The 1:1 capacity figure (30,000 users) does not apply here. The 1:N capacity is 4,000 users, which covers 3,500 enrollees. The matching speed of 1:4,000 match/sec applies to standard identification; the 1:5,000 figure applies to Group Matching, which is a distinct mode. Review the Ultra Performance specifications and the distinction between 1:1 and 1:N matching."
+      },
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "Matching Speed: 1:4,000 match/sec, Group Matching: 1:5,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales engineer forwards you a customer requirement: a financial services firm wants to deploy FaceStation 2 at their headquarters. Their existing badge infrastructure uses HID Prox cards, and their facilities team wants to pilot mobile credentials via Bluetooth for executive access. They also need wireless connectivity because running Ethernet to all entry points is not feasible.",
+        "question_text": "Which FaceStation 2 model variant should you recommend, and what is the primary specification basis for that selection?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FS2-D, because it supports 125kHz EM and 13.56MHz MIFARE credentials, which covers the firm's core card infrastructure needs.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FS2-AWB, because it supports HID Prox, BLE mobile credentials, and Wi-Fi connectivity — all three of which the FS2-D does not provide.",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FS2-AWB, because it supports a broader range of 13.56MHz card types including DESFire and FeliCa, which provides more future-proofing than the FS2-D.",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FS2-AWB is the only variant that supports HID Prox (125kHz), BLE (2.4GHz) for mobile credentials, and Wi-Fi (IEEE 802.11 b/g). The FS2-D supports neither HID Prox nor BLE, and does not include Wi-Fi. All three customer requirements point exclusively to the FS2-AWB.",
+        "incorrect": "The customer has three distinct requirements that must all be met: HID Prox card support, BLE for mobile credentials, and Wi-Fi connectivity. The FS2-D lacks all three of these capabilities. While both models share some 13.56MHz card support, the correct selection must be driven by the features that differentiate the models — HID Prox, BLE, and Wi-Fi — all of which are exclusive to the FS2-AWB. Review the RF Options and connectivity specifications for each model variant."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a customer-facing product review, a security architect raises a concern: 'Face recognition systems are notoriously easy to fool — someone could just hold up a photo or use a screen showing the enrolled person's face. We can't accept that risk in a high-security environment.'",
+        "question_text": "Which response most effectively counters the security architect's specific concern using FaceStation 2's documented security features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 uses IR-based live face detection to distinguish real faces from printed images and LCD screens, and the Android 5.0 security layer adds a further system-level protection against unauthorized access.",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FaceStation 2 stores high-quality image logs of every authentication event, providing a full audit trail that security teams can review to detect and investigate any spoofing attempts after the fact.",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 operates across a 0–25,000 lx illuminance range, which ensures the IR camera captures consistent, high-quality face images even in challenging lighting — reducing the risk of false acceptances.",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The architect's concern is specifically about spoofing via printed images or LCD screens. IR-based live face detection directly addresses this by analyzing whether the presented face is real. The Android 5.0 security layer adds system-level protection. Together, these features directly counter the vulnerability raised — not just describe general device quality.",
+        "incorrect": "The architect's concern is about active spoofing — someone presenting a photo or screen to fool the sensor. Image logging (option b) is a reactive audit tool, not a prevention mechanism, so it does not counter the concern. Illuminance range (option c) relates to lighting performance, not anti-spoofing. The features that directly address spoofing are IR-based live face detection and the Android 5.0 security layer. Review the Enhanced Security feature set."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    }
+  ]
+}

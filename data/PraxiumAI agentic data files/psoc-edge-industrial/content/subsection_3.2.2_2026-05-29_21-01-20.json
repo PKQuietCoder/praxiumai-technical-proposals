@@ -1,0 +1,304 @@
+{
+  "subsection_id": "3.2.2",
+  "subsection_title": "Partition Memory for Multi-Core Operation",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Match each SRAM region (low-power 1 MB SRAM vs. SoCMEM) to the workload it best serves based on domain location and retention characteristics",
+    "Select the correct SRAM retention configuration for the Cortex-M33 during Deep Sleep to preserve wakeup context while minimizing power"
+  ],
+  "content": {
+    "hook_sentence": "Placing your ML activation buffer in the wrong SRAM region doesn't just waste memory — it forces every inference tensor transfer across a bus bridge, adding latency that can push a sub-500ms face recognition target out of reach.",
+    "introduction": "The PSOC Edge E8 gives you two physically separate SRAM pools, each anchored to a different power domain. Choosing which pool holds which data is not a style preference — it directly determines whether your Ethos-U55 inference pipeline runs at full bandwidth, whether your Cortex-M33 wakes from Deep Sleep with its context intact, and how much current the device draws while waiting for the next face to appear at the terminal.",
+    "key_points": [
+      {
+        "point": "Two SRAM regions serve two domains: 1 MB in the low-power domain for the Cortex-M33, and 5120 KB SoCMEM in the high-performance domain for the Cortex-M55 and Ethos-U55.",
+        "explanation": "The PSOC Edge E8 splits its volatile memory across both CPU subsystems. The low-power domain contains 1 MB of SRAM co-located with the Cortex-M33. The high-performance domain contains the System SRAM, called SoCMEM, at 5120 KB. Both the Cortex-M55 and the Cortex-M33 can access SoCMEM, but the M33 must cross a bus bridge to do so, which adds wait states. For your face recognition terminal, this means the Ethos-U55 activation buffers and inference tensors belong in SoCMEM — they are already in the same domain as the accelerator and the high-bandwidth AXI interconnect. Placing those buffers in the 1 MB low-power SRAM instead would route every DMA transfer across the bus bridge, degrading throughput and adding latency to every inference pass.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "SRAM: 1 MB in the low power CPU subsystem (Cortex-M33)... System SRAM (\"SoCMEM\"): 5120 KB in the high-performance domain. This memory is organized in ten partitions of 512-KB each... It can be accessed from either the M55 or the M33, with bus arbitration.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "dfd51e9b-44f0-4b5c-89f9-24cac76bcf23",
+            "snippet": "All CPUs and other bus masters can access any memory block. The number of wait states depends on the access path.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_24/ChunkType.text_dfd51e9b-44f0-4b5c-89f9-24cac76bcf23_0.png",
+            "page_number": 24,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "SoCMEM is organized as ten independent 512 KB partitions, each with individual retention control — giving you fine-grained power management over which inference data survives a domain power-down.",
+        "explanation": "Rather than treating SoCMEM as a monolithic 5 MB block, you can power down individual 512 KB partitions when the high-performance domain is not active. For the face recognition terminal, this matters during the transition from active recognition back to standby: you can retain only the partitions holding model weights or intermediate results you want to reuse on the next wakeup, and power down the rest. Partitions holding temporary activation data from a completed inference pass can be released entirely, reducing retention current. The 1 MB low-power SRAM offers a similar but coarser mechanism — retention is selectable in 64 KB increments — which suits the smaller, more granular context data the Cortex-M33 needs to preserve across Deep Sleep cycles.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "System SRAM (\"SoCMEM\"): 5120 KB in the high-performance domain. This memory is organized in ten partitions of 512-KB each, with retention of individual partitions.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "SRAM: 1 MB in the low power CPU subsystem (Cortex-M33). Portions of this SRAM can be retained during the System Deep Sleep power mode; the retained amount is selectable in 64-KB increments.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The low-power SRAM is implemented as several independent blocks, enabling simultaneous access from different processors to different regions — a structural property that matters when both cores are active.",
+        "explanation": "When the terminal is in active recognition mode and both the Cortex-M33 and Cortex-M55 are running, the multi-block structure of the 1 MB SRAM means the two cores can access different regions of it concurrently without serializing on a single memory port. This is relevant for the IPC-based handoff sequences you configured in the previous section: the shared SRAM buffer used for cross-domain messaging can sit in the low-power SRAM, and the Cortex-M33 can read or write its own region of that SRAM at the same time the Cortex-M55 is accessing a different region via the bus bridge. The hardware does not force one core to wait for the other as long as they target different blocks.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "The SRAM is implemented as several independent blocks to allow simultaneous access from different processors to different regions.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Assign Cortex-M33 sensor state and access logs to the low-power SRAM with selective 64 KB retention — not to SoCMEM — so that context survives Deep Sleep without keeping the high-performance domain powered.",
+        "explanation": "During standby, the high-performance domain can be powered down entirely while the Cortex-M33 continues monitoring for presence. Any data you need the M33 to have immediately on wakeup — sensor state, access log entries, IPC channel state — must live in the low-power SRAM, because SoCMEM is in the high-performance domain and may not be retained or accessible when that domain is off. You select exactly how much of the 1 MB SRAM to retain in 64 KB increments, so you only pay the retention current for the minimum context size your wakeup handler actually needs. Putting that same data in SoCMEM would either force you to keep the high-performance domain partially powered (increasing standby current) or lose the data entirely when the domain powers down.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+            "snippet": "Portions of this SRAM can be retained during the System Deep Sleep power mode; the retained amount is selectable in 64-KB increments.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+            "page_number": 25,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+            "snippet": "LOW POWER DOMAIN \"VIRTUAL\" ALWAYS-ON... Low Power CPU Subsystem Cortex-M33 160 MHz... SRAM 1 MB (granular)... HIGH PERFORMANCE DOMAIN... System SRAM (\"SoCMEM\") 5120 KB (granular)",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+            "page_number": 7,
+            "chunk_type": "figure"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition terminal uses a model whose activation buffer requires approximately 2 MB of SRAM during inference. The Cortex-M33 also needs to retain 128 KB of sensor state and access log data across Deep Sleep cycles. You have 1 MB of low-power SRAM and 5120 KB of SoCMEM available. Where do you place each allocation, and what retention configuration do you apply to the low-power SRAM?",
+        "reveal": "Place the 2 MB activation buffer in SoCMEM. It fits within the 5120 KB capacity (four 512 KB partitions), it is co-located with the Ethos-U55 in the high-performance domain, and the AXI interconnect gives the accelerator direct high-bandwidth access without crossing a bus bridge. When inference completes and the terminal returns to standby, you can power down those four partitions to eliminate their retention current. Place the 128 KB sensor state and access log data in the low-power SRAM. Configure retention for two 64 KB increments (128 KB total). This keeps the Cortex-M33's wakeup context alive through Deep Sleep without requiring the high-performance domain to remain powered. The remaining low-power SRAM capacity is available for the M33's stack, heap, and IPC shared buffers.",
+        "hint": "Think about which domain each accelerator and CPU belongs to, and what happens to SoCMEM when the high-performance domain powers down."
+      }
+    ],
+    "summary": "Place Ethos-U55 inference buffers in SoCMEM for direct high-performance domain access, and keep Cortex-M33 wakeup context in the low-power SRAM with selective 64 KB retention — this split lets you power down the high-performance domain during standby without losing the state your M33 needs to resume quickly.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 0,
+        "caption": "The PSOC Edge E8 block diagram shows the 1 MB granular SRAM in the low-power CPU subsystem alongside the Cortex-M33, and the 5120 KB SoCMEM in the high-performance domain alongside the Cortex-M55 and Ethos-U55 — the physical separation that drives the memory partitioning strategy.",
+        "alt_text": "Detailed block diagram of the PSOC Edge E8 showing three power domains. The low-power domain contains the Cortex-M33 at 160 MHz, 1 MB granular SRAM, RRAM 512 KB, and 2x 16-channel DMA. The high-performance domain contains the Cortex-M55 at 320 MHz, Ethos-U55 at 320 MHz, 4-channel HPDMA, and System SRAM SoCMEM at 5120 KB granular. IPC0 connects the deep sleep domain to the low-power domain interconnect, and IPC1 connects the low-power domain to the high-performance domain interconnect via AXI and AHB buses.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each data type to the SRAM region that best suits it, based on domain location and retention characteristics:",
+      "pairs": [
+        {
+          "left": "Ethos-U55 activation buffer during face recognition inference",
+          "right": "SoCMEM (high-performance domain, direct AXI access)"
+        },
+        {
+          "left": "Cortex-M33 sensor state retained across Deep Sleep",
+          "right": "Low-power SRAM (64 KB granular retention)"
+        },
+        {
+          "left": "Completed inference partition no longer needed after recognition",
+          "right": "SoCMEM partition powered down to reduce retention current"
+        }
+      ],
+      "explanation": "SoCMEM is co-located with the Ethos-U55 for high-bandwidth inference access, while the low-power SRAM's granular retention makes it the right home for M33 wakeup context that must survive when the high-performance domain is off."
+    },
+    {
+      "after_key_point": 3,
+      "type": "fill_blank",
+      "stem": "When the high-performance domain is powered down during standby, Cortex-M33 wakeup context must be stored in the ___ to remain accessible.",
+      "answer": "low-power SRAM",
+      "distractors": [
+        "SoCMEM",
+        "RRAM",
+        "TCM"
+      ],
+      "explanation": "SoCMEM resides in the high-performance domain and is unavailable when that domain is off; only the low-power SRAM with selective retention keeps data alive through Deep Sleep without requiring the high-performance domain to stay powered."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the exact wait-state penalty incurred when the Cortex-M33 accesses SoCMEM via the bus bridge at specific clock frequencies. Quantifying the latency cost of cross-domain SRAM access would strengthen the justification for keeping inference buffers in SoCMEM.",
+    "No guidance is provided on the maximum SoCMEM retention current per partition or the total retention current for the low-power SRAM at specific retention sizes. Learners cannot make precise power budget calculations without these figures from the electrical specifications."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are designing firmware for a biometric access control terminal using the PSOC Edge E8. The terminal must operate in two distinct modes: a low-power standby mode that continuously monitors a camera feed for any human presence, and an active recognition mode that runs a full face recognition model when presence is detected. The standby mode must run 24/7 with minimal power draw, while the active recognition mode requires high throughput to meet a sub-500ms identification latency target.",
+        "question_text": "Which accelerator assignment correctly matches each inference stage to the appropriate hardware on the PSOC Edge E8?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Assign presence detection to the Ethos-U55 and full face recognition to the NNLite, because the Ethos-U55 is in the high-performance domain and NNLite handles complex models",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Assign presence detection to the NNLite and full face recognition to the Ethos-U55, because NNLite is optimized for always-on low-power use cases and Ethos-U55 provides 128 MACs/cycle for high-throughput inference",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Assign both presence detection and full face recognition to the Ethos-U55, because it provides the highest throughput and the NNLite does not support inference tasks",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The NNLite coprocessor is in the low-power domain and is specifically designed for always-on use cases with low-to-moderate complexity models such as presence or wake detection. The Ethos-U55, with 128 MACs/cycle in the high-performance domain, is the right choice for the computationally intensive full face recognition model requiring low latency.",
+        "incorrect": "Review the documented capabilities of each accelerator. The NNLite is optimized for always-on, low-power inference (e.g., presence detection), while the Ethos-U55 provides 128 MACs/cycle for high-performance workloads like full face recognition. The NNLite does support inference — it is simply constrained to low-to-moderate complexity models."
+      },
+      "references": [
+        {
+          "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+          "snippet": "This product line includes an Arm® Ethos-U55 neural net processor, which works in conjunction with the Cortex®-M55 CPU to accelerate neural net (NN) operations. It supports 8-bit weights and weight compression to reduce memory usage. It also performs 128 MACs/clock cycle.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_b7cefb2c-3147-4b25-8a63-f80a20d5af0f_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "This product line includes a neural network (NNLite) coprocessor, which works in conjunction with the Cortex®-M33 CPU... It is an ACTIVE state peripheral that accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR)... The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are partitioning firmware tasks for a PSOC Edge E8-based face recognition terminal across the two CPU cores. The terminal performs the following functions: (1) running the face detection and recognition inference pipeline, (2) rendering the user interface on a MIPI-DSI display, (3) managing door lock relay output and access log I/O, and (4) storing and verifying cryptographic keys for secure access decisions. You need to assign each function to either the Cortex-M55 (high-performance domain) or the Cortex-M33 (low-power domain).",
+        "question_text": "Which assignment correctly maps all four terminal functions to the appropriate CPU domain?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Cortex-M55: face recognition inference and display rendering; Cortex-M33: access control I/O and cryptographic key management",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Cortex-M55: face recognition inference and cryptographic key management; Cortex-M33: display rendering and access control I/O",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Cortex-M55: display rendering and access control I/O; Cortex-M33: face recognition inference and cryptographic key management",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The Cortex-M55 is the high-performance domain core suited for compute-intensive tasks like ML inference and display rendering. The Cortex-M33 is the low-power domain core with TrustZone support, making it the correct home for always-on access control I/O and secure cryptographic key management via TF-M running in its SPE.",
+        "incorrect": "Reconsider the documented role of each domain. The Cortex-M55 high-performance domain is designed for DSP, NN inference, and display pipelines. The Cortex-M33 low-power domain hosts TrustZone with TF-M in the SPE, making it the correct location for secure key management — not the M55, which operates in NSPE. Display rendering belongs with the high-performance domain, not the low-power domain."
+      },
+      "references": [
+        {
+          "chunk_id": "d72e94e3-b08b-4d31-bdf9-e98fcff2a089",
+          "snippet": "The M33 CPU domain is a low-power domain. The M55 domain is a high-performance domain for high-performance compute purposes. The CPUs can access resources in each others' domains via a bus bridge.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_d72e94e3-b08b-4d31-bdf9-e98fcff2a089_0.png",
+          "page_number": 23,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "704af7e7-7ea5-4c50-8d88-f51770035c2d",
+          "snippet": "Cortex®-M33: Arm® TrustZone enabled core with two processing environments: secure (SPE) and non-secure (NSPE)... Infineon-provided Trusted firmware-M (TF-M) implemented in SPE — its services are leveraged by Cortex®-M33 NSPE and Cortex®-M55, fully enabled to use hardware accelerated crypto operations",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_704af7e7-7ea5-4c50-8d88-f51770035c2d_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "66c54d6b-d17a-48f2-9a25-b946d0c8cac8",
+          "snippet": "Cortex®-M55: This is an application core operating in NSPE. Applications run by this CPU can request TF-M services using PSA API calls",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_22/ChunkType.text_66c54d6b-d17a-48f2-9a25-b946d0c8cac8_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are allocating SRAM for the face recognition terminal firmware on the PSOC Edge E8. The Ethos-U55 inference pipeline requires a large activation buffer for the face recognition model, and the Cortex-M33 needs to retain sensor state and access logs during System Deep Sleep to resume quickly when the terminal wakes. You are reviewing the two available SRAM regions: the 1 MB SRAM in the low-power domain and the 5120 KB System SRAM (SoCMEM) in the high-performance domain.",
+        "question_text": "Which memory allocation strategy best matches each workload to the correct SRAM region?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Place the Ethos-U55 activation buffer in the 1 MB low-power SRAM and retain sensor state in SoCMEM partitions, because the low-power SRAM is larger and SoCMEM supports per-partition retention",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Place the Ethos-U55 activation buffer in SoCMEM and retain sensor state in the low-power SRAM, because SoCMEM is in the high-performance domain for ML workloads and the low-power SRAM supports selective retention during Deep Sleep",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Place both the activation buffer and retained sensor state in SoCMEM, because it is larger and both the M55 and M33 can access it via bus arbitration",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. SoCMEM (5120 KB) resides in the high-performance domain and is the appropriate location for the large Ethos-U55 activation buffer. The 1 MB low-power SRAM supports selective retention in 64 KB increments during System Deep Sleep, making it the right choice for the Cortex-M33's sensor state and access logs that must survive low-power transitions.",
+        "incorrect": "Review the documented properties of each SRAM region. The 1 MB SRAM is in the low-power domain and supports retention during Deep Sleep in 64 KB increments — it is the correct home for data that must persist across sleep cycles. SoCMEM is in the high-performance domain and is better suited for the large, high-bandwidth buffers needed by the Ethos-U55 inference pipeline. Placing both in SoCMEM would not leverage the retention capability of the low-power SRAM."
+      },
+      "references": [
+        {
+          "chunk_id": "f609c153-9042-424f-824a-64f75c44bea4",
+          "snippet": "SRAM: 1 MB in the low power CPU subsystem (Cortex®-M33). Portions of this SRAM can be retained during the System Deep Sleep power mode; the retained amount is selectable in 64-KB increments... System SRAM (\"SoCMEM\"): 5120 KB in the high-performance domain. This memory is organized in ten partitions of 512-KB each, with retention of individual partitions. It can be accessed from either the M55 or the M33, with bus arbitration.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_25/ChunkType.text_f609c153-9042-424f-824a-64f75c44bea4_0.png",
+          "page_number": 25,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    }
+  ]
+}

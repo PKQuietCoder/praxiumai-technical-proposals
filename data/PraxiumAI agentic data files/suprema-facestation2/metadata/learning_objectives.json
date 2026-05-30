@@ -1,0 +1,176 @@
+{
+  "key_content": {
+    "topics": [
+      "FaceStation 2 matching speed and user capacity specifications",
+      "Operating illuminance range and lighting condition performance",
+      "Live face detection and anti-spoofing security features",
+      "Multi-RFID card reading capabilities and supported card types by model variant",
+      "Model variant differences: FS2-D vs. FS2-AWB",
+      "Hardware interfaces and connectivity options (Ethernet, Wi-Fi, RS-485, Wiegand, USB, Relay, TTL)",
+      "System configuration scenarios: standalone, standalone-secure, and distributed access control",
+      "Ergonomics and physical usability features (height range, tilt bracket, GUI)"
+    ],
+    "skills": [
+      "Applying FaceStation 2 performance specifications to resolve cross-functional product inquiries",
+      "Differentiating FS2-D and FS2-AWB model capabilities to justify model selection decisions",
+      "Matching customer deployment scenarios to appropriate system configurations",
+      "Justifying security feature decisions using specification data",
+      "Addressing credential and card compatibility questions across card types and RF frequencies",
+      "Translating hardware interface specifications into product trade-off rationale",
+      "Countering stakeholder usability and accessibility objections using ergonomic design specifications"
+    ]
+  },
+  "goals": [
+    {
+      "id": "G1",
+      "statement": "You will apply FaceStation 2 performance, security, credential, and usability specifications to accurately resolve product questions, counter stakeholder objections, and advocate for product decisions in cross-functional discussions — without referencing external support.",
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "Matching Speed: 1:4,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)"
+        },
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs"
+        },
+        {
+          "chunk_id": "688aa197-361a-41a2-af2c-4ba2a4019ff2",
+          "snippet": "LF(125kHz), HF(13.56MHz) dual-band. Reads all card types that HID multiCLASS supports (EM/HID Prox/MIFARE/ICLASS/DESFire/FeliCa/NFC)"
+        },
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children."
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "statement": "You will select the appropriate FaceStation 2 model variant and system configuration to match a given deployment scenario, justifying your recommendation using hardware specifications and interface capabilities.",
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE"
+        },
+        {
+          "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+          "snippet": "Diagram showing various system configurations connected to a central BioStar 2 Server... Standalone-Secure Configuration... Standalone Configuration... Distributed Access Control Systems"
+        }
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "id": "O1",
+      "goal_id": "G1",
+      "audience": "You (the Hardware Product Owner for FaceStation 2)",
+      "behavior": "apply FaceStation 2 matching speed, group matching speed, and user capacity figures to directly resolve performance-related product inquiries from stakeholders",
+      "condition": "When questioned by engineering, sales, or leadership stakeholders about device performance capabilities during a cross-functional meeting",
+      "degree": "without referencing external documentation, correctly applying all three performance figures to directly address the stakeholder's specific performance question — not merely reciting the numbers in isolation",
+      "full_statement": "You (the Hardware Product Owner for FaceStation 2), when questioned by engineering, sales, or leadership stakeholders about device performance capabilities during a cross-functional meeting, will apply FaceStation 2 matching speed, group matching speed, and user capacity figures to directly resolve performance-related product inquiries — without referencing external documentation, correctly applying all three performance figures to directly address the stakeholder's specific performance question, not merely reciting the numbers in isolation.",
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "Matching Speed: 1:4,000 match/sec, Group Matching: 1:5,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)"
+        }
+      ]
+    },
+    {
+      "id": "O2",
+      "goal_id": "G1",
+      "audience": "You (the Hardware Product Owner for FaceStation 2)",
+      "behavior": "assess whether a proposed deployment environment is within FaceStation 2's supported operating illuminance range and resolve the stakeholder's suitability question with a clear, evidence-based rationale",
+      "condition": "Given a stakeholder scenario describing a specific lighting condition — such as complete darkness, outdoor sunlight, or standard indoor lighting",
+      "degree": "providing a clear rationale that references the 0–25,000 lx operating range and explicitly explains whether the described environment falls within or outside the supported range, with no unsupported suitability claims",
+      "full_statement": "You (the Hardware Product Owner for FaceStation 2), given a stakeholder scenario describing a specific lighting condition — such as complete darkness, outdoor sunlight, or standard indoor lighting — will assess whether the proposed deployment environment is within FaceStation 2's supported operating illuminance range and resolve the stakeholder's suitability question, providing a clear rationale that references the 0–25,000 lx operating range and explicitly explains whether the described environment falls within or outside the supported range, with no unsupported suitability claims.",
+      "references": [
+        {
+          "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+          "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions"
+        }
+      ]
+    },
+    {
+      "id": "O3",
+      "goal_id": "G1",
+      "audience": "You (the Hardware Product Owner for FaceStation 2)",
+      "behavior": "counter stakeholder concerns about face recognition vulnerabilities by citing FaceStation 2's specific security features and explicitly connecting each feature to the vulnerability concern raised",
+      "condition": "When a sales, security, or engineering stakeholder questions the reliability of face-based authentication in a product review or customer-facing discussion",
+      "degree": "citing all three security features — live face detection, IR-based image analysis, and the Android 5.0 security layer — and explicitly connecting each to the specific vulnerability concern raised by the stakeholder, with no security claims that exceed what the specification supports",
+      "full_statement": "You (the Hardware Product Owner for FaceStation 2), when a sales, security, or engineering stakeholder questions the reliability of face-based authentication in a product review or customer-facing discussion, will counter the concern by citing FaceStation 2's specific security features and explicitly connecting each to the vulnerability raised — citing all three security features (live face detection, IR-based image analysis, and the Android 5.0 security layer) and connecting each to the specific vulnerability concern raised by the stakeholder, with no security claims that exceed what the specification supports.",
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log"
+        }
+      ]
+    },
+    {
+      "id": "O4",
+      "goal_id": "G2",
+      "audience": "You (the Hardware Product Owner for FaceStation 2)",
+      "behavior": "select and justify the correct FaceStation 2 model variant (FS2-D or FS2-AWB) by mapping the customer's credential and connectivity requirements to model-specific features",
+      "condition": "Given a deployment scenario specifying required card types (e.g., HID Prox, iCLASS, BLE) and connectivity needs (e.g., Wi-Fi)",
+      "degree": "with no errors in model-to-feature mapping, and providing a brief rationale that references the specific credential or connectivity requirement that drove the model selection",
+      "full_statement": "You (the Hardware Product Owner for FaceStation 2), given a deployment scenario specifying required card types (e.g., HID Prox, iCLASS, BLE) and connectivity needs (e.g., Wi-Fi), will select and justify the correct FaceStation 2 model variant (FS2-D or FS2-AWB) by mapping the customer's credential and connectivity requirements to model-specific features — with no errors in model-to-feature mapping, and providing a brief rationale that references the specific credential or connectivity requirement that drove the model selection.",
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)"
+        }
+      ]
+    },
+    {
+      "id": "O5",
+      "goal_id": "G2",
+      "audience": "You (the Hardware Product Owner for FaceStation 2)",
+      "behavior": "match a customer's access control deployment scenario to the appropriate FaceStation 2 system configuration (standalone, standalone-secure, or distributed) and justify the recommendation using interface specifications directly relevant to the deployment constraints described",
+      "condition": "Given a cross-functional discussion or customer inquiry describing one or more of the following: site size, security requirements, or integration needs",
+      "degree": "correctly identifying the configuration type and citing at least two interface specifications that are directly relevant to the deployment constraints described in the scenario — not merely technically accurate in isolation",
+      "full_statement": "You (the Hardware Product Owner for FaceStation 2), given a cross-functional discussion or customer inquiry describing one or more of the following — site size, security requirements, or integration needs — will match the deployment scenario to the appropriate FaceStation 2 system configuration (standalone, standalone-secure, or distributed) and justify the recommendation, correctly identifying the configuration type and citing at least two interface specifications that are directly relevant to the deployment constraints described in the scenario, not merely technically accurate in isolation.",
+      "references": [
+        {
+          "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+          "snippet": "Standalone-Secure Configuration: A FaceStation 2 device is connected to a Secure I/O 2 module... Standalone Configuration: A FaceStation 2 device is connected directly to a door lock and an exit button... Distributed Access Control Systems: Multiple FaceStation 2 devices are shown"
+        },
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RS-485: 1ch Host or Slave (Selectable). Wiegand: 1ch In and 1ch Out. Relay: 1 Relay"
+        }
+      ]
+    },
+    {
+      "id": "O6",
+      "goal_id": "G1",
+      "audience": "You (the Hardware Product Owner for FaceStation 2)",
+      "behavior": "respond to and resolve stakeholder usability objections by citing FaceStation 2's ergonomic design specifications and explaining how each cited feature directly addresses the specific user population concern raised",
+      "condition": "When a stakeholder raises concerns about physical usability for diverse user populations — such as wheelchair users, children, or users of varying heights — during a product or deployment review",
+      "degree": "accurately citing the 145cm–210cm height range and tilt-type bracket as design features that support diverse user populations, connecting each feature to the specific population concern raised, and without overstating compliance claims not substantiated by the specification",
+      "full_statement": "You (the Hardware Product Owner for FaceStation 2), when a stakeholder raises concerns about physical usability for diverse user populations — such as wheelchair users, children, or users of varying heights — during a product or deployment review, will respond to and resolve the objection by citing FaceStation 2's ergonomic design specifications and explaining how each cited feature directly addresses the specific user population concern raised — accurately citing the 145cm–210cm height range and tilt-type bracket as design features that support diverse user populations, connecting each feature to the specific population concern raised, and without overstating compliance claims not substantiated by the specification.",
+      "references": [
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure"
+        }
+      ]
+    }
+  ],
+  "gaps_identified": [
+    "The document does not provide guidance on how to explain BioStar 2 software integration at a conceptual level — if the learner needs to address integration questions in cross-functional discussions, supplemental content from BioStar 2 documentation would be required.",
+    "The document does not include real-world stakeholder scenarios (e.g., sample sales objections, engineering trade-off discussions, or support escalations) that could anchor instructional examples — SME input is needed to develop realistic practice scenarios.",
+    "The document does not clarify which specifications are most frequently misquoted or misunderstood internally — SME input is needed to prioritize misconception correction within the course.",
+    "The document does not address competitive context or how FaceStation 2 specifications compare to alternatives — this is noted as out of scope but may surface as a stakeholder need.",
+    "The document does not specify whether the FS2-D vs. FS2-AWB distinction is a known source of internal confusion — SME confirmation is needed to determine whether this topic warrants disproportionate instructional emphasis.",
+    "O6 has been reassigned from G2 to G1 to correct the goal-objective misalignment identified in the critique. G1 has been updated to encompass product advocacy and usability objection handling, which more accurately reflects the full scope of cross-functional stakeholder communication tasks covered by O3 and O6."
+  ],
+  "contradictions": [],
+  "_reflection": {
+    "enabled": true,
+    "initial_score": 8.8,
+    "final_score": 8.9,
+    "refinement_applied": true,
+    "critique_summary": "This is a high-quality set of learning objectives that demonstrates strong instructional design practice. All six objectives are grounded in realistic job tasks, clearly tied to source content, and written with specific, observable behaviors. The ABCD components are consistently present across all objectives, which is a notable strength. The primary improvement areas are: (1) Degree statements across several objectives use weak qualifiers like 'accurately referencing' or 'correctly identifying' without specifying what quality or completeness looks like — these should be tightened to include contextual relevance standards, not just accuracy; (2) O6 is misaligned to G2 and should be reassigned to G1 or a new goal covering product advocacy; (3) The justification component present in G2 is partially dropped in O4's behavior statement, creating a goal-objective gap; (4) O3's use of 'defend' and O6's use of 'address' are the weakest behavioral verbs in the set and should be replaced with more precisely assessable actions. Overall, these objectives are well above average and would require only targeted revisions rather than a full rewrite.",
+    "iterations": 2,
+    "critique_failed": false,
+    "refinement_failed": false
+  }
+}

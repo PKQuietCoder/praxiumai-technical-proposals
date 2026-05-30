@@ -1,0 +1,322 @@
+{
+  "subsection_id": "4.2.2",
+  "subsection_title": "Justify Configuration Recommendations Using Interface Specifications",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Match a deployment scenario to the correct FaceStation 2 system configuration by applying interface specifications as justification",
+    "Counter stakeholder objections about configuration limitations using specific interface specifications",
+    "Select the correct model variant and configuration combination when a scenario combines credential requirements with security topology constraints"
+  ],
+  "content": {
+    "hook_sentence": "A stakeholder who hears 'single Relay output' and concludes the device can't scale to 12 buildings has made a category error — and you need the interface specifications to correct it on the spot.",
+    "introduction": "Knowing the three configurations is necessary but not sufficient. What separates a credible product recommendation from a vague one is the ability to cite the specific interface specifications that make a configuration viable for a given deployment. When sales, operations, or security stakeholders push back, your justification has to be grounded in the spec sheet — not general product familiarity. This section gives you a repeatable framework for translating deployment constraints directly into interface-backed configuration rationale.",
+    "key_points": [
+      {
+        "point": "For single-door deployments with no server or additional hardware, the standalone configuration is justified by the onboard Relay and TTL inputs working together.",
+        "explanation": "When a customer describes a single entry point where the device must control the door lock directly, two interface specifications close the argument: the onboard **Relay** (1 channel) drives the door lock, and the **TTL inputs** (2 inputs) connect the exit button. No RS-485 module, no BioStar 2 server, no additional controller — the device handles the full loop independently. The Wiegand output (1ch In, 1ch Out) is also present on the device, but it is not what justifies standalone suitability. The Relay is the direct lock-control mechanism; the TTL input is the exit-request mechanism. When a stakeholder asks why no additional hardware is needed, those two specifications are your answer. - Relay: direct door lock control - TTL input: exit button connection - No Ethernet server dependency required for local operation",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "TTL input: 2 Inputs. Relay: 1 Relay.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+            "snippet": "Standalone Configuration: A FaceStation 2 device is connected directly to a door lock and an exit button. Connections use Relay (orange) and Input (red).",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+            "page_number": 1,
+            "chunk_type": "figure"
+          }
+        ]
+      },
+      {
+        "point": "When physical separation of the lock relay from the reader is required, the standalone-secure configuration is justified by the RS-485 interface routing authenticated commands to a Secure I/O 2 module.",
+        "explanation": "High-security deployments — government facilities, data centers, financial institutions — often require that the hardware controlling the door lock cannot be physically accessed at the reader terminal. The standalone-secure configuration addresses this by moving relay control off the FaceStation 2 and onto a separate Secure I/O 2 module. The interface specification that makes this possible is the **RS-485 channel** (1ch, selectable as Host or Slave). FaceStation 2 sends authenticated commands over RS-485 to the Secure I/O 2 module; the module then drives the Relay to the door lock. The FaceStation 2's own onboard Relay is not used for lock control in this topology. When a security consultant or compliance stakeholder asks how the device supports physical separation of locking hardware, RS-485 is the specification that answers the question — not Ethernet, not Wiegand. Note also: if the deployment additionally requires iCLASS SE/SR/Seos credentials, the model must be **FS2-AWB**, since FS2-D does not include iCLASS SE/SR/Seos in its RF options.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RS-485: 1ch Host or Slave (Selectable). RF Options FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+            "snippet": "Standalone-Secure Configuration: A FaceStation 2 device is connected to a Secure I/O 2 module. Connections from FaceStation 2 to Secure I/O 2 use RS-485 (blue) and Input (red). Connections from Secure I/O 2 to door lock and exit button use Relay (orange) and Input (red).",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+            "page_number": 1,
+            "chunk_type": "figure"
+          }
+        ]
+      },
+      {
+        "point": "The single Relay per device is not a scalability ceiling — in distributed deployments, Ethernet enables centralized management of multiple devices through BioStar 2, each controlling its own door.",
+        "explanation": "This is the most common objection you will encounter from operations stakeholders: \"One Relay means one door — how does this scale to a campus?\" The answer requires separating two distinct concepts. The Relay (1 channel per device) controls the door at that device's entry point. Scalability across a multi-building or campus deployment is handled by the **Ethernet interface** (10/100/1000 Mbps, auto MDI/MDI-X), which connects multiple FaceStation 2 devices to a central BioStar 2 Server over TCP/IP. Each device manages its own door; BioStar 2 manages all devices centrally. The distributed access control configuration also supports RS-485 chaining to additional readers within an entry point cluster, giving each FaceStation 2 node the ability to serve more than one reader position if needed. When an operations stakeholder frames the single Relay as a deployment blocker, the correct counter is: the Relay governs per-door control, while Ethernet and BioStar 2 govern enterprise-scale management. These are different layers of the architecture, not competing constraints.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Ethernet: Supported (10/100/1000 Mbps, auto MDI/MDI-X). RS-485: 1ch Host or Slave (Selectable). Relay: 1 Relay.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+            "snippet": "Distributed Access Control Systems: Multiple FaceStation 2 devices are shown. One FaceStation 2 is connected to a Reader, a door lock, and an exit button. All FaceStation 2 devices are connected to the central TCP/IP network line.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+            "page_number": 1,
+            "chunk_type": "figure"
+          }
+        ]
+      },
+      {
+        "point": "A complete recommendation combines configuration type, model variant, and the specific interface specifications that link both choices to the deployment constraints.",
+        "explanation": "In a cross-functional discussion, a recommendation that names only the configuration type without citing the underlying specifications is incomplete and easy to challenge. A recommendation that also names the model variant without explaining why is equally weak. The pattern that holds up under scrutiny looks like this: 1. **State the configuration** (standalone, standalone-secure, or distributed) 2. **Cite the interface specifications** that make it viable for the described constraints (e.g., Relay for direct lock control, RS-485 for Secure I/O 2 separation, Ethernet for BioStar 2 centralization) 3. **State the model variant** if credential or connectivity requirements force a choice (e.g., FS2-AWB for iCLASS SE/SR/Seos or BLE; FS2-AWB for Wi-Fi) 4. **Connect the model choice to the spec** (e.g., \"FS2-D does not include iCLASS SE/SR/Seos in its RF options\") This four-part structure gives stakeholders a traceable rationale rather than an assertion, which is what makes it defensible in a product review or customer-facing discussion.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC. RF Options FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+            "snippet": "Standalone-Secure Configuration... Standalone Configuration... Distributed Access Control Systems: Multiple FaceStation 2 devices are shown connected to the central TCP/IP network line.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+            "page_number": 1,
+            "chunk_type": "figure"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A sales engineer brings you a prospect scenario: single small office, one door, no server infrastructure, no plans to expand. The prospect wants the device to control the door lock directly. Which configuration do you recommend, and which two interface specifications anchor your justification?",
+        "reveal": "Standalone configuration, justified by the Relay (1 channel, for direct door lock control) and the TTL inputs (2 inputs, for the exit button connection). No RS-485 module or BioStar 2 server is required. The Wiegand output is present on the device but is not what makes standalone viable for this scenario — the Relay is the direct lock-control mechanism, and that is the specification you cite. If a stakeholder asks why no additional hardware is needed, those two specs close the argument.",
+        "hint": "Focus on which interfaces handle the door lock and the exit button directly — not which interfaces enable network connectivity."
+      },
+      {
+        "prediction_prompt": "A security consultant describes a high-security government facility: the site requires physical separation of door-locking hardware from the reader terminal, and all users carry HID iCLASS Seos cards. You need to recommend both a model variant and a system configuration. What do you recommend, and what are the two specification-based reasons?",
+        "reveal": "FS2-AWB in a standalone-secure configuration. Reason 1: the RS-485 interface (1ch, selectable Host or Slave) enables communication with a Secure I/O 2 module, which physically separates the Relay controlling the door lock from the FaceStation 2 terminal — directly addressing the tamper-separation requirement. Reason 2: FS2-AWB includes iCLASS SE/SR/Seos in its RF options; FS2-D does not. Recommending FS2-D here would be a model-selection error because the credential requirement alone forces the FS2-AWB variant, independent of the configuration choice.",
+        "hint": "The configuration choice and the model choice are driven by different constraints — work through each independently before combining them."
+      },
+      {
+        "prediction_prompt": "During a product roadmap review, an operations stakeholder argues: 'FaceStation 2 has only one Relay output per device — that makes it unsuitable for a 12-building enterprise deployment.' How do you counter this objection using interface specifications?",
+        "reveal": "Counter the objection by separating per-door control from enterprise-scale management. The single Relay per device governs lock control at that device's entry point — that is its intended scope. Enterprise scalability is handled by the Ethernet interface (10/100/1000 Mbps), which connects multiple FaceStation 2 devices to a central BioStar 2 Server over TCP/IP in a distributed access control configuration. Each device manages its own door; BioStar 2 manages all devices centrally. The stakeholder is conflating two different architectural layers. The single Relay is not a scalability ceiling — it is a per-door control mechanism, and the distributed configuration with Ethernet is the answer to multi-building management.",
+        "hint": "Ask yourself: which interface handles per-door lock control, and which interface handles cross-building management? They are not the same layer."
+      }
+    ],
+    "summary": "Every configuration recommendation becomes defensible when you anchor it to the specific interface specifications that address the deployment constraints — Relay and TTL inputs for standalone, RS-485 for standalone-secure physical separation, and Ethernet for distributed multi-site management — combined with the model variant forced by credential requirements.",
+    "figures": [
+      {
+        "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+        "after_key_point": 2,
+        "caption": "All three FaceStation 2 system configurations shown side by side, with color-coded connections: orange lines indicate Relay (door lock control), blue lines indicate RS-485 (Secure I/O 2 or reader chaining), and red lines indicate TTL inputs (exit buttons). In the distributed configuration, all devices connect to the central TCP/IP network line leading to BioStar 2 Server.",
+        "alt_text": "System configurations diagram with three labeled sections. Top center: Standalone-Secure, showing FaceStation 2 connected via blue RS-485 line to a Secure I/O 2 module, which connects via orange Relay line to a door lock and via red Input line to an exit button. Top right: Standalone, showing FaceStation 2 connected directly via orange Relay line to a door lock and via red Input line to an exit button. Bottom center: Distributed Access Control Systems, showing multiple FaceStation 2 devices connected via black lines to a horizontal TCP/IP network line leading left to a BioStar 2 Server. One distributed node also shows a Reader connected via blue RS-485 line. Legend in top left shows red equals Input, blue equals RS-485, orange equals Relay.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+        "page_number": 1
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each deployment constraint to the interface specification that most directly justifies the configuration choice:",
+      "pairs": [
+        {
+          "left": "Direct door lock control with no additional hardware",
+          "right": "Relay (1 channel onboard)"
+        },
+        {
+          "left": "Physical separation of lock relay from the reader terminal",
+          "right": "RS-485 (to Secure I/O 2 module)"
+        },
+        {
+          "left": "Centralized management across multiple buildings",
+          "right": "Ethernet (TCP/IP to BioStar 2 Server)"
+        }
+      ],
+      "explanation": "Each configuration is justified by a different interface: the Relay enables standalone direct lock control, RS-485 enables standalone-secure physical separation via Secure I/O 2, and Ethernet enables distributed multi-site management through BioStar 2."
+    },
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When an operations stakeholder argues that the single Relay makes FaceStation 2 unsuitable for a multi-building deployment, the correct counter is that enterprise scalability is handled by ___, not by the number of Relay channels per device.",
+      "answer": "Ethernet connectivity to BioStar 2 Server",
+      "distractors": [
+        "adding more Relay modules per device",
+        "using the Wiegand output to chain locks",
+        "upgrading to the FS2-AWB model"
+      ],
+      "explanation": "The Relay governs per-door lock control at each device; Ethernet and the distributed access control configuration handle cross-building management through BioStar 2. These are separate architectural layers, and conflating them is the stakeholder's error."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not provide explicit guidance on how to structure a verbal recommendation in a stakeholder meeting — the four-part recommendation framework in key point 4 is derived from the specification data and instructional design logic, not a direct source quote. SME review is recommended to confirm this framing matches internal product communication norms.",
+    "The document does not describe BioStar 2 Server capabilities in detail — the distributed configuration justification relies on the system configuration diagram description and TCP/IP interface spec, but deeper BioStar 2 integration details (policy distribution, audit logging specifics) are not available in the provided chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are in a cross-functional meeting with the sales team. A prospect is deploying FaceStation 2 at a single entry point — a small office with one door. They want the device to control the door lock directly without any additional access control hardware or server infrastructure.",
+        "question_text": "Based on the deployment constraints described, which FaceStation 2 system configuration should you recommend, and which two interface specifications most directly justify that recommendation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Standalone configuration, justified by the Relay output (for direct door lock control) and Wiegand output (for connecting to a downstream reader if needed)",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Standalone-secure configuration, justified by the RS-485 interface (for connecting a Secure I/O 2 module) and Ethernet (for BioStar 2 server communication)",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Distributed access control configuration, justified by Ethernet connectivity (for network integration) and RS-485 (for linking multiple devices across the site)",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct! A standalone configuration connects the FaceStation 2 directly to a door lock and exit button — no additional modules or server required. The Relay output (1 Relay) enables direct door lock control, and the Wiegand output supports downstream reader connectivity if the setup ever expands. These two specs are directly relevant to a single-door, infrastructure-free deployment.",
+        "incorrect": "The standalone-secure and distributed configurations both require additional hardware or server infrastructure (a Secure I/O 2 module or BioStar 2 server), which contradicts the customer's constraint. For a single door with no additional hardware, the standalone configuration is correct. The Relay output enables direct lock control, making it the most relevant interface spec for this scenario. Review the system configuration options and their interface dependencies."
+      },
+      "references": [
+        {
+          "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+          "snippet": "Standalone Configuration: A FaceStation 2 device is connected directly to a door lock and an exit button",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+          "page_number": 1,
+          "chunk_type": "figure"
+        },
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RS-485: 1ch Host or Slave (Selectable). Wiegand: 1ch In and 1ch Out. Relay: 1 Relay",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O5",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "A security consultant contacts you about a high-security government facility deployment. The facility requires that door-locking hardware be physically separated from the access control reader to prevent tampering, and the site already uses HID iCLASS Seos cards as their standard credential.",
+        "question_text": "Which FaceStation 2 model and system configuration combination best fits this deployment, and what is the primary specification-based reason for your choice?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FS2-D in a standalone-secure configuration — the RS-485 interface supports a Secure I/O 2 module for separated lock control, and FS2-D reads the full range of 13.56MHz cards including iCLASS Seos",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FS2-AWB in a standalone-secure configuration — the RS-485 interface supports a Secure I/O 2 module for separated lock control, and FS2-AWB includes iCLASS SE/SR/Seos support that FS2-D lacks",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FS2-AWB in a distributed access control configuration — Ethernet connectivity enables centralized management across multiple readers, and FS2-AWB supports BLE for mobile credential flexibility",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct! The standalone-secure configuration connects FaceStation 2 to a Secure I/O 2 module, physically separating the locking hardware from the reader — directly addressing the tamper-resistance requirement. The FS2-AWB is required because iCLASS SE/SR/Seos is only supported on the FS2-AWB, not the FS2-D. Both specifications are directly relevant to the stated deployment constraints.",
+        "incorrect": "Two constraints must be satisfied simultaneously: physical separation of lock hardware (requiring standalone-secure with RS-485 to a Secure I/O 2 module) and iCLASS Seos card compatibility. The FS2-D does not support iCLASS SE/SR/Seos — that credential type is exclusive to the FS2-AWB. A distributed configuration addresses multi-device management, not the tamper-resistance requirement described. Review the model variant RF options and system configuration descriptions."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+          "snippet": "Standalone-Secure Configuration: A FaceStation 2 device is connected to a Secure I/O 2 module",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+          "page_number": 1,
+          "chunk_type": "figure"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O5",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "During a product roadmap review, a sales engineer raises a concern: a large enterprise customer wants to deploy FaceStation 2 across 12 buildings with centralized management through BioStar 2. An operations stakeholder pushes back, arguing that the device's single Relay output is a critical limitation that makes it unsuitable for multi-building deployments.",
+        "question_text": "How should you respond to the operations stakeholder's objection using FaceStation 2 specifications?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Acknowledge the limitation — a single Relay output means each device can only control one door, so multi-building deployments require a different product with more relay channels",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Partially agree — the single Relay is a constraint per device, but it can be offset by using the Wiegand output to daisy-chain additional locking hardware across buildings",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Counter the objection — the single Relay limitation per device is addressed by the distributed access control configuration, where multiple FaceStation 2 devices are networked via Ethernet and managed centrally through BioStar 2",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct! The stakeholder is conflating a per-device hardware spec with a system-level deployment constraint. In a distributed access control configuration, multiple FaceStation 2 units are networked via Ethernet and managed through BioStar 2 — each device controls its own door via its Relay output. The single Relay is not a barrier to multi-building deployment; it is the expected design for distributed systems. This is the kind of specification-to-configuration reasoning that prevents misaligned product decisions.",
+        "incorrect": "The single Relay output is a per-device spec, not a system-level limitation. In a distributed access control configuration, multiple FaceStation 2 devices are each connected to their own door via their individual Relay output, all managed centrally through BioStar 2 over Ethernet. Wiegand daisy-chaining is not the correct mechanism for multi-building scale. Review the distributed access control configuration and the Ethernet/Relay interface specifications together."
+      },
+      "references": [
+        {
+          "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+          "snippet": "Distributed Access Control Systems: Multiple FaceStation 2 devices are shown",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+          "page_number": 1,
+          "chunk_type": "figure"
+        },
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RS-485: 1ch Host or Slave (Selectable). Wiegand: 1ch In and 1ch Out. Relay: 1 Relay",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    }
+  ]
+}

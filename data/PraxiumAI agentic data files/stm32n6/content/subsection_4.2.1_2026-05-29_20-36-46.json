@@ -1,0 +1,396 @@
+{
+  "subsection_id": "4.2.1",
+  "subsection_title": "Map the ISP-to-NPU Data Path",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Trace the end-to-end data path from CSI-2 input through the DCMIPP ISP to the Neural-ART NPU, identifying each subsystem's role and the handoff mechanism between them",
+    "Confirm that the ISP-to-NPU transfer occurs via DMA without CPU involvement, and explain why this matters for recognition latency",
+    "Verify that the DCMIPP ISP's three parallel pipes can simultaneously produce multiple processed outputs from a single camera input stream"
+  ],
+  "content": {
+    "hook_sentence": "The Cortex-M55 never touches a single pixel on the path from your camera sensor to the Neural-ART NPU — and that design choice is what makes sub-100 ms face recognition latency achievable.",
+    "introduction": "When you architect a face recognition pipeline, every millisecond of CPU involvement in the image data path adds scheduling jitter and competes with inference workloads running on the same core. The STM32N6 camera subsystem is designed to eliminate that problem entirely: pixel data flows from the CSI-2 interface through the DCMIPP pixel pipeline and ISP, then lands in NPU-accessible memory via DMA, with no firmware intervention required for the transfer itself. Understanding exactly where each subsystem sits in that chain — and what it does to the data — lets you configure the pipeline correctly and reason about throughput margins before you write a line of code.",
+    "key_points": [
+      {
+        "point": "The DCMIPP groups the CSI-2 Host, the D-PHY, and the pixel pipeline into a single high-resolution camera path targeting sensors up to 5 Mpixels at 30 fps.",
+        "explanation": "When you select a camera sensor for your face recognition terminal, the DCMIPP is the subsystem you configure to receive its output. The DCMIPP path bundles the CSI-2 Host and PHY (which you worked with in the previous section) together with the pixel pipeline block that feeds the ISP. The high-resolution path supports sensors up to 5 Mpixels at 30 fps over CSI-2, which comfortably covers the resolution and frame rate needed for face capture. The CSI-2 serial interface within the DCMIPP accepts two data lanes at up to 2.5 Gbps per lane, and the maximum pixel rate it can sustain is 333 Mpixel/s for rawBayer 10-bit input — well above the 150 Mpixel/s your 5 Mpixel sensor at 30 fps actually demands. For RGB888 input the ceiling is lower at 200 Mpixel/s, because each pixel consumes more bits on the wire. This headroom matters: it means your CSI-2 link is not the bottleneck in the pipeline.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "da473eb1-8279-4b5c-8742-55824cdfa2ad",
+            "snippet": "a high resolution path, with the DCMIPP and a high frequency parallel interface or serial CSI-2 interface (RGB or rawBayer), targeting sensors up to 5 Mpixels at 30 fps",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_48/ChunkType.text_da473eb1-8279-4b5c-8742-55824cdfa2ad_0.png",
+            "page_number": 48,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "The DCMIPP path groups the DCMIPP pixel pipeline block, its included parallel interface, and the abutted CSI-2-Host and PHY.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+            "snippet": "Input rate: two data lanes at 2.5 Gbps/lane; Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "02134ca1-675c-488f-8cc1-a64fda059252",
+            "snippet": "Target sensors: 5 Mpixel at 30 fps max; Serial input: CSI-2 at 2.5 Gbps/lane on two data lanes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_02134ca1-675c-488f-8cc1-a64fda059252_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The ISP runs three parallel pipes on the same input stream, so a single camera feed can simultaneously produce multiple processed outputs with different formats, resolutions, and regions of interest.",
+        "explanation": "This is the architectural detail that makes your three-output face recognition pipeline feasible without a second sensor. The ISP processes one input stream through three independent pipes concurrently. Each pipe can apply its own combination of algorithms: bad pixel correction, decimation, black-level tuning, exposure control, demosaicing, column conversion, contrast adjustment, cropping, downsizing, ROI isolation, gamma correction, YUV conversion, and pixel packing. In practice, for a face recognition terminal you might configure one pipe to output a full-resolution frame for audit logging, a second pipe to produce a downscaled and gamma-corrected YUV frame sized for NPU inference, and a third pipe to extract a cropped region of interest for a liveness detection algorithm — all from the same rawBayer stream arriving over CSI-2, within the same frame period. The two application pipes described in the DCMIPP summary (with crop, downsize, gamma, and YUV conversion) are the output-facing pipes; the ISP itself provides the three-pipe processing architecture on the input side.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "The ISP provides processing of three parallel pipes on the same input stream. Supported algorithms are bad pixel, decimation, black-level tuning, exposure control, demosaicing, column conversion, contrast, cropping, downsizing, ROI isolation, gamma correction, YUV conversion, and pixel packer.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f6153906-0c8d-46df-931f-f627f2c4513f",
+            "snippet": "ISP (image signal processor) with three parallel pipes on the same input stream: bad pixel, decimation, black level, exposure, de-mosaic, column conversion, contrast, crop, downsize, ROI, gamma, YUV convention, pixel packer",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_f6153906-0c8d-46df-931f-f627f2c4513f_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "02134ca1-675c-488f-8cc1-a64fda059252",
+            "snippet": "Application pipes: two pipes with crop, downsize, gamma, YUV conversion, YUV420",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_02134ca1-675c-488f-8cc1-a64fda059252_0.png",
+            "page_number": 49,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The ISP output feeds the Neural-ART NPU directly via DMA, with no CPU involvement in the pixel transfer between subsystems.",
+        "explanation": "This is the critical handoff point in the pipeline. Once the ISP has processed a frame (or a pipe's output), the result is transferred to NPU-accessible memory by DMA — the Cortex-M55 does not read the pixel data, does not write it to an NPU input register, and does not coordinate the transfer in firmware. The CPU's role is limited to configuration: setting up the DMA descriptors, configuring the ISP pipe parameters, and triggering inference on the NPU. After that, the hardware handles the data movement autonomously. This design eliminates the two main CPU-induced latency risks in a biometric pipeline: scheduling jitter (the CPU might be preempted mid-transfer) and memory bandwidth contention (the CPU reading and writing large frame buffers competes with the NPU's own AXI accesses). For your face recognition terminal, this means the recognition latency budget is determined by sensor frame rate, ISP processing time, DMA transfer time, and NPU inference time — not by OS scheduling or interrupt latency on the Cortex-M55.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6c2e320d-ea97-4681-8ecc-c0737046be37",
+            "snippet": "The host configures the NPU subsystem through an AHB/AXI lite target port, connected to one of the ports of the system bus matrix/interconnect. The two controller ports of NPU are 64-bit wide controller AXI-4 interfaces that connect to the system bus matrix/Interconnect.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_6c2e320d-ea97-4681-8ecc-c0737046be37_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The NPU subsystem connects to shared system memory over 64-bit AXI-4 controller ports, and the CACHEAXI on STM32N6x7xx devices improves NPU data traffic performance by caching external memory accesses.",
+        "explanation": "When you size your memory layout for the inference pipeline, understanding how the NPU accesses data is essential. The NPU has two 64-bit AXI-4 controller ports that connect to the system bus matrix, giving it direct access to shared system memory — the same memory space the DMA writes ISP output into. This is what makes the DMA-to-NPU handoff work: the DMA writes processed frame data to a shared AXISRAM region, and the NPU reads it directly over AXI without any CPU mediation. On STM32N6x7xx devices (the variant with the Neural-ART NPU), the CACHEAXI is introduced on the AXI interconnect driven by the NPU to improve performance of data traffic by caching NPU data accessed in external memories. When you configure the CACHEAXI as SRAM, it is accessible by the NPU, the Cortex-M55, and other AXI controller peripherals. This is relevant when your model weights live in XSPI-mapped external flash: the CACHEAXI reduces the latency penalty of repeated weight fetches during inference, which directly affects throughput on weight-heavy layers.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "6c2e320d-ea97-4681-8ecc-c0737046be37",
+            "snippet": "The two controller ports of NPU are 64-bit wide controller AXI-4 interfaces that connect to the system bus matrix/Interconnect. The system memory is shared between the host subsystem and the NPU subsystem.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_6c2e320d-ea97-4681-8ecc-c0737046be37_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f73d2cb5-ee5b-4abe-945b-3dd6d72512b9",
+            "snippet": "The AXI cache (CACHEAXI) is introduced (only on STM32N6x7xx devices) on the AXI interconnect driven by the NPU (neural network) peripheral, to improve the performance of data traffic, by caching the NPU data accessed in the external memories.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_f73d2cb5-ee5b-4abe-945b-3dd6d72512b9_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "f73d2cb5-ee5b-4abe-945b-3dd6d72512b9",
+            "snippet": "When configured as an SRAM, the CACHEAXI can be accessed by the NPU, and also by the Cortex-M55 processor or by any AXI controller peripheral.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_f73d2cb5-ee5b-4abe-945b-3dd6d72512b9_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "A common architectural mistake is routing ISP output through the CPU before the NPU — this introduces scheduling jitter and wastes memory bandwidth that the NPU needs for inference.",
+        "explanation": "When you first integrate the camera and NPU subsystems, it can be tempting to write firmware that reads ISP output into a CPU-managed buffer and then explicitly triggers an NPU transfer. This pattern works functionally but breaks the real-time latency guarantee. The Cortex-M55 is also running your application logic, RTOS tasks, and potentially USB or Ethernet stacks. Any of those can preempt the pixel copy, adding variable delay between frame capture and inference start. The correct pattern is to configure the DMA to write ISP pipe output directly to the memory region the NPU will read from, then signal the NPU to begin inference via its AHB/AXI lite configuration port. The CPU's only involvement is the initial setup and the inference result readback — the pixel data path itself is entirely hardware-managed. Verify this in your design by confirming that no CPU read or write touches the frame buffer between ISP output and NPU input.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+            "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6c2e320d-ea97-4681-8ecc-c0737046be37",
+            "snippet": "The host configures the NPU subsystem through an AHB/AXI lite target port, connected to one of the ports of the system bus matrix/interconnect.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_32/ChunkType.text_6c2e320d-ea97-4681-8ecc-c0737046be37_0.png",
+            "page_number": 32,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition terminal must simultaneously output: (1) a full-resolution rawBayer frame to AXISRAM for audit logging, (2) a 224x224 YUV frame to the NPU input buffer for inference, and (3) a cropped 64x64 region to a secondary liveness detection buffer — all from a single 5 Mpixel sensor at 30 fps over CSI-2. A colleague says you need a second sensor or a second frame capture cycle to produce three outputs. Are they correct, and what does the ISP architecture tell you?",
+        "reveal": "Your colleague is wrong. The ISP provides three parallel pipes on the same input stream, so all three outputs can be produced from a single sensor within a single frame period. You configure each pipe independently: pipe 1 passes the full-resolution rawBayer data through with minimal processing for the audit log, pipe 2 applies demosaicing, downsizing to 224x224, gamma correction, and YUV conversion for the NPU inference input, and pipe 3 applies cropping to the face ROI coordinates and outputs the 64x64 region for liveness detection. The DMA then transfers each pipe's output to its respective destination buffer. The CSI-2 link at 2.5 Gbps per lane and the 333 Mpixel/s rawBayer 10-bit ceiling give you more than enough headroom for the 150 Mpixel/s your 5 Mpixel at 30 fps sensor produces. No second sensor, no second frame capture, no CPU involvement in the pixel path.",
+        "hint": "Focus on how many parallel pipes the ISP supports and whether they share the same input stream."
+      },
+      {
+        "prediction_prompt": "During a design review, a colleague proposes the following pipeline: CSI-2 receives rawBayer data, the ISP processes it, the Cortex-M55 reads the ISP output from AXISRAM, converts it to the NPU's expected format in software, writes it to a second buffer, then signals the NPU to start inference. They argue this gives you flexibility to add preprocessing steps in firmware. What is the architectural problem with this approach, and what does the STM32N6 datasheet tell you about the correct alternative?",
+        "reveal": "The proposed approach inserts the CPU into the pixel data path between the ISP and the NPU. This creates two problems. First, the Cortex-M55 must read and write the entire frame buffer on every inference cycle, consuming AXI bandwidth that the NPU needs for weight fetches and activation reads. Second, any RTOS task, interrupt handler, or peripheral service routine that preempts the CPU during the pixel copy adds variable latency to the inference start time, making your recognition latency non-deterministic. The datasheet is explicit: the ISP output can be directly fed via a DMA to the NPU. The correct architecture configures the DMA to transfer ISP pipe output directly to the NPU's input memory region, with the CPU only involved in initial configuration and result readback. If you need additional preprocessing, implement it as an ISP pipe algorithm (the ISP supports demosaicing, gamma, YUV conversion, cropping, and downsizing natively) rather than in firmware.",
+        "hint": "Think about what happens to recognition latency when the CPU is preempted mid-transfer."
+      }
+    ],
+    "summary": "The STM32N6 ISP-to-NPU data path runs entirely in hardware: CSI-2 delivers rawBayer pixels to the DCMIPP, the ISP processes them through up to three parallel pipes simultaneously, and DMA transfers the output directly to NPU-accessible shared memory — keeping the Cortex-M55 out of the pixel path and your recognition latency deterministic.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When your face recognition terminal needs to produce a full-resolution audit frame, a downscaled inference frame, and a cropped liveness frame from one sensor simultaneously, the correct approach is to configure ___ on the same input stream.",
+      "answer": "three parallel ISP pipes",
+      "distractors": [
+        "two DMA channels with interleaved transfers",
+        "a second camera sensor via DCMI",
+        "sequential pipe reconfiguration between frames"
+      ],
+      "explanation": "The ISP provides three parallel pipes on the same input stream, making simultaneous multi-output processing from a single sensor architecturally native — no second sensor or sequential recapture is needed."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each pipeline design decision to its correct architectural consequence for the ISP-to-NPU data path:",
+      "pairs": [
+        {
+          "left": "CPU reads ISP output and writes it to the NPU input buffer in firmware",
+          "right": "Adds scheduling jitter and AXI bandwidth contention on every inference cycle"
+        },
+        {
+          "left": "DMA transfers ISP pipe output directly to NPU-accessible shared memory",
+          "right": "Keeps the pixel data path hardware-managed and recognition latency deterministic"
+        },
+        {
+          "left": "CPU configures DMA descriptors and ISP pipe parameters at startup",
+          "right": "Correct and expected CPU role — setup only, not per-frame data movement"
+        }
+      ],
+      "explanation": "The ISP output feeds the NPU via DMA without CPU involvement in the data transfer. The CPU's role is limited to initial configuration and inference result readback, not per-frame pixel movement."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the maximum frame buffer size or maximum ISP output resolution, making it impossible to size AXISRAM allocations for the face capture pipeline from the datasheet alone.",
+    "No application note, STM32Cube firmware example, or HAL API reference for configuring the DCMIPP ISP pipes and DMA descriptors for the camera-to-NPU pipeline is referenced in the available document chunks.",
+    "The datasheet does not clarify whether all three ISP pipes can write to separate DMA destinations simultaneously, or whether there are constraints on concurrent DMA channel usage across pipes.",
+    "The specific HPDMA vs. GPDMA selection guidance for the ISP-to-NPU transfer is not addressed in the available chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are architecting the camera-to-inference pipeline for a face recognition access control terminal using the STM32N6. You need to confirm that preprocessed image data reaches the Neural-ART NPU without creating a CPU bottleneck that would delay recognition latency.",
+        "question_text": "Based on the STM32N6 datasheet, how does the ISP deliver processed frame data to the Neural-ART NPU in the recommended pipeline configuration?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The Cortex-M55 reads ISP output from a frame buffer in AXISRAM and writes it to the NPU input register, coordinating the transfer in firmware",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The ISP output is fed directly to the NPU via DMA, bypassing the CPU for the data transfer between subsystems",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The CSI-2 interface streams pixel data directly into the NPU input buffer over the AXI interconnect, skipping ISP processing for latency-critical paths",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The STM32N6 datasheet states: 'The ISP output can be directly fed via a DMA to the NPU.' This CPU-offloaded path is the key architectural feature that enables real-time inference without software-managed data movement.",
+        "incorrect": "The datasheet explicitly describes a DMA-based handoff from ISP to NPU — the CPU is not involved in the data transfer, and the CSI-2 interface feeds the DCMIPP/ISP pipeline rather than the NPU directly. Review Section 3.25 of the STM32N6 datasheet on the camera subsystem."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP output can be directly fed via a DMA to the NPU.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the camera subsystem specification for your STM32N6-based face recognition terminal. Your camera sensor outputs a rawBayer 10-bit stream over a two-lane CSI-2 interface, and you need to verify that the DCMIPP can handle the incoming data rate before committing to this sensor.",
+        "question_text": "According to the STM32N6 datasheet, what is the maximum pixel rate the DCMIPP CSI-2 interface supports for a rawBayer 10-bit input stream?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Up to 200 Mpixel/s, matching the maximum rate supported for RGB888 input on the same interface",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Up to 120 Mpixel/s, limited by the parallel interface clock rate shared with the CSI-2 path",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Up to 333 Mpixel/s, which is higher than the RGB888 rate due to the lower bit depth per pixel",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The datasheet specifies 'Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10' on the CSI-2 interface. The higher pixel rate for rawBayer 10 reflects the lower bandwidth per pixel compared to RGB888, allowing more pixels per second over the same 2.5 Gbps/lane link.",
+        "incorrect": "The 120 MHz figure applies to the parallel interface clock, not the CSI-2 pixel rate. The CSI-2 pixel rate differs by format: 200 Mpixel/s for RGB888 and 333 Mpixel/s for rawBayer 10. Review Section 3.25.2 of the STM32N6 datasheet on DCMIPP characteristics."
+      },
+      "references": [
+        {
+          "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+          "snippet": "Pixel rate: up to 200 Mpixel/s for RGB888, up to 333 Mpixel/s for rawBayer 10",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+          "page_number": 49,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O2",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are designing the ISP processing stage for a face recognition terminal that must simultaneously produce a full-resolution frame for storage, a downscaled and gamma-corrected YUV frame for NPU inference, and a cropped region-of-interest for a secondary liveness detection algorithm — all from the same camera input stream.",
+        "question_text": "Based on the STM32N6 ISP architecture, which statement best describes whether this three-output processing requirement can be met from a single camera input stream?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The ISP supports two application pipes with crop and downsize, so a third simultaneous output would require a second camera sensor connected via the DCMI parallel interface",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The ISP provides three parallel pipes on the same input stream, making it architecturally capable of producing three simultaneous processed outputs from one sensor",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The ISP processes one pipe at a time and must be reconfigured between frames, so three outputs would require three consecutive frame captures from the same sensor",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The datasheet states the ISP 'provides processing of three parallel pipes on the same input stream,' which directly supports producing multiple simultaneous outputs — such as a full-resolution frame, a downscaled inference input, and a cropped ROI — from a single camera sensor without additional hardware.",
+        "incorrect": "The ISP is explicitly described as supporting three parallel pipes on the same input stream, not sequential processing or a two-pipe limit. The two-pipe description in the DCMIPP summary refers to application pipes specifically, while the full ISP supports three. Review Section 3.25 and the ISP feature list in the STM32N6 datasheet."
+      },
+      "references": [
+        {
+          "chunk_id": "f1881246-59fb-4b12-86b3-74da714e3761",
+          "snippet": "The ISP provides processing of three parallel pipes on the same input stream.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_f1881246-59fb-4b12-86b3-74da714e3761_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "f6153906-0c8d-46df-931f-f627f2c4513f",
+          "snippet": "ISP (image signal processor) with three parallel pipes on the same input stream: bad pixel, decimation, black level, exposure, de-mosaic, column conversion, contrast, crop, downsize, ROI, gamma, YUV convention, pixel packer",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_f6153906-0c8d-46df-931f-f627f2c4513f_0.png",
+          "page_number": 0,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are documenting the end-to-end data path for your STM32N6-based face recognition terminal for a design review. A colleague questions whether the CSI-2 interface bandwidth is sufficient for a high-resolution sensor, noting that the two-lane link must carry the full uncompressed pixel stream.",
+        "question_text": "According to the STM32N6 datasheet, what is the maximum per-lane data rate of the DCMIPP CSI-2 interface operating in high-speed mode?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "1.0 Gbps per lane, with a combined two-lane throughput of 2.0 Gbps in high-speed mode",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "2.5 Gbps per lane, giving a combined two-lane throughput of 5.0 Gbps in high-speed mode",
+          "is_correct": true,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "120 MHz per lane, equivalent to the parallel interface clock rate used as the CSI-2 reference",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The datasheet specifies 'Input rate: two data lanes at 2.5 Gbps/lane' and 'Up to 2.5 Gbit/s per lane in high-speed (HS) mode,' giving a combined bandwidth of 5.0 Gbps across both lanes — sufficient for high-resolution sensors at high frame rates.",
+        "incorrect": "The 120 MHz figure is the parallel interface pixel clock limit, not the CSI-2 lane rate. The CSI-2 interface supports up to 2.5 Gbps per lane in high-speed mode. Review Section 3.25.2 of the STM32N6 datasheet on the DCMIPP CSI-2 serial interface features."
+      },
+      "references": [
+        {
+          "chunk_id": "a3f9307f-4e53-400b-b536-6b0af54c97f8",
+          "snippet": "Input rate: two data lanes at 2.5 Gbps/lane",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_49/ChunkType.text_a3f9307f-4e53-400b-b536-6b0af54c97f8_0.png",
+          "page_number": 49,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "cb725a80-748c-4fd1-9162-17620d84114a",
+          "snippet": "Up to 2.5 Gbit/s per lane in high-speed (HS) mode",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_50/ChunkType.text_cb725a80-748c-4fd1-9162-17620d84114a_0.png",
+          "page_number": 50,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_2"
+    }
+  ]
+}

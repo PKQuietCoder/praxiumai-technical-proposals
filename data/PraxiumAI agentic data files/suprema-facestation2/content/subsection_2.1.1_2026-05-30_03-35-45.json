@@ -1,0 +1,282 @@
+{
+  "subsection_id": "2.1.1",
+  "subsection_title": "Counter Face Spoofing Concerns with Specification Evidence",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Counter stakeholder spoofing concerns by citing FaceStation 2's live face detection, IR-based image analysis, and Android 5.0 security layer — connecting each feature to the specific vulnerability raised",
+    "Distinguish what each security layer addresses so you can match the right specification evidence to the right objection"
+  ],
+  "content": {
+    "hook_sentence": "A printed photo or an LCD screen showing a face is all it takes to defeat many face recognition systems — and your security stakeholders already know this.",
+    "introduction": "When a security engineer or customer raises spoofing concerns in a product review, a vague reassurance about 'advanced algorithms' will not hold up. FaceStation 2 has three documented security features that directly address the most common attack vectors, and your job is to map each feature to the specific vulnerability the stakeholder named — not recite a feature list. This subsection gives you the specification evidence and the framing to counter spoofing objections with precision.",
+    "key_points": [
+      {
+        "point": "Live face detection blocks the two most common spoofing attacks: printed images and LCD displays.",
+        "explanation": "The most frequently cited spoofing concern is presentation attack — someone holding up a photograph or an LCD screen showing an enrolled user's face. FaceStation 2 addresses this directly through **live face detection**, which uses IR-based image analysis to distinguish a live face from a flat, static representation. When you counter this objection, name the attack vector the stakeholder raised, then cite the feature that defeats it: IR-based image analysis detects the depth, texture, and thermal signature characteristics of a live face that a printed image or LCD cannot replicate. This is not a software heuristic — it is a hardware-level imaging capability built into the device's dual-camera array.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Live Face Detection: Supported",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Android 5.0 Lollipop adds a platform-level security layer independent of biometric matching.",
+        "explanation": "Spoofing concerns are not limited to the biometric capture step. Stakeholders with a security background will also ask about the device's operating system integrity — whether the platform itself can be compromised to bypass authentication logic or manipulate access logs. FaceStation 2 runs on Android 5.0 Lollipop, which provides enhanced security at the OS level. When a stakeholder raises concerns about platform-level vulnerabilities or unauthorized software modification, cite this directly: the device's security posture is not solely dependent on the biometric algorithm — it is reinforced by the Android 5.0 security architecture. This matters in high-security deployment discussions because it separates the biometric layer from the platform layer, giving you two independent lines of defense to reference.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Enhanced security by Android 5.0 Lollipop",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "High-quality image logging provides the audit trail that security and compliance stakeholders require.",
+        "explanation": "A third concern that surfaces in high-security deployments is auditability: if a spoofing attempt occurs, can you prove it happened and identify the actor? FaceStation 2 addresses this through a **high-quality image log** that captures face images at the point of authentication. When a stakeholder asks 'what happens if someone does get through?' or raises concerns about forensic evidence, the image log is your answer. It creates a verifiable record of every authentication event — successful or not — that security teams and compliance auditors can review. Note the scope of what the specification supports: the log captures high-quality images, not just event metadata. That distinction matters when stakeholders are evaluating whether the audit trail will hold up in an incident investigation.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "High quality Image log",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Max. Log: 5,000,000 (text), 50,000 (image)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Match each security feature to the specific vulnerability raised — do not recite all three features for every objection.",
+        "explanation": "The most common mistake in a product review is responding to a narrow spoofing question with a full feature dump. If a security engineer asks specifically about photo spoofing, leading with Android 5.0 or image logging before addressing IR-based live face detection signals that you do not understand the concern. Use this mapping when you respond: - **Printed image or LCD spoofing attack** → live face detection via IR-based image analysis - **Platform integrity or OS-level compromise** → Android 5.0 Lollipop security layer - **Audit trail, forensic evidence, or compliance** → high-quality image log When a stakeholder raises multiple concerns at once — as often happens in a product review — address them in the order raised, naming the feature and connecting it explicitly to the vulnerability before moving to the next. This structure demonstrates command of the specification, not just familiarity with it.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A security engineer says: 'Face recognition systems are notoriously easy to fool — someone could just hold up a photo or use an LCD screen showing a face to gain unauthorized access. We can't recommend this for a high-security deployment.' What do you say, and in what order do you address the concerns?",
+        "reveal": "The engineer has raised two related but distinct concerns: (1) presentation attacks using printed images or LCD screens, and (2) the broader suitability for high-security deployment.\n\nYour response addresses them in order:\n\nFirst, counter the spoofing attack directly: FaceStation 2 uses IR-based image analysis as part of its live face detection capability. This specifically prevents spoofing by printed images and LCDs — the two attack vectors the engineer named. A flat image, whether printed or displayed on a screen, does not produce the IR response of a live face, so the device rejects it at the capture stage.\n\nSecond, address the high-security deployment concern: the device's security posture is not limited to biometric matching. Android 5.0 Lollipop provides an additional platform-level security layer, and a high-quality image log creates a verifiable audit trail for every authentication event — up to 50,000 image records.\n\nWhat you do NOT do: lead with processor specs, user capacity, or matching speed. None of those address the vulnerability the engineer raised, and citing them signals a mismatch between the concern and your response.",
+        "hint": "Think about which feature directly defeats the attack method the engineer described, then consider what else a 'high-security deployment' evaluation typically requires beyond the biometric layer."
+      },
+      {
+        "prediction_prompt": "After you address the spoofing concern, a compliance officer in the same meeting asks: 'If a spoofing attempt does occur, what evidence does the system capture that we could use in an investigation?' Which specification do you cite, and what does it tell the compliance officer?",
+        "reveal": "Cite the high-quality image log. FaceStation 2 captures face images at authentication events and stores up to 50,000 image records (in addition to 5,000,000 text log entries).\n\nFor the compliance officer, the key point is not just that a log exists — it is that the log captures images, not only event metadata. That means an investigator reviewing a suspected spoofing incident has visual evidence of what was presented to the camera, not just a timestamp and an access result.\n\nFrame it this way: 'The device maintains a high-quality image log of authentication events. If a spoofing attempt occurs, security teams have image-level evidence to review — not just access records.'",
+        "hint": "The compliance officer is asking about forensic evidence quality, not just whether logging is enabled."
+      }
+    ],
+    "summary": "When a stakeholder raises face spoofing concerns, counter with three specification-grounded features: IR-based live face detection (defeats printed image and LCD attacks), Android 5.0 Lollipop (platform-level security hardening), and a high-quality image log (audit trail for incident investigation). Match each feature to the specific vulnerability raised — do not recite all three for every question.",
+    "figures": [
+      {
+        "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db",
+        "after_key_point": 0,
+        "caption": "FaceStation 2's dual-camera array — visible at the bottom of the device — houses the IR imaging hardware that enables live face detection. The two lenses work together to capture the IR response that distinguishes a live face from a printed image or LCD display.",
+        "alt_text": "Front view of the FaceStation 2 device, a black rectangular terminal with a 4-inch color TFT LCD screen showing the Face Station 2 logo with a colorful geometric human head silhouette on the left and a time display reading 09:15 AM on 03/24 FRI on the right. Below the screen, two camera lenses are mounted side by side in a horizontal housing. The Suprema brand name appears at the bottom of the device.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When a stakeholder specifically asks how FaceStation 2 prevents someone from using a photograph to gain access, the most directly relevant feature to cite is ___.",
+      "answer": "IR-based live face detection",
+      "distractors": [
+        "Android 5.0 security layer",
+        "high-quality image log",
+        "dual-camera hardware"
+      ],
+      "explanation": "IR-based image analysis is the feature that specifically defeats printed image and LCD spoofing attacks at the capture stage — it is the direct counter to the attack method described. The other features address platform integrity and audit trails, not the presentation attack itself."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each stakeholder concern to the FaceStation 2 security feature that most directly addresses it:",
+      "pairs": [
+        {
+          "left": "Someone could hold up a photo of an enrolled user to gain access",
+          "right": "Live face detection via IR-based image analysis"
+        },
+        {
+          "left": "We need evidence of who presented their face during a security incident",
+          "right": "High-quality image log"
+        },
+        {
+          "left": "The device's operating system could be compromised to bypass authentication",
+          "right": "Android 5.0 Lollipop security layer"
+        }
+      ],
+      "explanation": "Each security feature targets a distinct layer of the attack surface: IR-based detection stops presentation attacks at capture, the image log supports forensic investigation after an event, and Android 5.0 hardens the platform against OS-level compromise. Matching the right feature to the right concern is what makes a stakeholder response credible."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not describe the technical mechanism by which IR-based image analysis distinguishes a live face from a printed image or LCD at a hardware or algorithm level — SME input would strengthen the technical depth of the live face detection explanation.",
+    "The document does not specify which Android 5.0 security features are active on FaceStation 2 or how they are configured — the current content is limited to what the specification states ('enhanced security by Android 5.0 Lollipop') and does not elaborate further.",
+    "No information is available in the source chunks about whether the image log captures failed authentication attempts specifically, or only successful ones — this distinction could be relevant for compliance stakeholders and should be confirmed with SME or additional documentation."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a product review meeting, a security engineer raises a concern: 'Face recognition systems are notoriously easy to fool — someone could just hold up a photo or use an LCD screen showing a face to gain unauthorized access. We can't recommend this for a high-security deployment.'",
+        "question_text": "How should you counter this concern using FaceStation 2's documented security features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Explain that FaceStation 2 uses IR-based image analysis to detect live faces and reject printed images or LCD displays, is hardened by Android 5.0 Lollipop's security layer, and maintains a high-quality image log — each directly addressing the spoofing and audit trail concerns raised.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Explain that FaceStation 2 uses a 1.4 GHz quad-core processor and 8GB flash memory to run advanced algorithms that make spoofing attempts computationally infeasible for standard attack methods.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Explain that FaceStation 2 supports multi-factor authentication by combining face recognition with RFID card credentials, so a spoofed face alone cannot grant access without a valid card present.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The specification directly documents three security features that address spoofing: live face detection via IR-based image analysis (prevents printed image and LCD attacks), the Android 5.0 Lollipop security layer (platform-level hardening), and high-quality image logging (audit trail). Citing all three and connecting each to the concern raised is the evidence-based response.",
+        "incorrect": "The hardware specs (processor, memory) and multi-factor credential options are real FaceStation 2 features, but neither directly addresses the spoofing vulnerability the engineer raised. The documented anti-spoofing response relies on live face detection via IR-based image analysis, the Android 5.0 security layer, and image logging. Review the Enhanced Security section of the FaceStation 2 specification."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A facilities manager at a prospective customer site asks whether FaceStation 2 can be deployed at a covered outdoor entrance that receives direct sunlight during peak hours, with measured illuminance readings reaching approximately 22,000 lx at midday.",
+        "question_text": "Based on FaceStation 2's operating illuminance specification, what is the most accurate response to give the facilities manager?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Confirm the deployment is not supported, because outdoor environments introduce variables beyond illuminance — such as temperature and moisture — that invalidate the illuminance specification.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Confirm the deployment is supported, because 22,000 lx falls within FaceStation 2's 0–25,000 lx operating illuminance range, which is designed to cover conditions from complete darkness through high-intensity indoor and comparable outdoor lighting.",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Advise the facilities manager to retest at peak illuminance above 25,000 lx before confirming suitability, since midday sunlight at covered entrances frequently exceeds the device's rated maximum.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. FaceStation 2's operating illuminance range is 0–25,000 lx, explicitly described as covering complete darkness to all indoor lighting conditions. At 22,000 lx, the described environment falls within the supported range, making the deployment viable based on this specification. Citing the range and confirming the environment falls within it is the evidence-based response.",
+        "incorrect": "The specification states FaceStation 2 operates from 0 lx to 25,000 lx — the highest operating illuminance available. At 22,000 lx, the described environment is within the supported range. Introducing unsupported caveats about outdoor variables or advising retesting above 25,000 lx goes beyond what the specification states and could create unnecessary doubt. Review the Highest Operating Illuminance section of the FaceStation 2 specification."
+      },
+      "references": [
+        {
+          "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+          "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a deployment review for a hospital access control project, an operations stakeholder raises a concern: 'Our staff includes employees in wheelchairs and workers of varying heights. A fixed-height face recognition terminal won't work for everyone — we'll need a different solution.'",
+        "question_text": "Which response most accurately uses FaceStation 2's ergonomic specifications to address this objection?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Acknowledge the concern and recommend pairing FaceStation 2 with an adjustable mounting post, since the device itself does not include height adjustment features in its standard configuration.",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Acknowledge the concern and note that FaceStation 2's intuitive Android 5.0 GUI and improved face enrollment procedure reduce interaction time, minimizing the physical strain of reaching the terminal for users of varying heights.",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Acknowledge the concern and explain that FaceStation 2 supports an extended height range of 145cm–210cm and includes a tilt-type bracket designed specifically for wheelchair users and children, directly addressing the diverse user population described.",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The specification documents two ergonomic features that directly address this objection: the 145cm–210cm extended height range accommodates users of varying heights, and the tilt-type bracket is explicitly designed for wheelchair users and children. Citing both features and connecting each to the specific populations raised is the evidence-based response.",
+        "incorrect": "The specification documents specific ergonomic design features for this exact concern: a 145cm–210cm height range and a tilt-type bracket designed for wheelchair users and children. Recommending third-party mounting solutions or citing GUI improvements does not address the physical accessibility concern using the product's documented capabilities. Review the Ergonomics and User Convenience section of the FaceStation 2 specification."
+      },
+      "references": [
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    }
+  ]
+}

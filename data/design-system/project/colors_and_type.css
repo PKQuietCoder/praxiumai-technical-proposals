@@ -1,0 +1,163 @@
+/* ============================================================================
+   INFINEON DIGITAL DESIGN SYSTEM (DDS) — Colors & Type
+   Source of truth: Infineon DDS (public). Typeface: Source Sans 3.
+   Primary brand digital color: "Ocean" teal-green (#0A8276).
+   NOTE: Secondary/neutral hex values are matched to the DDS by eye and are
+   very close; connect the Infineon GitHub token repos to swap in exact values.
+   ============================================================================ */
+
+/* Source Sans 3 — Infineon's official UI typeface (Regular 400, Semibold 600,
+   Bold 700, plus italics). Served from Google Fonts CDN; the DDS ships the same
+   family via @infineon/design-system-tokens for local hosting. */
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+
+:root {
+  /* ----------------------------------------------------------------------
+     BRAND — Ocean (primary). The signature Infineon digital action color.
+     ---------------------------------------------------------------------- */
+  --ocean-50:  #E6F2F1;
+  --ocean-100: #C0DFDB;
+  --ocean-200: #84C2BA;
+  --ocean-300: #3FA197;
+  --ocean-400: #0A8276;   /* BASE — primary buttons, links, focus */
+  --ocean-500: #0A8276;
+  --ocean-600: #086A60;   /* hover */
+  --ocean-700: #06544C;   /* pressed */
+  --ocean-800: #043F39;
+
+  /* ----------------------------------------------------------------------
+     BRAND — secondary accents (Infineon marketing palette)
+     ---------------------------------------------------------------------- */
+  --engineering-blue: #08266E;  /* corporate logo blue — accents, deep fills */
+  --engineering-blue-700: #0A1A78;
+  --green:  #5A9E1B;            /* fresh / energy green */
+  --green-600: #4A831A;
+  --orange: #FFB600;            /* warm highlight */
+  --orange-600: #E89A00;
+  --berry:  #B0228C;            /* magenta accent */
+  --berry-600: #8E1B70;
+
+  /* ----------------------------------------------------------------------
+     SEMANTIC / FUNCTIONAL
+     ---------------------------------------------------------------------- */
+  --success: #009E49;
+  --success-bg: #E6F5EC;
+  --warning: #F39200;
+  --warning-bg: #FEF3E0;
+  --error:   #CD002F;
+  --error-bg: #FBE6EB;
+  --info:    var(--ocean-400);
+  --info-bg: var(--ocean-50);
+
+  /* ----------------------------------------------------------------------
+     NEUTRALS — cool grey scale (UI chrome, borders, text)
+     ---------------------------------------------------------------------- */
+  --white:   #FFFFFF;
+  --grey-50:  #F7F9FA;
+  --grey-100: #EDF1F2;
+  --grey-200: #DDE3E6;
+  --grey-300: #C5CDD1;
+  --grey-400: #9AA5AB;
+  --grey-500: #6B7780;
+  --grey-600: #4A555C;
+  --grey-700: #2E373D;
+  --grey-800: #1B2226;
+  --black:   #0A0E11;
+
+  /* ----------------------------------------------------------------------
+     SEMANTIC SURFACES & TEXT
+     ---------------------------------------------------------------------- */
+  --bg-page:    var(--white);
+  --bg-subtle:  var(--grey-50);
+  --bg-muted:   var(--grey-100);
+  --bg-inverse: var(--engineering-blue);
+
+  --fg-1: #1B2226;   /* primary text — near-black */
+  --fg-2: #4A555C;   /* secondary text */
+  --fg-3: #6B7780;   /* tertiary / muted / captions */
+  --fg-on-dark: #FFFFFF;
+  --fg-on-dark-2: #C5CDD1;
+
+  --border:        var(--grey-200);
+  --border-strong: var(--grey-300);
+  --border-focus:  var(--ocean-400);
+  --link:          var(--ocean-400);
+  --link-hover:    var(--ocean-600);
+
+  /* ----------------------------------------------------------------------
+     TYPE — Source Sans 3
+     ---------------------------------------------------------------------- */
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Type scale — display-01..05 (headings), body-01..04, label/caption.
+     DDS pairs a semibold heading register with a regular body register. */
+  --display-01: 600 44px/1.15 var(--font-sans);
+  --display-02: 600 36px/1.18 var(--font-sans);
+  --display-03: 600 28px/1.22 var(--font-sans);
+  --display-04: 600 22px/1.30 var(--font-sans);
+  --display-05: 600 18px/1.35 var(--font-sans);
+  --body-01: 400 18px/1.55 var(--font-sans);
+  --body-02: 400 16px/1.55 var(--font-sans);   /* base */
+  --body-03: 400 14px/1.50 var(--font-sans);
+  --body-04: 400 12px/1.45 var(--font-sans);
+  --label:   600 14px/1.20 var(--font-sans);
+  --caption: 400 12px/1.35 var(--font-sans);
+  --overline: 600 12px/1.20 var(--font-sans);  /* uppercase, tracked */
+
+  /* ----------------------------------------------------------------------
+     SPACING — 4px base grid
+     ---------------------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ----------------------------------------------------------------------
+     RADII — DDS uses small, restrained rounding
+     ---------------------------------------------------------------------- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+
+  /* ----------------------------------------------------------------------
+     ELEVATION — subtle, cool-tinted shadows
+     ---------------------------------------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(10, 30, 40, 0.08);
+  --shadow-2: 0 2px 8px rgba(10, 30, 40, 0.10);
+  --shadow-3: 0 8px 24px rgba(10, 30, 40, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(10, 130, 118, 0.30);
+
+  --duration-fast: 120ms;
+  --duration: 200ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   SEMANTIC ELEMENT DEFAULTS — opt-in via .dds-prose or use the vars directly
+   ============================================================================ */
+.dds-type-display-01 { font: var(--display-01); letter-spacing: -0.01em; color: var(--fg-1); }
+.dds-type-display-02 { font: var(--display-02); letter-spacing: -0.01em; color: var(--fg-1); }
+.dds-type-display-03 { font: var(--display-03); color: var(--fg-1); }
+.dds-type-display-04 { font: var(--display-04); color: var(--fg-1); }
+.dds-type-display-05 { font: var(--display-05); color: var(--fg-1); }
+.dds-type-body-01 { font: var(--body-01); color: var(--fg-2); }
+.dds-type-body-02 { font: var(--body-02); color: var(--fg-2); }
+.dds-type-body-03 { font: var(--body-03); color: var(--fg-2); }
+.dds-type-label { font: var(--label); color: var(--fg-1); }
+.dds-type-overline { font: var(--overline); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+.dds-link { color: var(--link); text-decoration: none; }
+.dds-link:hover { color: var(--link-hover); text-decoration: underline; }

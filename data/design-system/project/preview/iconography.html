@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);background:var(--white);color:var(--fg-1);padding:20px 22px;}
+  h4{font:var(--overline);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin:0 0 14px;}
+  .row{display:flex;gap:26px;}
+  .ic{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--fg-2);}
+  .ic svg{width:28px;height:28px;stroke-width:1.75;}
+  .ic span{font:var(--caption);color:var(--fg-3);}
+  .note{margin-top:16px;font:var(--caption);color:var(--fg-3);max-width:560px;}
+</style></head>
+<body>
+  <h4>Iconography — line, ~1.75px stroke, 24px grid</h4>
+  <div class="row">
+    <div class="ic"><i data-lucide="cpu"></i><span>cpu</span></div>
+    <div class="ic"><i data-lucide="zap"></i><span>zap</span></div>
+    <div class="ic"><i data-lucide="shield-check"></i><span>shield</span></div>
+    <div class="ic"><i data-lucide="car"></i><span>car</span></div>
+    <div class="ic"><i data-lucide="leaf"></i><span>leaf</span></div>
+    <div class="ic"><i data-lucide="radio"></i><span>radio</span></div>
+    <div class="ic"><i data-lucide="search"></i><span>search</span></div>
+    <div class="ic"><i data-lucide="download"></i><span>download</span></div>
+    <div class="ic"><i data-lucide="arrow-right"></i><span>arrow</span></div>
+  </div>
+  <p class="note">Substitution: Lucide (CDN) stands in for the official DDS icon set — same outline style &amp; stroke weight. Swap when DDS assets are available.</p>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

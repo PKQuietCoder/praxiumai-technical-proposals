@@ -1,0 +1,447 @@
+{
+  "subsection_id": "5.1.1",
+  "subsection_title": "Apply Specifications Across a Full Stakeholder Scenario",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Apply FaceStation 2 user capacity figures to resolve a large-scale deployment inquiry, distinguishing 1:1 from 1:N matching limits",
+    "Assess deployment environment suitability by mapping a described lighting condition to the 0–25,000 lx operating range",
+    "Counter a spoofing objection by connecting live face detection and IR-based image analysis to the specific vulnerability raised",
+    "Select the correct model variant (FS2-D or FS2-AWB) by mapping credential and connectivity requirements to model-specific specifications",
+    "Respond to an accessibility objection by citing the 145cm–210cm height range and tilt-type bracket as design features for diverse user populations"
+  ],
+  "content": {
+    "hook_sentence": "A stakeholder who walks out of a product review unconvinced has already started looking for an alternative — and the gap between a persuasive answer and a vague one is almost always a single, precisely cited specification.",
+    "introduction": "Every concept you've built across this course converges here. In real cross-functional discussions, stakeholders don't ask about one specification at a time — they bring compound scenarios where performance, security, credential compatibility, configuration topology, and accessibility concerns land in the same conversation. This section puts you in the chair as Hardware Product Owner and runs you through the full range of stakeholder challenges you're most likely to face. Your job is to pull the right specification, connect it directly to the concern raised, and close the question — without hedging and without reaching for documentation.",
+    "key_points": [
+      {
+        "point": "User capacity questions require you to distinguish 1:1 from 1:N matching limits — not just cite the larger number.",
+        "explanation": "When a stakeholder asks whether FaceStation 2 can handle a large user base, the instinct is to lead with 30,000 users. That number is accurate, but only for 1:1 verification mode, where the device matches a presented face against a single enrolled template. The 1:N identification mode — where the device searches the full enrolled database without a claimed identity — caps at 4,000 users. For a face-only deployment, this distinction is decisive. If users present no card or PIN, the device must run 1:N identification. A 28,000-employee campus in face-only mode exceeds the 4,000-user 1:N limit, even though it falls within the 30,000-user 1:1 ceiling. When you answer this question, you need to name both figures and specify which mode the deployment actually requires — otherwise you're giving a technically accurate answer that leads to the wrong conclusion.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "Matching Speed: 1:4,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Max. User: 30,000 (1:1), 4,000(1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Lighting suitability questions are answered by mapping the described environment to the 0–25,000 lx operating range — then stating explicitly whether it falls inside or outside.",
+        "explanation": "FaceStation 2 operates across 0 lx (complete darkness) to 25,000 lx, which Suprema describes as the highest operating illuminance available and sufficient to cover all indoor lighting conditions. When a stakeholder describes a specific environment — a covered outdoor entrance at 20,000 lx in morning sunlight, for example — your answer has two required parts: cite the supported range, then explicitly confirm whether the described condition is within it. Avoid vague reassurances like \"it should be fine outdoors.\" The specification gives you a precise upper bound. A 20,000 lx environment is within the 25,000 lx ceiling; a deployment in direct equatorial midday sun that exceeds 25,000 lx would not be. Stakeholders asking this question need a clear in-range or out-of-range verdict, not a general statement about the device's lighting performance.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+            "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Spoofing objections require you to name all three security mechanisms and connect each one to the specific attack vector the stakeholder described.",
+        "explanation": "When a security engineer raises spoofing as a concern, a generic response about \"advanced biometrics\" will not close the objection. FaceStation 2 addresses spoofing through three documented mechanisms: live face detection using IR-based image analysis, which distinguishes real faces from printed images and LCD screens; the Android 5.0 Lollipop security platform, which adds an OS-level security layer; and high-quality image logging, which creates an auditable record of every authentication event. The key discipline here is connecting each feature to the attack vector the stakeholder named. If the concern is photo spoofing, lead with IR-based live face detection — that is the mechanism that directly defeats it. If the concern is audit accountability, the image log is your answer. Citing all three features without connecting them to the stated concern reads as a recitation, not a rebuttal. Match the feature to the threat.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Model variant selection is driven by the credential and connectivity requirements the customer states — map each requirement to the spec table before recommending FS2-D or FS2-AWB.",
+        "explanation": "The two model variants share most specifications, but diverge on RF credential support and wireless connectivity. FS2-D supports 125kHz EM and 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, and NFC. FS2-AWB adds HID Prox at 125kHz, iCLASS SE/SR/Seos, BLE at 2.4GHz, and Wi-Fi (IEEE 802.11 b/g). When a customer specifies HID Prox cards, iCLASS credentials, BLE mobile access, or wireless connectivity, FS2-AWB is the only viable choice — FS2-D does not support any of those. When a customer's requirements are satisfied by MIFARE-family cards and wired Ethernet, FS2-D is sufficient. Your recommendation must name the specific credential or connectivity requirement that drove the selection, not just assert that one model is \"better.\" A university running HID Prox infrastructure that also needs Wi-Fi connectivity requires FS2-AWB on two independent grounds — cite both.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Accessibility objections are resolved by citing the 145cm–210cm height range and tilt-type bracket, then connecting each feature to the specific user population the stakeholder named.",
+        "explanation": "When a facilities director raises concerns about wheelchair users or children, the response must be grounded in documented design features — not general claims about usability. FaceStation 2 supports an extended installation height range of 145cm to 210cm and includes a tilt-type bracket specifically designed for wheelchair users and children. The discipline here mirrors the spoofing response: connect each feature to the population concern raised. The tilt-type bracket directly addresses wheelchair users by allowing the device to angle toward a seated user. The extended height range addresses the full spectrum from children to tall adults. Do not claim ADA compliance or any certification not stated in the specification — the spec supports the design features, not a compliance certification. Overstating the claim creates a liability; the documented features are sufficient to address the concern as raised.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+            "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A Head of Sales brings you this scenario mid-sprint review: 'We have a prospect with 28,000 employees who want face-only access — no cards, no PINs. They asked if FaceStation 2 can handle it.' How do you respond, and what is the critical distinction you must make?",
+        "reveal": "The correct response confirms that FaceStation 2 supports up to 30,000 users in 1:1 verification mode — so the 28,000-employee count fits within that ceiling. However, a face-only deployment with no card or PIN means the device must run 1:N identification, which caps at 4,000 users. A 28,000-employee face-only deployment exceeds the 1:N limit by a factor of seven. The answer to the sales question is: yes, FaceStation 2 can handle 28,000 users, but only in 1:1 mode — which requires users to present a secondary credential (card or PIN) to claim their identity before the face match. If the prospect truly wants face-only with no secondary credential, the 1:N cap makes FaceStation 2 unsuitable at that scale. That distinction determines whether this is a viable deal.",
+        "hint": "The 30,000-user figure and the 4,000-user figure apply to different matching modes — which mode does a face-only deployment require?"
+      },
+      {
+        "prediction_prompt": "During a security review, a senior engineer says: 'I've seen demos where someone holds up a photo of an enrolled user and the system grants access. What stops that here?' You have three documented security features available. Which one do you lead with, and how do you frame the response?",
+        "reveal": "Lead with live face detection using IR-based image analysis — this is the mechanism that directly defeats the attack the engineer described. IR-based analysis distinguishes real faces from printed images and LCD screens, which is precisely the spoofing vector named. Follow with the Android 5.0 Lollipop security layer as an additional OS-level control, and note that high-quality image logging creates an auditable record if any attempt does occur. The response structure matters: name the threat, name the feature that defeats it, then add the supporting layers. Responding with all three features in a flat list without connecting them to the photo-spoofing scenario reads as a product pitch, not a technical rebuttal — and a security engineer will notice the difference.",
+        "hint": "Which of the three security features is specifically designed to distinguish a real face from a printed image or screen?"
+      },
+      {
+        "prediction_prompt": "A sales engineer is building a proposal for a university that runs HID Prox cards and wants wireless connectivity to avoid Ethernet runs to every door. They ask which FaceStation 2 model to specify. What is your recommendation and what are the two specification grounds for it?",
+        "reveal": "Recommend FS2-AWB on two independent grounds. First, HID Prox support at 125kHz is exclusive to FS2-AWB — FS2-D does not include HID Prox in its RF options, so the existing card infrastructure cannot be preserved with FS2-D. Second, Wi-Fi (IEEE 802.11 b/g) is available on FS2-AWB only — FS2-D has no wireless connectivity option. Either requirement alone would force the selection to FS2-AWB; together they make the recommendation unambiguous. The proposal should cite both: 'FS2-AWB is required because the customer's HID Prox infrastructure and wireless connectivity requirement are both FS2-AWB-exclusive specifications.'",
+        "hint": "Check both the RF Options row and the Wi-Fi row in the spec table — which model appears in both?"
+      }
+    ],
+    "summary": "Across every stakeholder scenario, the pattern is the same: identify the specific constraint or concern, pull the specification that addresses it directly, and make the connection explicit — the spec is only persuasive when the stakeholder can see exactly why it answers their question.",
+    "figures": [
+      {
+        "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+        "after_key_point": 4,
+        "caption": "The system configurations diagram shows all three deployment topologies side by side — standalone, standalone-secure, and distributed — with color-coded connections (relay in orange, RS-485 in blue, input in red) that map directly to the interface specifications you cite when justifying configuration recommendations.",
+        "alt_text": "A flowchart titled 'System Configurations' showing three deployment topologies for FaceStation 2. Top center shows Standalone-Secure: a FaceStation 2 connected via blue RS-485 and red input lines to a Secure I/O 2 module, which connects via orange relay and red input lines to a door lock and exit button. Top right shows Standalone: a FaceStation 2 connected directly to a door lock via orange relay and to an exit button via red input. Bottom center shows Distributed Access Control Systems: multiple FaceStation 2 devices connected via black TCP/IP lines to a central BioStar 2 Server, with individual devices also connecting to readers, door locks, and exit buttons via RS-485, relay, and input lines. A BioStar 2 Server on the left connects to the internet via WAN, enabling remote access through BioStar 2 Mobile and a web browser client. A legend in the top left identifies red as Input, blue as RS-485, and orange as Relay.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+        "page_number": 1
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "A face-only deployment with no card or PIN requires ___ matching mode, which determines the applicable user capacity limit.",
+      "answer": "1:N identification",
+      "distractors": [
+        "1:1 verification",
+        "group matching",
+        "biometric enrollment"
+      ],
+      "explanation": "Without a secondary credential to claim identity, the device must search the full enrolled database — that is 1:N identification, which caps at 4,000 users, not the 30,000-user 1:1 ceiling."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each customer requirement to the FaceStation 2 model it forces:",
+      "pairs": [
+        {
+          "left": "Existing HID Prox card infrastructure",
+          "right": "FS2-AWB only"
+        },
+        {
+          "left": "Wireless connectivity, no Ethernet run",
+          "right": "FS2-AWB only"
+        },
+        {
+          "left": "MIFARE-family cards, wired Ethernet",
+          "right": "FS2-D or FS2-AWB"
+        },
+        {
+          "left": "BLE mobile credentials",
+          "right": "FS2-AWB only"
+        }
+      ],
+      "explanation": "HID Prox, Wi-Fi, iCLASS, and BLE are all FS2-AWB-exclusive specifications. MIFARE-family cards over wired Ethernet are supported by both models, so either variant is viable when those are the only requirements."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not provide real-world stakeholder objection scripts or common internal misconceptions — SME input is needed to validate that the scenario framings used here reflect actual cross-functional discussion patterns at Suprema.",
+    "The document does not clarify the typical matching mode (1:1 vs. 1:N) used in large enterprise deployments — SME confirmation would strengthen the user capacity scenario guidance.",
+    "No specification data is available on what illuminance levels typical outdoor environments reach in different geographies or seasons — learners applying the 0–25,000 lx range to real sites may need supplemental reference data."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a sprint review, your Head of Sales asks: 'We have a prospect running a large corporate campus with 28,000 employees. They want to use face recognition as the primary credential — no cards. Can FaceStation 2 handle that user base in a face-only deployment?'",
+        "question_text": "Based on FaceStation 2's user capacity specifications, how should you respond to this question?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Yes — FaceStation 2 supports up to 30,000 users in 1:1 mode, so a 28,000-employee face-only deployment fits within capacity, though 1:N mode caps at 4,000 users and would not be suitable here.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Yes — FaceStation 2 supports up to 30,000 users in both 1:1 and 1:N modes, so a 28,000-employee face-only deployment is fully supported under either matching configuration.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "No — FaceStation 2's user capacity tops out at 4,000 users for face recognition, so a 28,000-employee deployment would exceed the device's supported limit.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. FaceStation 2 supports up to 30,000 users in 1:1 mode and 4,000 users in 1:N mode. A face-only deployment at scale requires 1:N matching, which caps at 4,000 — but if the deployment uses 1:1 (face + ID), 28,000 users fits within the 30,000 limit. Accurately distinguishing these two modes is essential when advising on large-site feasibility.",
+        "incorrect": "Review the user capacity specification carefully. FaceStation 2 has two distinct capacity limits: 30,000 users in 1:1 mode and 4,000 users in 1:N mode. These are not interchangeable, and the distinction directly affects whether a large-site deployment is feasible under a given matching configuration."
+      },
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O2",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A facilities manager at a prospective customer asks during a pre-sales call: 'We're planning to install the device at a covered outdoor entrance — it gets direct sunlight in the morning and can hit around 20,000 lx. Will FaceStation 2 work reliably in that environment?'",
+        "question_text": "How should you respond to address this lighting suitability concern?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "No — outdoor sunlight environments are outside FaceStation 2's supported range, and the device is rated for indoor use only regardless of lux levels.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Yes — FaceStation 2 operates across 0 to 25,000 lx, so a 20,000 lx outdoor entrance falls within the supported range and should perform reliably under those lighting conditions.",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Yes — FaceStation 2 supports 0 to 25,000 lx, which covers complete darkness through high-illuminance environments, so 20,000 lx is within the supported range and the deployment is suitable.",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. FaceStation 2's operating illuminance range of 0–25,000 lx is explicitly described as covering complete darkness to all indoor lighting conditions, and 20,000 lx falls within that range. Citing the full range and confirming the environment is within spec gives the stakeholder a clear, evidence-based answer.",
+        "incorrect": "FaceStation 2 supports an operating illuminance range of 0 to 25,000 lx — described as the highest available, covering complete darkness through high-illuminance environments. A 20,000 lx outdoor entrance falls within this range. Review the illuminance specification to ensure you can accurately assess deployment suitability."
+      },
+      "references": [
+        {
+          "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+          "snippet": "Operating illuminance from 0 lx to 25,000 lx. Highest operating illuminance available. Covers complete darkness to all indoor lighting conditions",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_127ac179-a85d-4ceb-9d41-ba3e443baafe_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a security review meeting, a senior security engineer raises a concern: 'Face recognition systems are notoriously easy to spoof — someone could just hold up a photo or use a screen showing someone's face to gain access. Why should we trust this device for a high-security environment?'",
+        "question_text": "Which response most accurately and completely addresses the security engineer's spoofing concern using FaceStation 2's documented security features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 uses IR-based live face detection to distinguish real faces from printed images and LCD screens, and the Android 5.0 Lollipop platform adds an additional security layer — together these features directly address the spoofing vectors you've described.",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FaceStation 2 captures high-quality image logs of every authentication attempt, which allows security teams to audit access events and identify any spoofing attempts after the fact.",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 uses a 1.4 GHz quad-core processor and 140 IR LEDs to deliver fast, accurate face matching, which reduces the window of opportunity for spoofing attempts during authentication.",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The engineer's concern is about active spoofing using photos or screens. IR-based live face detection directly prevents this by distinguishing real faces from printed images and LCDs. The Android 5.0 security layer adds a platform-level defense. These are the specification-supported features that directly counter the stated vulnerability — not audit logs or hardware speed.",
+        "incorrect": "The security engineer is asking about prevention of spoofing attacks using photos or screens. Image logs (option b) are a reactive audit tool, not a spoofing prevention mechanism. Hardware specs like processor speed and IR LEDs (option c) support performance, not anti-spoofing security. The correct response cites live face detection and the Android 5.0 security layer — the features explicitly documented as addressing spoofing."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales engineer is preparing a proposal for a university campus that currently uses HID Prox cards for building access and wants to add face recognition without replacing their existing card infrastructure. The campus also wants wireless connectivity to avoid running Ethernet to every door.",
+        "question_text": "Which FaceStation 2 model variant should you recommend, and what is the primary specification basis for that recommendation?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FS2-D — it supports 125kHz EM and 13.56MHz MIFARE-family cards, which covers the most common card types and is sufficient for most campus deployments.",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FS2-AWB — it supports HID Prox at 125kHz and includes Wi-Fi (IEEE 802.11 b/g), directly matching both the existing card infrastructure and the wireless connectivity requirement.",
+          "is_correct": true,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FS2-AWB — it supports BLE at 2.4GHz, which provides the wireless connectivity needed and can replace HID Prox cards with mobile credentials over time.",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FS2-AWB is the only model that supports HID Prox (125kHz) — a requirement for backward compatibility with the existing card infrastructure — and it is the only variant with Wi-Fi (IEEE 802.11 b/g). Both requirements are explicitly met by FS2-AWB and neither is available on FS2-D.",
+        "incorrect": "This scenario has two hard requirements: HID Prox card compatibility and wireless connectivity. FS2-D does not support HID Prox and has no Wi-Fi. While FS2-AWB does include BLE, recommending BLE as the wireless solution (option c) misidentifies the connectivity feature — Wi-Fi is the documented wireless networking interface, not BLE. The correct answer cites both HID Prox support and Wi-Fi as the specification basis for selecting FS2-AWB."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_2"
+    },
+    {
+      "mcq_id": "MCQ5",
+      "objective_id": "O5",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A customer is deploying access control at a single-door server room with strict security requirements. They want the door lock controller to be physically separate from the reader — so that even if the FaceStation 2 unit is tampered with or removed, the door lock cannot be directly manipulated. They have no existing access control server.",
+        "question_text": "Which FaceStation 2 system configuration best fits this deployment, and which interface specification most directly supports the physical separation requirement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Distributed access control — multiple FaceStation 2 devices managed by a BioStar 2 server provide centralized control and isolate the lock from any single device.",
+          "is_correct": false,
+          "id": "MCQ5_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Standalone configuration — the FaceStation 2 connects directly to the door lock via the onboard relay, keeping the deployment simple and server-free for a single-door site.",
+          "is_correct": false,
+          "id": "MCQ5_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Standalone-secure configuration — the FaceStation 2 connects to a Secure I/O 2 module via RS-485, physically separating the lock controller from the reader and meeting the tamper-resistance requirement without requiring a server.",
+          "is_correct": true,
+          "id": "MCQ5_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The standalone-secure configuration uses a Secure I/O 2 module connected via RS-485 to physically separate the lock controller from the FaceStation 2 reader — directly addressing the tamper-resistance requirement. The standalone configuration connects the lock directly to the device (no separation), and distributed requires a BioStar 2 server the customer does not have.",
+        "incorrect": "The key constraint here is physical separation of the lock controller from the reader, without a server. Standalone configuration (option b) connects the lock directly to the FaceStation 2 — no separation. Distributed access control (option a) requires a BioStar 2 server, which this customer does not have. The standalone-secure configuration uses a Secure I/O 2 module over RS-485 to achieve the required physical separation in a server-free deployment."
+      },
+      "references": [
+        {
+          "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+          "snippet": "Standalone-Secure Configuration: A FaceStation 2 device is connected to a Secure I/O 2 module... Standalone Configuration: A FaceStation 2 device is connected directly to a door lock and an exit button... Distributed Access Control Systems: Multiple FaceStation 2 devices are shown",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.figure_4b911e80-3a91-4b73-bb45-8ae2d5c77b85_0.png",
+          "page_number": 1,
+          "chunk_type": "figure"
+        },
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RS-485: 1ch Host or Slave (Selectable)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ5_opt_3"
+    },
+    {
+      "mcq_id": "MCQ6",
+      "objective_id": "O6",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a deployment review for a hospital, the facilities director raises a concern: 'We have staff who use wheelchairs and a significant number of pediatric visitors. I'm worried that a fixed-height face recognition terminal won't work for everyone — we could face accessibility complaints.'",
+        "question_text": "How should you respond to address this accessibility concern using FaceStation 2's documented ergonomic design features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FaceStation 2 is ADA-compliant by design, with a certified accessibility rating that covers wheelchair users and children across all standard installation heights.",
+          "is_correct": false,
+          "id": "MCQ6_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FaceStation 2 supports an extended installation height range of 145cm to 210cm and includes a tilt-type bracket specifically designed for wheelchair users and children, directly addressing the populations you've described.",
+          "is_correct": true,
+          "id": "MCQ6_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "FaceStation 2 uses an Android 5.0-based intuitive GUI and an improved face enrollment procedure, which simplifies the experience for users of all ages and physical abilities.",
+          "is_correct": false,
+          "id": "MCQ6_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The 145cm–210cm height range and tilt-type bracket are the specification-supported features that directly address physical accessibility for wheelchair users and children. These are the documented design features for this purpose — not ADA certification claims (which the spec does not make) and not GUI improvements (which address ease of use, not physical reach).",
+        "incorrect": "The director's concern is about physical accessibility — whether the device can be used by wheelchair users and children. Option a overstates the specification by claiming ADA compliance, which is not documented. Option c cites GUI and enrollment improvements, which address usability ease, not physical reach or positioning. The correct response cites the 145cm–210cm height range and tilt-type bracket — the features explicitly documented as supporting wheelchair users and children."
+      },
+      "references": [
+        {
+          "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+          "snippet": "Extended height range: 145cm – 210cm. Tilt-type bracket for wheelchaired persons & children. Android 5.0 Lollipop based intuitive GUI. Improved face enrolment procedure",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_7eaa95c8-1c2a-4f8b-a12d-169de89bea4d_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ6_opt_2"
+    }
+  ]
+}

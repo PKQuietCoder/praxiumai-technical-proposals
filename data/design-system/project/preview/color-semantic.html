@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);background:var(--white);color:var(--fg-1);padding:20px 22px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .item{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+  .cap{height:54px;display:flex;align-items:center;justify-content:center;color:#fff;font:var(--label);}
+  .meta{padding:8px 10px;}
+  .meta b{font:var(--caption);font-weight:600;display:block;} .meta small{font-size:10px;color:var(--fg-3);}
+  h4{font:var(--overline);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin:0 0 12px;}
+</style></head>
+<body>
+  <h4>Semantic / functional</h4>
+  <div class="grid">
+    <div class="item"><div class="cap" style="background:var(--success)">Success</div><div class="meta"><b>#009E49</b><small>bg #E6F5EC</small></div></div>
+    <div class="item"><div class="cap" style="background:var(--warning);color:var(--fg-1)">Warning</div><div class="meta"><b>#F39200</b><small>bg #FEF3E0</small></div></div>
+    <div class="item"><div class="cap" style="background:var(--error)">Error</div><div class="meta"><b>#CD002F</b><small>bg #FBE6EB</small></div></div>
+    <div class="item"><div class="cap" style="background:var(--ocean-400)">Info</div><div class="meta"><b>#0A8276</b><small>bg #E6F2F1</small></div></div>
+  </div>
+</body></html>

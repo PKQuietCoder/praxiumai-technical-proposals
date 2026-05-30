@@ -1,0 +1,434 @@
+{
+  "subsection_id": "6.1.1",
+  "subsection_title": "Allocate On-Chip Memory Regions",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Map each pipeline component (model weights, time-critical code, frame buffers, biometric templates) to the correct STM32N6 memory region based on access latency and security requirements",
+    "Justify why biometric templates stored in plain XSPI-mapped flash require MCE-encrypted regions rather than standard memory-mapped access",
+    "Distinguish the roles of ITCM, AXISRAM, XSPI-mapped external flash, and MCE-encrypted XSPI regions in the face recognition pipeline"
+  ],
+  "content": {
+    "hook_sentence": "Placing your face detection interrupt handler in XSPI-mapped external flash instead of ITCM can introduce enough latency to miss a real-time deadline — even though both regions appear identical to the CPU in memory-mapped mode.",
+    "introduction": "Defining the memory layout for the biometric terminal is not just a capacity exercise — it is a latency and security exercise. Each pipeline component has a different access pattern and a different threat model, and the STM32N6 gives you distinct memory regions to match them. Getting this allocation right determines whether your inference pipeline meets real-time deadlines and whether enrolled biometric templates are protected against physical flash extraction.",
+    "key_points": [
+      {
+        "point": "Place time-critical interrupt handlers and real-time routines in ITCM for deterministic, zero-wait-state execution.",
+        "explanation": "The STM32N6 Cortex-M55 core includes a **64-Kbyte instruction TCM (ITCM) RAM with ECC** specifically for code that must execute with minimal and predictable latency. TCM is tightly coupled to the core — the CPU fetches from it without going through the AXI interconnect or any cache hierarchy, so execution time is deterministic. For your face detection interrupt handler, this matters: if the handler fires mid-inference and stalls waiting on an XSPI fetch, you lose the determinism that real-time access control requires. Place your time-critical routines — interrupt handlers, RTOS tick code, latency-sensitive state machines — in ITCM. The 64 KB limit means you must be selective; reserve ITCM for code paths where jitter is unacceptable, not for the full application image.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+            "snippet": "128-Kbyte data TCM RAM with ECC for critical real-time data, and 64-Kbyte of instruction TCM RAM with ECC for critical real-time routines",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "90e14d53-ab98-49d6-8f16-70aba1d78a33",
+            "snippet": "128-Kbyte TCM (tightly-coupled memory) RAM with ECC for critical real-time data + 64-Kbyte instruction TCM RAM with ECC for critical real-time routines",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_90e14d53-ab98-49d6-8f16-70aba1d78a33_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Store active frame buffer data in AXISRAM, where the AXI interconnect gives both the CPU and DMA controllers high-bandwidth access.",
+        "explanation": "The STM32N6 embeds **4.2 Mbytes of contiguous SRAM** organized in multiple banks, including AXISRAM1 through AXISRAM6. These banks are accessible via the AXI interconnect, which means both the Cortex-M55 and the HPDMA can read and write them concurrently without arbitration bottlenecks that would stall the pipeline. For the face recognition terminal, active frame buffers — the raw or ISP-processed image data being fed to the inference engine — belong here. The HPDMA moves frames from the ISP output into AXISRAM, and the NPU (on the STM32N6x7xx) or the CPU-driven inference code reads them back. AXISRAM also supports ECC (single-error detection and correction), which adds a layer of data integrity for in-flight biometric image data.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "90e14d53-ab98-49d6-8f16-70aba1d78a33",
+            "snippet": "4.2-Mbyte contiguous SRAM",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_90e14d53-ab98-49d6-8f16-70aba1d78a33_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "22db0ae3-4492-4262-90ab-9d7fb9efe232",
+            "snippet": "4.2 Mbytes of SRAM... AXISRAM1 to 6... Flexible external memory controller (FLEXMEM) with cypher engine supporting up to 32-bit data bus",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_22db0ae3-4492-4262-90ab-9d7fb9efe232_0.png",
+            "page_number": 22,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "01ca8afe-1568-4ddb-9fc4-03eff7394056",
+            "snippet": "The devices embed a 4.2-Mbyte contiguous SRAM organized in several banks, an 8-Kbyte backup SRAM active in V_BAT mode, and a flexible external memory controller (FMC) for static memories, XSPI 8-/16-bit configurations.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_01ca8afe-1568-4ddb-9fc4-03eff7394056_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Store large neural network model weights in XSPI-mapped external flash using memory-mapped mode, which makes the external device appear as internal memory to the CPU.",
+        "explanation": "A face recognition DNN model can easily exceed the on-chip SRAM budget. The XSPI interface solves this by supporting **memory-mapped mode**, where the external flash or HyperRAM is mapped directly into the CPU's address space and accessed as if it were internal memory — no explicit read commands or DMA transfers required for weight fetching. The XSPI supports serial PSRAM, NAND, NOR flash, HyperRAM, and HyperFlash frame formats, giving you flexibility in the external memory device you select. In memory-mapped mode, both read and write operations are supported, and the XSPI handles the protocol framing transparently. For model weights, which are read-only during inference, this is the natural fit: the weights live in external flash, the CPU or NPU fetches them through the memory-mapped window, and you are not constrained by on-chip SRAM capacity.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+            "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+            "page_number": 42,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+            "snippet": "The XSPI supports most external serial memories such as serial PSRAMS, serial NAND and serial NOR flash memories, HyperRAM and HyperFlash memories",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+            "page_number": 42,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "90e14d53-ab98-49d6-8f16-70aba1d78a33",
+            "snippet": "XSPI supporting serial PSRAM, NAND, NOR, HyperRAM / HyperFlash frame formats. 2 ports: XSPIM 8- and 16-bit configuration up to 200 MHz",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_0/ChunkType.text_90e14d53-ab98-49d6-8f16-70aba1d78a33_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Biometric templates stored in plain XSPI-mapped flash are exposed to physical extraction — assign them to an MCE-encrypted XSPI region to protect data at rest.",
+        "explanation": "Memory-mapped mode makes external flash transparent to the CPU, but transparency cuts both ways: an attacker with physical access to the board can read the flash chip directly with a programmer, bypassing the MCE entirely if no encrypted region is configured. **MCE provides on-the-fly inline encryption for writes and decryption for reads** within defined XSPI address regions, with up to four independently configured encrypted regions each bounded at 4-Kbyte granularity. When you store enrolled biometric templates (face feature vectors) in an MCE-encrypted region, every write to that region is encrypted before it reaches the flash die, and every read is decrypted before it reaches the AXI bus — the CPU sees plaintext, but the flash chip holds only ciphertext. A plain XSPI-mapped region with no MCE configuration stores templates in cleartext on the flash die, which is the critical security gap. Assigning templates to an MCE region with a hardware-bound key closes that gap without any per-access firmware overhead.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Start and end of regions defined with 4-Kbytes granularity. Default filtering (region 0): any access granted",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Map each security feature to a distinct protection role: MCE for external flash at-rest encryption, SAES/CRYP for software-controlled biometric processing, and TrustZone for domain isolation.",
+        "explanation": "These three features address different threat vectors and should not be treated as interchangeable. **MCE** handles the at-rest threat: biometric templates on external flash are encrypted at the hardware level, with zero firmware overhead per transaction. **SAES and CRYP** handle the in-transit and software-processing threat: when your enrollment firmware computes or transforms a biometric template in software (e.g., during template enrollment or comparison), SAES provides AES encryption with side-channel attack (SCA) protection certified to SESIP and PSA Level 3. **TrustZone** handles the isolation threat: it partitions the Cortex-M55 execution environment into secure and non-secure worlds, ensuring that the non-secure application layer cannot access the secure biometric processing domain or its keys. All three are available only on STM32N6x5xx variants (STM32N655xx and STM32N657xx); the STM32N6x7xx NPU variant lacks MCE, SAES, CRYP, and PKA entirely, which means software AES libraries cannot replicate inline external memory encryption — biometric templates on external flash would remain in cleartext at the hardware level regardless of what the firmware does.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+            "snippet": "This function is available only on STM32N655xx and STM32N657xx devices.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+            "snippet": "Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes. Supported block ciphers: AES-128, AES-256 or Noekeon (12 round version), selected at boot",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+            "page_number": 57,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "bc84a890-cfc5-48e4-89b4-5d552f1c1579",
+            "snippet": "These microcontrollers have TrustZone-aware support and a memory protection unit (MPU) for enhanced application security. A secure boot ROM ensures secure booting from external interfaces.",
+            "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_bc84a890-cfc5-48e4-89b4-5d552f1c1579_0.png",
+            "page_number": 13,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "You are reviewing a colleague's memory allocation table for the biometric terminal. They have placed the enrolled face feature vectors in a standard XSPI memory-mapped region (no MCE configuration), the face detection ISR in AXISRAM, and the DNN model weights in ITCM. They argue this is fine because the CPU sees all three regions identically in memory-mapped mode. How many allocation errors are in this table, and what are they?",
+        "reveal": "There are three errors. First, the face feature vectors (biometric templates) are in a plain XSPI region with no MCE encryption — an attacker with physical access to the flash chip can read them directly with a programmer, bypassing all firmware protections. They must be in an MCE-encrypted XSPI region. Second, the face detection ISR is in AXISRAM rather than ITCM — AXISRAM goes through the AXI interconnect and does not provide the deterministic, zero-wait-state fetch latency that a time-critical interrupt handler requires. The ISR belongs in ITCM. Third, the DNN model weights are in ITCM, which is only 64 Kbytes — far too small for a face recognition model that can be several megabytes. Model weights belong in XSPI-mapped external flash using memory-mapped mode, where capacity is not constrained by on-chip SRAM. The corrected table: model weights in XSPI-mapped external flash, face detection ISR in ITCM, frame buffers in AXISRAM, biometric templates in MCE-encrypted XSPI regions.",
+        "hint": "Think about what each memory region optimizes for: latency, capacity, or security."
+      },
+      {
+        "prediction_prompt": "A project lead proposes using the STM32N657xx variant for the biometric terminal because its Neural-ART NPU delivers the 600 Gops throughput needed for real-time face recognition. They plan to add software AES libraries to protect biometric templates stored on external flash. Will this approach meet both the inference and security requirements?",
+        "reveal": "The inference requirement is met — the STM32N657xx does include the Neural-ART NPU at up to 1 GHz providing 600 Gops. However, the security requirement for external flash protection cannot be met with this variant. The STM32N657xx lacks MCE, SAES, CRYP, and PKA entirely; these hardware security features are available only on STM32N655xx and STM32N657xx (the STM32N6x5xx family), not on the STM32N6x7xx NPU variants. Software AES libraries running on the Cortex-M55 can encrypt data before writing it to flash, but they cannot replicate MCE's inline, transparent, per-transaction encryption at the system bus level. More critically, software encryption requires the firmware to explicitly manage every write — any code path that writes a template without calling the encryption routine leaves data in cleartext. MCE enforces encryption at the hardware level for every byte that crosses the region boundary, with no firmware involvement per transaction. The proposal has a hard architectural gap: you cannot have both the Neural-ART NPU and hardware MCE on the same STM32N6 device.",
+        "hint": "Consider whether software encryption can replicate hardware inline encryption at the bus level, and which STM32N6 variant family includes MCE."
+      }
+    ],
+    "summary": "Match each pipeline component to the memory region that fits its access pattern and threat model: ITCM for time-critical interrupt handlers, AXISRAM for active frame buffers, XSPI memory-mapped mode for large model weights, and MCE-encrypted XSPI regions for biometric templates — and remember that MCE is only available on STM32N6x5xx variants, making it a hard constraint in your device selection.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "fill_blank",
+      "stem": "When a face detection interrupt handler must execute with deterministic, zero-wait-state latency, the correct memory region to place it in is ___.",
+      "answer": "ITCM",
+      "distractors": [
+        "AXISRAM",
+        "XSPI-mapped external flash",
+        "DTCM"
+      ],
+      "explanation": "ITCM is tightly coupled to the Cortex-M55 core and bypasses the AXI interconnect, providing deterministic fetch latency. AXISRAM and XSPI-mapped flash both introduce variable latency through the interconnect or external interface."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each pipeline data type to the memory region that correctly addresses its primary requirement:",
+      "pairs": [
+        {
+          "left": "Large DNN model weights (several MB, read-only during inference)",
+          "right": "XSPI-mapped external flash (memory-mapped mode)"
+        },
+        {
+          "left": "Active frame buffer data (high-bandwidth, CPU and DMA access)",
+          "right": "AXISRAM"
+        },
+        {
+          "left": "Enrolled biometric templates (must be protected against physical flash extraction)",
+          "right": "MCE-encrypted XSPI region"
+        },
+        {
+          "left": "Time-critical face detection interrupt handler",
+          "right": "ITCM"
+        }
+      ],
+      "explanation": "Each allocation is driven by a primary constraint: capacity for model weights (XSPI), bandwidth for frame buffers (AXISRAM), at-rest encryption for biometric templates (MCE-encrypted XSPI), and deterministic latency for interrupt handlers (ITCM)."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify the maximum size of a single MCE-encrypted region or the total addressable XSPI space that can be covered by all four MCE regions combined — this would be needed to verify that the biometric template storage area fits within MCE region constraints.",
+    "The datasheet does not provide the specific AXISRAM bank sizes (AXISRAM1 through AXISRAM6 individual capacities) that would be needed to size frame buffer allocations precisely.",
+    "No datasheet information is available in the provided chunks on DTCM (data TCM) size or its suitability for active frame buffer data as an alternative to AXISRAM — the 128 Kbyte data TCM is referenced but its AXI accessibility for DMA is not described in the available chunks."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O5",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are defining the memory layout for the STM32N6-based face recognition terminal. The inference pipeline requires storing a large neural network model (several megabytes of weights), a real-time face detection routine that must execute with minimal latency, and active frame buffer data being processed by the NPU.",
+        "question_text": "You need to allocate memory for three pipeline components: the neural network model weights, the time-critical face detection interrupt handler, and the active frame buffer. Which allocation correctly maps each component to the most appropriate memory region?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Model weights in AXISRAM, face detection handler in XSPI-mapped external flash, frame buffer in ITCM",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Model weights in XSPI-mapped external flash, face detection handler in ITCM, frame buffer in AXISRAM",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Model weights in ITCM, face detection handler in AXISRAM, frame buffer in XSPI-mapped external flash",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The XSPI memory-mapped mode allows external flash to appear as internal memory, making it suitable for large model weights that exceed on-chip SRAM capacity. The 64-Kbyte ITCM with ECC is specifically designed for critical real-time routines, making it ideal for the low-latency face detection handler. AXISRAM provides fast on-chip access for active frame buffer data being processed by the NPU.",
+        "incorrect": "Review the purpose of each memory region. ITCM (64 Kbyte) is reserved for critical real-time routines — it is too small and too valuable for large model weights. XSPI-mapped external flash is best suited for large, read-heavy data like model weights accessed via memory-mapped mode. AXISRAM provides fast on-chip bandwidth for active data like frame buffers. Placing the real-time handler in external flash would introduce unacceptable latency."
+      },
+      "references": [
+        {
+          "chunk_id": "4e815e6f-d56e-4459-8a1d-dabe39fe7da4",
+          "snippet": "The Cortex-M55 includes a 32-Kbyte ICACHE, a 32-Kbyte DCACHE, as well as 128-Kbyte data TCM RAM and 64-Kbyte instruction TCM RAM with ECC for critical real-time routines.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_4e815e6f-d56e-4459-8a1d-dabe39fe7da4_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "c758334f-70a5-4e10-895a-e6e2175492f2",
+          "snippet": "Memory-mapped mode: the external memory is memory mapped and it is seen by the system as if it was an internal memory, supporting both read and write operations.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_42/ChunkType.text_c758334f-70a5-4e10-895a-e6e2175492f2_0.png",
+          "page_number": 42,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "4cb5d89c-1d8a-435a-800b-da938ea3bbfe",
+          "snippet": "AHBSRAM1/2, AXISRAM1 to 6, BKPSRAM, FLEXRAM, and VENCRAM, with the following features: Error code correction (ECC): Single-error detection and correction with interrupt generation",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_22/ChunkType.text_4cb5d89c-1d8a-435a-800b-da938ea3bbfe_0.png",
+          "page_number": 22,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O5",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the memory allocation table for the face recognition terminal. A colleague has proposed storing enrolled biometric templates (face feature vectors) in a standard XSPI-mapped external flash region with no additional configuration, arguing that the memory-mapped mode provides sufficient transparency for the CPU to access them like internal memory.",
+        "question_text": "Your colleague's proposal stores biometric templates in a plain XSPI-mapped region. What is the critical security gap in this approach, and which MCE capability directly addresses it?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The templates are accessible without authentication; MCE's region access filtering enforces read/write permissions per memory region",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The templates are stored in plaintext on external flash; MCE provides on-the-fly inline encryption for writes and decryption for reads within defined XSPI address regions",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The templates lack integrity verification; MCE computes a cryptographic hash over each region to detect tampering before data is returned to the CPU",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. External flash is physically accessible and stores data in plaintext unless encrypted. The MCE performs system bus inline encryption on writes and decryption on reads automatically, so biometric templates stored in an MCE-configured XSPI region are never exposed as plaintext on the external bus — directly closing this gap.",
+        "incorrect": "The core vulnerability of storing biometric data on external flash is that the flash chip itself holds plaintext data, making it readable if physically extracted. MCE's primary role is inline encryption and decryption of data transiting to and from external memory regions — not access control filtering or integrity hashing. For integrity verification, the HASH peripheral (Section 3.35) would be the appropriate feature."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6439ab06-d564-4800-b36f-bbbcc5bb954b",
+          "snippet": "MCE main features are: System bus in-line encryption (for writes) and decryption (for reads), based on embedded firewall programming — Four encryption modes per region (maximum 4 regions available): no encryption (bypass mode), stream cipher, block cipher and fast block cipher modes",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_6439ab06-d564-4800-b36f-bbbcc5bb954b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are finalizing the security feature mapping for the biometric terminal. The product requires: (1) protecting stored biometric templates on external flash from physical extraction, (2) encrypting biometric data during software-controlled processing (e.g., template enrollment), and (3) isolating the secure biometric processing domain from the non-secure application layer. You are selecting from the STM32N6 security features: MCE, SAES/CRYP, and TrustZone.",
+        "question_text": "Which assignment correctly maps each security requirement to the appropriate STM32N6 feature?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "External flash protection → TrustZone; software-controlled encryption → MCE; domain isolation → SAES/CRYP",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "External flash protection → SAES/CRYP; software-controlled encryption → TrustZone; domain isolation → MCE",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "External flash protection → MCE; software-controlled encryption → SAES/CRYP; domain isolation → TrustZone",
+          "is_correct": true,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. MCE operates inline on the system bus to automatically encrypt writes to and decrypt reads from external memory regions — it is the right tool for protecting data at rest on XSPI-connected flash. SAES provides AES encryption with side-channel attack protection for software-driven cryptographic operations such as template enrollment. TrustZone partitions the processor into secure and non-secure domains, isolating the biometric processing environment from the general application.",
+        "incorrect": "Each feature has a distinct architectural role. MCE is a bus-level cipher engine specifically for external memory regions — it cannot replace TrustZone's domain isolation. SAES/CRYP are software-invoked cryptographic accelerators for explicit encrypt/decrypt operations, not bus-level memory protection. TrustZone enforces secure/non-secure domain separation at the processor level, not encryption of stored data. Mixing these roles leads to gaps in the security architecture."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. It incorporates a protection against side-channel attacks (SCA), including differential power analysis (DPA), certified SESIP and PSA security assurance level 3.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "bc84a890-cfc5-48e4-89b4-5d552f1c1579",
+          "snippet": "These microcontrollers have TrustZone-aware support and a memory protection unit (MPU) for enhanced application security.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_13/ChunkType.text_bc84a890-cfc5-48e4-89b4-5d552f1c1579_0.png",
+          "page_number": 13,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_3"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are advising a hardware procurement decision for the biometric terminal. The project lead suggests using the STM32N657xx variant because its NPU delivers the 600 Gops throughput needed for real-time face recognition, and assumes the security features can be added in firmware using software AES libraries.",
+        "question_text": "You need to evaluate whether the STM32N657xx variant alone can meet both the AI inference and hardware security requirements for the terminal. What is the most accurate assessment of this proposal?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The STM32N657xx supports the NPU for inference but lacks MCE, SAES, CRYP, and PKA hardware — software AES libraries cannot replicate inline external memory encryption, leaving biometric templates on external flash unprotected at the hardware level",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The STM32N657xx supports the NPU for inference and includes TrustZone, which is sufficient to protect biometric templates stored on external flash without requiring MCE or SAES",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The STM32N657xx lacks both NPU and hardware security features, so neither inference performance nor biometric data protection requirements can be met with this variant",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The STM32N657xx provides the NPU for inference acceleration, but MCE, SAES, CRYP, and PKA are available only on STM32N655xx and STM32N657xx (security) variants. Critically, MCE performs inline hardware encryption on the external memory bus — this cannot be replicated by a software AES library, which would require the CPU to explicitly encrypt/decrypt every template access and would leave data exposed on the physical bus during transfers.",
+        "incorrect": "Review the variant feature constraints carefully. TrustZone provides domain isolation but does not encrypt data stored on external flash — that is MCE's role. The STM32N657xx does include the NPU, so inference performance is not the concern. The gap is specifically the absence of MCE, SAES, CRYP, and PKA hardware security peripherals on this variant, which cannot be fully compensated by software libraries for bus-level memory encryption."
+      },
+      "references": [
+        {
+          "chunk_id": "b6e06864-78e1-4bf2-9a42-26f70af6db5b",
+          "snippet": "The memory cipher engine (MCE) defines, in a given address space, multiple regions with specific security setup (encryption). All system bus traffic going through an encrypted region is managed on-the-fly by the MCE, automatically decrypting reads and encrypting writes if authorized. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_57/ChunkType.text_b6e06864-78e1-4bf2-9a42-26f70af6db5b_0.png",
+          "page_number": 57,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "773e666c-102c-43f1-8b41-f8cdac78c359",
+          "snippet": "The cryptographic processor (CRYP) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST. This function is available only on STM32N655xx and STM32N657xx devices.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_55/ChunkType.text_773e666c-102c-43f1-8b41-f8cdac78c359_0.png",
+          "page_number": 55,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "6bd6b0a2-180b-4490-aa5f-8af7d9382ad0",
+          "snippet": "The SAES (available only on STM32N655xx and STM32N657xx devices) encrypts or decrypts data in compliance with the advanced encryption standard (AES) defined by NIST.",
+          "image_path": "/courses/5985e18b-a317-4198-a5e3-6cdc01412d77/grounding/page_54/ChunkType.text_6bd6b0a2-180b-4490-aa5f-8af7d9382ad0_0.png",
+          "page_number": 54,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    }
+  ]
+}

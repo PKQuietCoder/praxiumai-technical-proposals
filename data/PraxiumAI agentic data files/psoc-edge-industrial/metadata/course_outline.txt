@@ -1,0 +1,662 @@
+<analysis>
+
+## Pre-Design Analysis
+
+### 1. Learning Goals and Associated Objectives
+
+**G1: Multi-core architecture selection and ML workload assignment**
+- O1: Decide whether to assign face recognition inference to Ethos-U55 or NNLite based on workload characteristics
+- O2: Partition firmware tasks across Cortex-M55 and Cortex-M33 using IPC block
+
+**G2: Power domains and clock tree configuration**
+- O3: Select system power mode and configure clock tree for each operating state
+- O4: Select SRAM retention configuration and power domain state for deep sleep variants
+
+**G3: Security subsystem configuration**
+- O5: Select EPC2 vs EPC4 part number and configure TrustZone SPE/NSPE partitioning
+
+**G4: Display pipeline and peripheral configuration**
+- O6: Configure MIPI-DSI display pipeline and select SCB peripheral modes for each interface
+
+### 2. Major Topic Areas from Technical Document
+
+1. **Product Overview** - Features, description, potential applications
+2. **Development Ecosystem** - ModusToolbox, PDL, SDK, application notes, dev kits
+3. **Chip-Level Functional Description** - Power, supply circuits, power modes, transitions
+4. **Processor Architecture** - CM55, CM33, Ethos-U55, NNLite, IPC, caches, DMA
+5. **Memory Architecture** - RRAM, EEPROM emulation, SMIF, wait states
+6. **Protection Units** - TrustZone, MPU, MPC, PPC, protection contexts
+7. **Clock Subsystem** - IHO, PILO, ECO, WCO, DPLLs, dividers, WDT, RTC
+8. **Reset** - Reset sources, XRES pin
+9. **Autonomous Analog** - SAR ADC, DAC, CTB, PTComp
+10. **Low-Power Comparator** - Deep sleep operation
+11. **Fixed Function Digital** - TCPWM, SCB (I2C/SPI/UART), CAN FD, Ethernet, I3C, USB
+12. **GPIO Ports** - Drive modes, HSIOM, Smart I/O
+13. **Neural Net Processing** - Ethos-U55 (128 MACs/cycle), NNLite (low-power, always-on)
+14. **Audio Functions** - PDM/PCM, TDM/I2S, autonomous analog audio
+15. **Graphics Functions** - 2.5D GPU, display controller, MIPI-DSI, DBI
+16. **Boot and DFU** - Boot source configuration, extended boot, DFU protocol
+17. **Security Architecture** - EPC2/EPC4, TrustZone SPE/NSPE, TF-M, secure boot, RoT
+18. **Electrical Specifications** - Supply voltages, current consumption by mode, GPIO specs, clock specs
+19. **Ordering Information** - Part number nomenclature, product variants
+20. **Package Information** - BGA-220 dimensions
+
+### 3. Persona's Top Pain Points
+
+1. **Multi-core/multi-domain peripheral bring-up complexity** - Alex needs to understand how CM55 and CM33 domains interact, how peripherals are assigned, and how to bring up hardware correctly
+2. **ML model performance vs. SRAM/latency constraints** - Choosing between Ethos-U55 and NNLite, understanding their capabilities, and fitting face recognition models within memory and timing budgets
+3. **Clock tree and power domain configuration** - Getting GPIO, power domains, and clock trees right for a feature-rich product with multiple operating states
+4. **PSA security compliance** - Configuring TrustZone, selecting EPC level, and ensuring secure boot for an access control device
+
+### 4. Logical Content Sequence
+
+**Foundation Layer (must come first):**
+- Product overview and architecture orientation
+- Development ecosystem (ModusToolbox, PDL)
+- Power architecture fundamentals
+
+**Core Architecture Layer:**
+- Processor architecture (CM55, CM33, IPC)
+- Memory architecture
+- Clock subsystem
+- Protection units and security architecture
+
+**Peripheral Configuration Layer:**
+- GPIO and HSIOM
+- SCB (I2C, SPI, UART)
+- DMA controllers
+- SMIF
+- USB, I3C
+
+**ML Accelerator Layer:**
+- Ethos-U55 capabilities
+- NNLite capabilities
+- Workload assignment decisions
+
+**Display and HMI Layer:**
+- Graphics subsystem
+- MIPI-DSI pipeline
+- Audio functions
+
+**Power Management Layer:**
+- Power modes and transitions
+- Deep sleep variants and SRAM retention
+- Electrical specifications
+
+**Security Layer:**
+- EPC2 vs EPC4 selection
+- TrustZone SPE/NSPE partitioning
+- Secure boot and TF-M
+
+**Integration Layer:**
+- Boot configuration and DFU
+- Ordering and part selection
+- Full system integration
+
+### 5. Duration Calculation
+
+- Total course: 2 hours = 120 minutes
+- Course Introduction: 3 minutes
+- Course Summary: 3 minutes
+- Available for content: 114 minutes
+- Each subsection: 7 minutes
+- Number of subsections: 114 ÷ 7 = 16.28 → **16 subsections**
+
+**Module Structure Plan:**
+- Module 1: Product Overview & Development Ecosystem (2 sections, 4 subsections = 28 min)
+- Module 2: Power Architecture & Modes (2 sections, 4 subsections = 28 min)
+- Module 3: Processor Architecture & ML Accelerators (2 sections, 4 subsections = 28 min)
+- Module 4: Security Architecture (2 sections, 2 subsections = 14 min)
+- Module 5: Peripherals, Display & System Integration (2 sections, 2 subsections = 14 min)
+
+Total: 16 subsections × 7 min = 112 min + 3 min intro + 3 min summary = **118 minutes ≈ 2 hours** ✓
+
+### 6. Delivery Format Opportunities
+
+- **Video walkthroughs**: Block diagram explanations (processor architecture, power domains, security architecture)
+- **Interactive diagrams**: Clock tree configuration, power mode transitions, HSIOM routing
+- **Case studies**: ML accelerator selection scenarios, deep sleep mode selection
+- **Decision tables**: EPC2 vs EPC4 selection, Ethos-U55 vs NNLite comparison
+- **Annotated schematics**: Power supply diagrams, GPIO configuration
+- **Scenario-based exercises**: Partitioning firmware tasks, configuring clock tree for operating states
+- **Reference tables**: Current consumption specs, frequency limits by power mode
+
+</analysis>
+
+---
+
+# PSOC Edge E8: Firmware Engineering for Face Recognition Terminals
+
+## Course Metadata
+
+| Field | Detail |
+|---|---|
+| **Target Learner** | Alex Kim, Firmware Engineer – Biometric Access Control |
+| **Total Duration** | 2 hours (120 minutes) |
+| **Format** | Self-paced eLearning (video, interactive diagrams, case studies, scenario exercises) |
+| **Platform** | LMS-compatible (SCORM 1.2 / xAPI) |
+| **Prerequisites** | Embedded C firmware development experience; familiarity with ARM Cortex-M architecture; basic understanding of I2C, SPI, UART |
+| **Source Document** | PSOC™ Edge E8x2, E8x3, E8x5, E8x6 Industrial Datasheet |
+| **Primary Goals** | G1, G2, G3, G4 |
+
+---
+
+## Course Introduction (3 minutes)
+
+**Format:** Video with animated block diagram overlay
+
+You're building firmware for a face recognition terminal — a device that needs to run a complex ML inference pipeline, drive a display, manage secure access credentials, and do it all within a tight power budget. The PSOC Edge E8 is designed for exactly this kind of challenge, but its multi-core, multi-domain architecture means there are a lot of decisions to make before you write your first line of code.
+
+This course walks you through those decisions. By the end, you'll be able to assign ML workloads to the right accelerator, configure the clock tree and power domains for each operating state, set up the security subsystem for PSA compliance, and bring up the key peripherals your terminal needs — all grounded in the actual datasheet specifications you'll reference on the job.
+
+**What you'll be able to do after this course:**
+- Select and configure the right ML accelerator for each inference stage
+- Partition tasks across the CM55 and CM33 domains using the IPC block
+- Configure the clock tree and power modes for active recognition, idle monitoring, and deep sleep
+- Choose the correct EPC security level and configure TrustZone SPE/NSPE partitioning
+- Configure the MIPI-DSI display pipeline and serial communication peripherals using the ModusToolbox PDL
+
+---
+
+## Module 1: Product Architecture & Development Ecosystem (28 minutes)
+
+**Module Overview:** Before you configure a single register, you need a clear mental model of what the PSOC Edge E8 actually is — its domain structure, its key blocks, and the tools you'll use to bring it up. This module gives you that foundation, grounded in the datasheet's feature list and the ModusToolbox ecosystem.
+
+---
+
+### Section 1.1: Understanding the PSOC Edge E8 Architecture (14 minutes)
+
+**Section Overview:** You'll orient yourself to the chip's multi-domain block diagram, understand which blocks live in which domain, and see how this architecture directly shapes your firmware partitioning decisions for the face recognition terminal.
+
+---
+
+#### Subsection 1.1.1: Map the Dual-Domain Architecture
+
+**Duration:** 7 minutes
+**Format:** Annotated interactive block diagram (Figure 1 from datasheet)
+
+**Content:**
+- The PSOC Edge E8 organizes its blocks into three domains: the High-Performance Domain (CM55 + Ethos-U55 + GPU + SMIF + USB), the Low-Power Domain (CM33 + NNLite + SCBs + I3C + Crypto + Ethernet + CAN FD), and the Deep Sleep / Always-On Domain (autonomous analog, LP comparators, SCB0)
+- The High-Performance Domain is designed for burst workloads — DSP, neural network inference, display output — and can be selectively powered down between recognition events
+- The Low-Power Domain is "virtually always-on": it handles security, communications, access control I/O, and lightweight ML inference continuously
+- The Deep Sleep / Always-On Domain keeps running even when both CPU domains are asleep, enabling wake-on-event from analog sensors or the SCB0 I2C/SPI slave
+- The IPC block bridges the two CPU domains, allowing the CM55 and CM33 to synchronize tasks and share data without polling
+- For your face recognition terminal: the CM55 domain handles face detection inference and display rendering; the CM33 domain handles access control I/O, secure key management, and presence detection via NNLite
+
+**Learning Check:** Drag-and-drop exercise — assign six terminal functions (face recognition inference, display rendering, door relay control, secure credential storage, presence detection, UART debug) to the correct domain. Feedback explains the reasoning for each assignment.
+
+---
+
+#### Subsection 1.1.2: Identify Key Compute Blocks
+
+**Duration:** 7 minutes
+**Format:** Comparison table + short video walkthrough (3 min video + 4 min reading)
+
+**Content:**
+- The Cortex-M55 runs at up to 320 MHz in HP mode and 140 MHz in LP mode; it includes Helium DSP extensions, FPU, 32 KB I/D caches, and 512 KB of 0-wait-state TCM — making it your primary compute engine for face recognition inference
+- The Cortex-M33 runs at up to 160 MHz in HP mode and 80 MHz in LP mode; it has a 16 KB I-cache and 1 MB of coupled SRAM — your always-on security and control processor
+- The Ethos-U55 NPU runs at the same clock as the CM55 (up to 320 MHz) and delivers 128 MACs/clock cycle with 8-bit weight support and weight compression — roughly 50× faster than a Cortex-M7 at the same frequency for NN inference
+- The NNLite coprocessor runs at the same clock as the CM33 (up to 160/80 MHz) and accelerates a specific set of NN kernels optimized for low-to-moderate complexity models; it operates in the Active state and is ideal for always-on presence detection
+- Both CPUs support SWD and JTAG debug; the chip also supports boundary scan via a separate TAP controller
+- Key implication for your terminal: you have two independent inference engines — choose based on model complexity, latency requirement, and power budget (covered in Module 3)
+
+**Learning Check:** Multiple-choice — "Your terminal needs to run a lightweight presence detection model continuously while the CM55 domain is powered down. Which processor and accelerator combination should you use, and why?" (Answer: CM33 + NNLite; explanation references LP domain always-on capability and NNLite's low-power design)
+
+---
+
+### Section 1.2: Using the ModusToolbox Development Ecosystem (14 minutes)
+
+**Section Overview:** You'll identify the specific ModusToolbox resources you'll use for peripheral initialization, clock configuration, and ML integration — so you know exactly where to go when you start writing firmware for the terminal.
+
+---
+
+#### Subsection 1.2.1: Navigate ModusToolbox Resources
+
+**Duration:** 7 minutes
+**Format:** Annotated resource map + guided reading
+
+**Content:**
+- ModusToolbox is Infineon's cross-OS (Windows, Linux, macOS) IDE-neutral development environment supporting VS Code, IAR, Keil, and Eclipse; it is the primary tool for PSOC Edge E8 firmware development
+- The **Peripheral Driver Library (PDL)** provides low-level, device-specific firmware drivers for all hardware subsystems — this is what you'll use for peripheral initialization, clock configuration, and pin assignment in your terminal bring-up
+- **Installable SDKs** handle peripheral initialization, clock and pin configuration, and middleware selection; the **Hardware Abstraction Layer (HAL)** provides portability across product families
+- Key application notes for your terminal project: AN235935 (Getting started with PSOC Edge E84 on ModusToolbox), AN237849 (Getting started with PSOC Edge security), AN240096 (Getting started with TF-M), AN239191 (Getting started with graphics), AN237976 (Low-power modes and power reduction techniques)
+- The **DEEPCRAFT Studio** tool supports the full ML model development-to-embedded-software journey, including model quantization and deployment to Ethos-U55 and NNLite
+- Development kits: KIT_PSE84_EVAL (general purpose) and KIT_PSE84_AI (AI/ML focused) — the AI kit is your best starting point for face recognition terminal development
+
+**Learning Check:** Matching exercise — match five development tasks (peripheral bring-up, ML model deployment, security provisioning, graphics bring-up, low-power optimization) to the correct ModusToolbox resource or application note.
+
+---
+
+#### Subsection 1.2.2: Apply PDL for Peripheral Setup
+
+**Duration:** 7 minutes
+**Format:** Annotated code walkthrough scenario (text-based with pseudocode)
+
+**Content:**
+- The PDL follows a consistent initialization pattern: configure a structure with your desired settings, then call the peripheral's `_Init()` function — this pattern applies to SCBs, GPIO, clocks, and DMA controllers
+- For clock configuration, you'll use the PDL clock API to set DPLL output frequency, configure `clk_hf` dividers, and assign clock paths to peripherals — the configurator tool in ModusToolbox generates this code from a GUI, but you need to understand the underlying structure to debug it
+- For GPIO, the PDL lets you set drive mode (strong push-pull, open drain, resistive pull-up/down, input-only), slew rate, and HSIOM routing — the HSIOM setting is what connects a GPIO pin to a specific peripheral signal (e.g., SCB1 SPI MOSI)
+- The PDL's DMA API lets you configure HPDMA (4-channel AXI, high-performance domain) or DMA (2×16-channel AHB, low-power domain) for autonomous data transfers — critical for moving image data and ADC results without CPU intervention
+- For your terminal bring-up sequence: initialize clocks first, then GPIO/HSIOM, then peripherals, then DMA — this order prevents undefined behavior from peripherals clocking before their pins are configured
+- The ModusToolbox configurator tools (Device Configurator, Clock Configurator) generate PDL initialization code automatically — use them to validate your configuration before writing manual register code
+
+**Learning Check:** Ordering exercise — arrange six bring-up steps in the correct sequence for a new SCB-based I2C sensor interface. Feedback explains why each step must precede the next.
+
+---
+
+## Module 2: Power Architecture & Clock Configuration (28 minutes)
+
+**Module Overview:** Power management is where face recognition terminals live or die on battery-backed installations. This module takes you through the PSOC Edge E8's power domain structure, system power modes, deep sleep variants, and clock tree — giving you the tools to configure each operating state of your terminal correctly.
+
+---
+
+### Section 2.1: System Power Modes and Domain Control (14 minutes)
+
+**Section Overview:** You'll learn to select the right system power mode for each terminal operating state and understand how the HP/LP domain structure affects what your firmware can do at each frequency.
+
+---
+
+#### Subsection 2.1.1: Select System Power Modes
+
+**Duration:** 7 minutes
+**Format:** Interactive decision tree + reference table
+
+**Content:**
+- The PSOC Edge E8 supports four system power modes: **System HP** (core at 0.9 V, all peripherals at maximum speed — CM55 up to 320 MHz, CM33 up to 160 MHz), **System LP** (core at 0.8 V, reduced speed — CM55 up to 140 MHz, CM33 up to 80 MHz), **System Deep Sleep** (CPUs halted, most peripherals off, SRAM optionally retained), and **System Hibernate** (lowest power, GPIO state frozen, wakeup via reset or wakeup pin)
+- For your face recognition terminal: use **System HP** during active face recognition (CM55 + Ethos-U55 running at full speed); use **System LP** during idle monitoring (CM33 + NNLite running presence detection at reduced power); use **System Deep Sleep** between recognition events
+- The buck regulator powers core logic at 0.9 V (HP), 0.8 V (LP), or lower in deep sleep — dynamic voltage and frequency scaling is supported via power control registers
+- CPU power modes (Active, Sleep, Deep Sleep) are ARM-standard and nest within the system power modes — both CPUs must request Deep Sleep before the system enters System Deep Sleep
+- The high-performance domain can be selectively powered down (PD1 off) while the low-power domain (PD0) remains active — this is the key mechanism for power-gating the CM55/Ethos-U55 between recognition events
+- Power mode transitions have documented timing: HP→LP takes ~65 µs typical, LP→HP takes ~49 µs typical, Deep Sleep→Active LP takes ~27 µs typical — factor these into your recognition latency budget
+
+**Learning Check:** Scenario question — "Your terminal has been idle for 30 seconds. The CM33 NNLite detects a face approaching. What sequence of power mode transitions do you initiate, and what are the approximate transition times?" (Answer: Deep Sleep → Active LP → Active HP; ~27 µs + ~49 µs; total ~76 µs before CM55 is running at full speed)
+
+---
+
+#### Subsection 2.1.2: Configure Deep Sleep SRAM Retention
+
+**Duration:** 7 minutes
+**Format:** Comparison table + case study scenario
+
+**Content:**
+- Three Deep Sleep variants offer different SRAM retention and power consumption trade-offs:
+  - **Deep Sleep-OFF** (SIDDSO): PD1 disabled, no SRAM retention beyond the always-on domain — IBAT typical 20.7 µA; use when the terminal can reload all context from flash on wakeup
+  - **Deep Sleep-RAM** (SIDDSRA): PD1 disabled, 64 KB SRAM retention — IBAT typical 21.7 µA; use when you need to retain a small wakeup context (e.g., NNLite model weights, access control state)
+  - **Deep Sleep** (SIDDSD): PD1 and CM55 enabled, 64 KB + 1024 KB System SRAM + TCM retention — IBAT typical 41.6 µA; use when you need to retain the full CM55 context for fast wakeup
+- SRAM retention is granular — you can select which SRAM blocks to retain, minimizing power while keeping the minimum context needed for your wakeup handler
+- The wakeup time from Deep Sleep-RAM and Deep Sleep-OFF to Active is ~25.5 ms (SID14A/SID14B) — significantly longer than from Deep Sleep (~27–40 µs) — factor this into your terminal's response time specification
+- For a face recognition terminal: Deep Sleep-RAM with 64 KB retention is appropriate for overnight idle (retain NNLite model and access control state); Deep Sleep with CM55 enabled is appropriate for short inter-recognition pauses (retain full inference context)
+- The RTC and 16 backup registers remain active in all deep sleep modes including Hibernate — use backup registers to store critical state that must survive power cycling
+- The MCWDT (multi-counter watchdog timer) can serve as a wakeup source from Deep Sleep, clocked by PILO or WCO — configure it to wake the terminal periodically for presence detection polling
+
+**Learning Check:** Decision scenario — given a power budget of 25 µA IBAT and a requirement to retain 64 KB of NNLite model weights during deep sleep, which deep sleep variant do you select? Justify your answer by citing the relevant spec ID and typical current value. (Answer: SIDDSRA at 21.7 µA typical meets the budget; SIDDSD at 41.6 µA exceeds it)
+
+---
+
+### Section 2.2: Clock Tree Configuration (14 minutes)
+
+**Section Overview:** You'll configure the PSOC Edge E8 clock tree — selecting DPLL frequencies, setting clk_hf dividers, and assigning clock paths to peripherals — for each operating state of your face recognition terminal.
+
+---
+
+#### Subsection 2.2.1: Understand Clock Sources and DPLLs
+
+**Duration:** 7 minutes
+**Format:** Annotated clock tree diagram + guided reading
+
+**Content:**
+- The PSOC Edge E8 provides fully integrated clocks with glitch-free switching: **IHO** (Internal High-Speed Oscillator, fixed 50 MHz ±1%, used as wakeup clock source), **PILO** (Precision Internal Low-Speed Oscillator, 32 kHz, no crystal needed), **ECO** (External Crystal Oscillator, MHz range, pins P19.0/P19.1), **WCO** (Watch Crystal Oscillator, 32.768 kHz, pins P18.0/P18.1)
+- Three **DPLLs** are available for clock generation, operating in HP and LP modes: one HP DPLL (50–500 MHz range) and two LP DPLLs (10–500 MHz range in HP mode, up to 350 MHz in LP mode)
+- The HP DPLL is optimized for high-speed operation; LP DPLLs are more power-efficient — for your terminal, use the HP DPLL to generate the 320 MHz clock for CM55/Ethos-U55 in HP mode
+- 16-bit clock dividers provide fine-grained frequency generation from DPLL outputs — they generate either 1-in-N clocking or approximately 50% duty cycle for analog circuitry
+- The IHO is always used as the clock source during wakeup from deep sleep — your firmware must switch to the DPLL after wakeup if full-speed operation is needed
+- PLL cold start lock time is ≤60 µs; frequency change lock time is ≤20 µs — add these to your wakeup latency budget when transitioning from deep sleep to active HP mode
+
+**Learning Check:** Fill-in-the-blank — "To generate a 320 MHz clock for the CM55 in HP mode, you configure the _____ DPLL with a source of _____ and an output frequency of _____ MHz. After wakeup from deep sleep, the system initially uses _____ as its clock source before switching to the DPLL."
+
+---
+
+#### Subsection 2.2.2: Build a Clock Configuration Table
+
+**Duration:** 7 minutes
+**Format:** Guided scenario exercise with reference table
+
+**Content:**
+- The `clk_hf` root clock dividers distribute clock signals to specific subsystems — key assignments: `clk_hf[0]` → SYSCPUSS/CM33 (max 160 MHz HP, 80 MHz LP), `clk_hf[1]` → APPCPUSS/CM55/U55/GPU/DC (max 320 MHz HP, 140 MHz LP), `clk_hf[2]` → SoCMEM system SRAM (max 240 MHz HP, 110 MHz LP), `clk_hf[3]` → SMIF[0] (max 320 MHz HP, 200 MHz LP), `clk_hf[10]` → SCBs/CAN/TCPWM/SmartI/O (max 80 MHz HP, 40 MHz LP), `clk_hf[12]` → MIPI DSI D-PHY PLL reference (max 51 MHz HP only)
+- For active face recognition (HP mode): set DPLL_HP0 to 320 MHz, `clk_hf[1]` divider = 1 (CM55 at 320 MHz), `clk_hf[0]` divider = 2 (CM33 at 160 MHz), `clk_hf[2]` = 240 MHz for SoCMEM
+- For idle monitoring (LP mode): set DPLL_LP0 to 160 MHz, `clk_hf[1]` divider = 1 (CM55 at 140 MHz max in LP — use 140 MHz), `clk_hf[0]` divider = 2 (CM33 at 80 MHz), disable `clk_hf[1]` if CM55 is powered down
+- For deep sleep: DPLLs are disabled; IHO provides the wakeup clock; `clk_hf[0]` sources from IHO bypass path
+- The MIPI DSI D-PHY PLL reference clock (`clk_hf[12]`) is only available in HP mode (max 51 MHz) — the display pipeline cannot operate in LP mode; plan your power mode transitions accordingly
+- Dynamic frequency scaling is implemented by writing to power control registers — the PDL provides APIs for this; always follow the documented sequence: change voltage first when scaling down, change frequency first when scaling up
+
+**Learning Check:** Practical exercise — complete a clock configuration table for three terminal operating states (Active Recognition, Idle Monitoring, Deep Sleep-RAM) by filling in DPLL source, DPLL frequency, clk_hf[0] divider, clk_hf[1] divider, and system power mode for each state. A completed reference table is provided for self-check.
+
+---
+
+## Module 3: Processor Architecture & ML Accelerator Selection (28 minutes)
+
+**Module Overview:** This module is where you make the most consequential firmware architecture decisions for your face recognition terminal: which accelerator handles which inference stage, and how do you partition the rest of your firmware tasks across the two CPU domains. You'll work through these decisions using the documented capabilities of the Ethos-U55 and NNLite.
+
+---
+
+### Section 3.1: ML Accelerator Capabilities and Selection (14 minutes)
+
+**Section Overview:** You'll analyze the documented capabilities of the Ethos-U55 and NNLite accelerators and apply a structured decision framework to assign each inference stage of your face recognition pipeline to the correct accelerator.
+
+---
+
+#### Subsection 3.1.1: Analyze Ethos-U55 Capabilities
+
+**Duration:** 7 minutes
+**Format:** Specification deep-dive with annotated feature table
+
+**Content:**
+- The Ethos-U55 works in conjunction with the CM55 CPU, running at the same clock frequency (up to 320 MHz in HP mode) — it is a high-performance domain peripheral and requires PD1 to be powered
+- Key performance specification: **128 MACs/clock cycle** with 8-bit weight support and weight compression — the CM55 + Ethos-U55 combination is approximately 50× faster than a Cortex-M7 at the same clock frequency for NN inference, and approximately 25× more energy efficient
+- Supported NN types: dense (fully connected), convolutional (1D/2D/3D), recurrent (GRU/LSTM) — this covers the full range of architectures used in face recognition (MobileNetV1/V2, RNNoise, and similar)
+- Supported NN kernels: convolution (1D/2D/3D), fully-connected, recurrent (GRU/LSTM) — compatible with popular architectures including MobileNetV1, MobileNetV2
+- Weight compression reduces memory usage — critical for fitting large face recognition models within the available SRAM budget (up to 5 MB system SRAM + 512 KB TCM for CM55)
+- **Use Ethos-U55 for:** full face recognition inference (embedding extraction, liveness detection), any model requiring >4 MACs/cycle throughput, models with convolutional layers that benefit from hardware acceleration, latency-sensitive recognition stages
+
+**Learning Check:** True/False with justification — "The Ethos-U55 can operate while the CM55 domain (PD1) is powered down." (False — Ethos-U55 is a high-performance domain peripheral; it requires PD1 to be active. NNLite in the low-power domain is the correct choice for always-on inference.)
+
+---
+
+#### Subsection 3.1.2: Analyze NNLite Capabilities
+
+**Duration:** 7 minutes
+**Format:** Comparison scenario + specification table
+
+**Content:**
+- The NNLite coprocessor works in conjunction with the CM33 CPU, running at the same clock frequency (up to 160 MHz HP, 80 MHz LP) — it is a **low-power domain** peripheral, making it ideal for always-on use cases
+- NNLite is an **ACTIVE state peripheral** — it operates when the CM33 is active, not in deep sleep; it is optimized for low-to-moderate complexity ML models such as wake word detection (WWD) and human activity recognition (HAR)
+- The MAC unit supports **up to 4 multiplications/additions per clock cycle** — significantly lower throughput than Ethos-U55's 128 MACs/cycle, but at a fraction of the power cost
+- Supported kernels: dense (fully connected), 2D convolution, depthwise 2D convolution, pooling (min/max/average), GRU, LSTM, pointwise operations (add/subtract/multiply), re-quantization, activation functions (ReLU, Leaky ReLU, Sigmoid, tanh, Softmax)
+- Supported data precisions: 8-bit, 16-bit, and 32-bit for activations and weights; zero weight skipping for efficient computation; compatible with TensorFlow Lite for Microcontrollers
+- **Use NNLite for:** lightweight presence/wake detection (is there a face in the frame?), human activity recognition, always-on sensor fusion — workloads that must run continuously while the CM55 domain is powered down
+
+**Learning Check:** Scenario decision — "Your terminal needs to detect whether a person is approaching (presence detection) while consuming less than 25 µA total system current. The CM55 domain is powered down. Which accelerator do you use, and what is the maximum clock frequency available to it in this configuration?" (Answer: NNLite on CM33; in LP mode with CM55 off, CM33/NNLite runs at up to 80 MHz)
+
+---
+
+### Section 3.2: Task Partitioning Across CPU Domains (14 minutes)
+
+**Section Overview:** You'll apply the IPC block to partition your terminal's firmware tasks across the CM55 and CM33 domains, producing a justified task assignment that references each domain's documented clock frequency, power characteristics, and peripheral access.
+
+---
+
+#### Subsection 3.2.1: Apply the IPC Block for Task Synchronization
+
+**Duration:** 7 minutes
+**Format:** Architecture diagram walkthrough + scenario exercise
+
+**Content:**
+- The **IPC (Inter-Processor Communication) block** is the hardware mechanism for synchronizing tasks between the CM55 and CM33 — it provides semaphore-based signaling without requiring shared memory polling
+- The CM55 domain is the high-performance domain: it has direct access to the Ethos-U55, the 2.5D GPU, the display controller, SMIF (external flash), USB, and the 4-channel HPDMA (AXI bus, 128-byte FIFO per channel) — use it for compute-intensive, latency-sensitive tasks
+- The CM33 domain is the low-power domain: it has direct access to NNLite, all 12 SCBs, I3C, CAN FD, Ethernet, Crypto, and the 2×16-channel DMA (AHB bus) — use it for always-on sensing, communications, and security operations
+- Both CPUs can access resources in each other's domains via a bus bridge — but cross-domain access adds latency and power; minimize it by assigning tasks to the domain that owns the relevant peripheral
+- The CM33 runs TF-M in the Secure Processing Environment (SPE) — all security operations (key management, attestation, secure storage) must execute on the CM33 in the SPE, not on the CM55
+- IPC workflow for face recognition: CM33 NNLite detects presence → CM33 signals CM55 via IPC → CM55 wakes up, runs full face recognition via Ethos-U55 → CM55 sends result to CM33 via IPC → CM33 makes access control decision and actuates door relay
+
+**Learning Check:** Task assignment exercise — given a list of eight terminal functions (face embedding extraction, door relay GPIO control, MIPI-DSI display update, secure key lookup via TF-M, NNLite presence detection, UART debug output, USB firmware update, I2C sensor polling), assign each to CM55 or CM33 and provide a one-sentence justification for each assignment.
+
+---
+
+#### Subsection 3.2.2: Partition Memory for Multi-Core Operation
+
+**Duration:** 7 minutes
+**Format:** Memory map diagram + guided reading
+
+**Content:**
+- The PSOC Edge E8 provides multiple memory types with different access characteristics: **512 KB RRAM** (35 ns read access, 128-bit reads with word caching, in the low-power domain — use for CM33 code and security assets), **up to 5 MB system SRAM (SoCMEM)** (shared, accessible by both CPUs via bus bridge), **1 MB SRAM coupled with CM33** (low-power domain, fast CM33 access), **512 KB TCM for CM55** (256 KB instruction + 256 KB data, 0-wait-state — use for time-critical CM55 code and inference buffers)
+- The SMIF interfaces (2×, each with 32 KB cache) support XIP (execute-in-place) from external flash up to 64 MB — use for storing large ML models that don't fit in internal SRAM; the 32 KB cache reduces repeated flash access latency
+- SRAM wait states depend on the access path and operating frequency — the CM55 accessing SoCMEM at 320 MHz incurs more wait states than accessing its own TCM; place your most latency-sensitive inference buffers in TCM
+- 5120 bytes of RRAM are dedicated to OTP use cases including security asset storage — this is where device keys and provisioning data live; do not use this region for application data
+- For your terminal: store the NNLite presence detection model in CM33-coupled SRAM; store the full face recognition model in SoCMEM or external flash (XIP via SMIF); store inference input/output buffers in CM55 TCM for lowest latency
+- The DMA controllers handle data movement autonomously: HPDMA (CM55 domain) for large transfers (image frames from USB/SMIF to SoCMEM); DMA (CM33 domain) for small transactional transfers (ADC results, I2C sensor data)
+
+**Learning Check:** Memory allocation scenario — given a face recognition model requiring 2 MB of weights and a presence detection model requiring 128 KB, plus 512 KB of inference buffers for the CM55, describe where you would place each component and why, referencing the documented memory types and their access characteristics.
+
+---
+
+## Module 4: Security Architecture & PSA Compliance (14 minutes)
+
+**Module Overview:** Your face recognition terminal is an access control device — security isn't optional. This module walks you through the PSOC Edge E8's security architecture, helps you select the right EPC security level for your application, and shows you how to configure TrustZone SPE/NSPE partitioning with TF-M.
+
+---
+
+### Section 4.1: Selecting EPC Level and Configuring TrustZone (14 minutes)
+
+**Section Overview:** You'll select the correct part number (EPC2 vs EPC4) for your PSA compliance requirement and specify which firmware components belong in the Secure Processing Environment (SPE) versus the Non-Secure Processing Environment (NSPE).
+
+---
+
+#### Subsection 4.1.1: Select EPC2 vs EPC4 Security Level
+
+**Duration:** 7 minutes
+**Format:** Decision framework + ordering information table
+
+**Content:**
+- The PSOC Edge E8 is available in two security configurations: **EPC2** (Infineon Edge Protect Category 2, supporting SESIP/PSA Level 2) and **EPC4** (Infineon Edge Protect Category 4, supporting SESIP/PSA Level 3 + secure enclave)
+- Both EPC levels include: hardware crypto accelerator, TrustZone isolation, Infineon proprietary MPU/MPC/PPCs, secure boot with hardware-based Root of Trust (RoT), DICE mechanisms for device attestation, and off-the-shelf TF-M + mbedTLS
+- **EPC4 adds:** a lock-step secure enclave with runtime services (PSA-compliant cryptographic services, key management, attestation, secure storage), tamper detection, side-channel attack (SCA) mitigation, and fault injection attack protection — EPC4 targets PSA Level 3 + ISE certification (pending)
+- For an access control terminal: **EPC4 is the appropriate choice** — access control devices store biometric templates and cryptographic keys that require the highest level of hardware protection; PSA Level 3 + secure enclave provides the isolation needed for production deployment
+- Part number selection: EPC4 variants include suffix "S4" in the part number (e.g., PSE846GPS4DBZQ3 = E84, BGA-220, 5120 KB SRAM, U55, GFX, EPC4); EPC2 variants use "S2" (e.g., PSE846GPS2DBZQ3)
+- Secure boot with hardware-based RoT is enabled on both EPC levels — the boot ROM authenticates the OEM application before execution; the boot source is selected via the P17.6 pin state (Low = OEM_APP_ADDRESS, High = OEM_ALT_APP_ADDRESS)
+
+**Learning Check:** Part number selection exercise — given the requirement for PSA Level 3 compliance, Ethos-U55 support, graphics capability, 5120 KB system SRAM, and BGA-220 package, identify the correct part number from the ordering table and explain why EPC4 is required over EPC2 for this application.
+
+---
+
+#### Subsection 4.1.2: Configure TrustZone SPE/NSPE Partitioning
+
+**Duration:** 7 minutes
+**Format:** Security architecture diagram walkthrough + partitioning exercise
+
+**Content:**
+- The CM33 is a TrustZone-enabled core with two processing environments: the **Secure Processing Environment (SPE)** and the **Non-Secure Processing Environment (NSPE)** — the CM55 operates exclusively in NSPE and accesses TF-M services via PSA API calls over IPC
+- **SPE contains:** Infineon-provided TF-M (Trusted Firmware-M) implementation, Extended Boot firmware, hardware crypto accelerator access, secure key storage, and (EPC4 only) secure enclave runtime services — this is where your biometric template encryption keys and access control credentials live
+- **NSPE contains:** your application code on both CM33 and CM55, middleware, RTOS tasks, and any code that does not require direct access to secure assets — face recognition inference, display rendering, and peripheral drivers all run in NSPE
+- TF-M services are accessed from NSPE via the PSA API — your CM55 face recognition code calls TF-M to encrypt/decrypt biometric templates, generate attestation tokens, and access secure storage, without ever touching the secure keys directly
+- Infineon proprietary protection units (MPCs and PPCs) enforce memory and peripheral access control using secured/non-secured address aliases and protection contexts — the PSOC Edge E8 supports up to 8 protection contexts
+- For your terminal: configure the SPE to contain TF-M + biometric key management + access control credential storage; configure the NSPE to contain face recognition inference (CM55), display rendering (CM55), presence detection (CM33), and all peripheral drivers; use PSA API calls across the SPE/NSPE boundary for all security operations
+
+**Learning Check:** Partitioning scenario — given a list of six firmware components (TF-M key management service, face embedding extraction model, door relay GPIO driver, biometric template encryption routine, MIPI-DSI display driver, device attestation token generator), assign each to SPE or NSPE and justify each assignment with reference to the documented security architecture.
+
+---
+
+## Module 5: Peripherals, Display Pipeline & System Integration (14 minutes)
+
+**Module Overview:** With your architecture decisions made, it's time to configure the hardware interfaces your terminal needs: the MIPI-DSI display pipeline, the serial communication blocks for sensors and debug, and the GPIO routing that ties it all together. You'll also look at boot configuration and DFU for production deployment.
+
+---
+
+### Section 5.1: Display Pipeline and Serial Peripheral Configuration (14 minutes)
+
+**Section Overview:** You'll configure the MIPI-DSI display pipeline for your terminal's status display and select the correct SCB peripheral mode for each external interface, identifying the hardware constraints that affect your PCB design.
+
+---
+
+#### Subsection 5.1.1: Configure the MIPI-DSI Display Pipeline
+
+**Duration:** 7 minutes
+**Format:** Pipeline diagram walkthrough + hardware constraint checklist
+
+**Content:**
+- The PSOC Edge E8 graphics subsystem consists of: a **2.5D GPU** (rendering engine, up to 200 MHz in HP mode), a **Display Controller (DC)** (multi-plane composition, frame buffer compression), and a **MIPI-DSI host controller** (2-lane output, 500–1500 Mbps per lane) — frames flow GPU → DC → DSI host → display panel
+- The display controller supports up to **1024×768 resolution at 60 fps**, up to 24 bits per pixel, with 4-layer alpha blending and 2× frame buffer compression via YUV 4:2:0 color space conversion
+- Both **DBI (command mode)** and **DPI (video mode)** standards are supported over the DSI interface; MIPI DBI Types A, B, and C are also available for displays with integrated frame buffers
+- **Critical hardware constraint:** If you use the graphics feature, you must connect the **DSI.REXT pin (J6 on BGA-220) to a 200 Ω resistor to ground** — if graphics is not used, tie DSI.REXT to ground. Failure to do this will cause DSI PHY malfunction
+- The display pipeline operates only in **HP mode** — `clk_hf[12]` (MIPI DSI D-PHY PLL reference, max 51 MHz) is only available in HP mode; plan your power mode transitions to ensure the display is updated before entering LP or deep sleep
+- GPIO routing for DSI: dedicated pins DSI.CLKN/P (A4/A5), DSI.DATA0N/P (B4/B3), DSI.DATA1N/P (A3/A2) — these are fixed-function pins, not routed through HSIOM; the GPU/DC alternate functions for DBI mode route through P16/P17 via HSIOM settings ACT #13, #14, #15
+
+**Learning Check:** Hardware design checklist — identify three hardware design decisions you must make for the MIPI-DSI interface (resistor value and pin, power mode constraint, DBI vs DPI mode selection) and explain the consequence of getting each one wrong.
+
+---
+
+#### Subsection 5.1.2: Select and Configure SCB Peripheral Modes
+
+**Duration:** 7 minutes
+**Format:** Interface mapping table + constraint identification exercise
+
+**Content:**
+- The PSOC Edge E8 has **12 SCBs**: SCB1–SCB11 can be configured as I2C master/slave, UART, or SPI master/slave; **SCB0 is special** — it only supports I2C slave mode and SPI slave mode, and it can operate in System Deep Sleep with an external clock (the only SCB that can do this)
+- **SCB0 constraint for your terminal:** Use SCB0 only for interfaces that must remain active during deep sleep (e.g., an I2C slave interface to a host controller that polls the terminal during sleep); do not use SCB0 as a UART or I2C master
+- I2C mode: up to 1 Mbps (Fast Mode Plus), full multi-master arbitration — use for sensor buses (e.g., IR sensor, temperature sensor); route via HSIOM ACT #7 settings
+- UART mode: up to 8 Mbps in LP mode, 16 Mbps in HP mode — use for debug console (UART) and host communication; route via HSIOM ACT #8 settings
+- SPI mode: standard SCBs up to 25 Mbps; one SCB supports high-speed mode up to 50 Mbps (Fscb/4 with Fscb max 200 MHz) — use for high-speed SPI flash or display interfaces; route via HSIOM ACT #6 settings
+- **GPIO HSIOM routing:** Each SCB signal must be routed to a specific GPIO port via the HSIOM bitfield — for example, SCB1 I2C SCL routes to P9.3 (ACT #7), SCB1 SPI MOSI routes to P9.2 (ACT #6); consult Table 12/13 in the datasheet for the complete routing table; the ModusToolbox Device Configurator automates this but you must verify pin conflicts manually
+
+**Learning Check:** Peripheral configuration plan exercise — given four interface requirements (MIPI-DSI display, I2C sensor bus that must work in deep sleep, SPI external flash at 25 Mbps, UART debug at 115200 baud), map each to the correct PSOC Edge E8 peripheral, identify the GPIO port and HSIOM setting, and flag any constraints that affect the hardware design.
+
+---
+
+## Course Summary and Final Assessment (3 minutes)
+
+**Format:** Summary video + final knowledge check
+
+### What You've Covered
+
+In this course, you've built the firmware architecture knowledge you need to start developing for the PSOC Edge E8 face recognition terminal:
+
+- **Module 1:** You mapped the dual-domain architecture, identified the key compute blocks, and learned to navigate the ModusToolbox ecosystem and PDL
+- **Module 2:** You selected system power modes for each terminal operating state, configured deep sleep SRAM retention to meet power budgets, and built a clock configuration table for active, idle, and sleep states
+- **Module 3:** You analyzed the Ethos-U55 (128 MACs/cycle, HP domain) and NNLite (4 MACs/cycle, LP domain always-on) capabilities, made workload assignment decisions, and partitioned firmware tasks across the CM55 and CM33 using the IPC block
+- **Module 4:** You selected EPC4 for PSA Level 3 compliance, configured TrustZone SPE/NSPE partitioning with TF-M, and assigned firmware components to the correct security environment
+- **Module 5:** You configured the MIPI-DSI display pipeline (including the DSI.REXT hardware constraint), selected SCB modes for each interface, and mapped GPIO HSIOM routing
+
+### Final Assessment (Integrated into Summary)
+
+**Format:** 5-question scenario-based assessment (not timed)
+
+1. A new terminal requirement adds a lightweight voice activity detection model that must run continuously while the face recognition pipeline is idle and the CM55 is powered down. Which accelerator do you assign this to, and what is its maximum clock frequency in LP mode?
+
+2. Your power budget for overnight idle is 22 µA IBAT. You need to retain 64 KB of NNLite model weights. Which deep sleep variant do you select? Cite the spec ID and typical current value.
+
+3. Your terminal must achieve PSA Level 3 certification. Which EPC level do you specify in your part number, and what additional security features does it provide over EPC2?
+
+4. You need to configure an I2C sensor interface that must remain active when the system is in deep sleep. Which SCB do you use, and what is the constraint on its operating mode?
+
+5. Your clock configuration table shows `clk_hf[12]` enabled in LP mode for the MIPI-DSI D-PHY PLL reference. What is wrong with this configuration, and how do you fix it?
+
+**Passing score:** 4/5 correct. Learners who score below 4/5 are directed to review the relevant module before proceeding to hands-on lab work.
+
+---
+
+## Downloadable Job Aids
+
+1. **PSOC Edge E8 Domain & Block Assignment Quick Reference**
+   A one-page table mapping every major peripheral to its domain (HP, LP, Deep Sleep/Always-On), its CPU owner, and its DMA controller — use this during firmware architecture planning to quickly verify which domain owns each peripheral you need.
+
+2. **ML Accelerator Selection Decision Tree**
+   A flowchart guiding you from workload characteristics (model complexity, latency requirement, power budget, domain availability) to the correct accelerator (Ethos-U55 or NNLite) — includes the key specs: 128 MACs/cycle vs. 4 MACs/cycle, HP domain vs. LP domain, supported NN kernel types.
+
+3. **Clock Configuration Table Template**
+   A fillable table with columns for Operating State, System Power Mode, DPLL Source, DPLL Frequency, clk_hf[0] Divider (CM33), clk_hf[1] Divider (CM55/U55), clk_hf[2] (SoCMEM), clk_hf[12] (DSI), and Notes — pre-populated with the documented frequency limits for HP and LP modes.
+
+4. **Deep Sleep Mode Comparison Card**
+   A three-column comparison of Deep Sleep-OFF, Deep Sleep-RAM, and Deep Sleep variants showing: SRAM retention options, typical IBAT (battery powered), wakeup time, PD1 state, and recommended use case for each — includes the relevant spec IDs from Table 17.
+
+5. **EPC2 vs EPC4 Security Feature Comparison**
+   A side-by-side table of security features available in EPC2 (PSA Level 2) and EPC4 (PSA Level 3 + secure enclave), with a PSA compliance requirement mapping and part number suffix guide (S2 vs S4).
+
+6. **TrustZone SPE/NSPE Partitioning Checklist**
+   A checklist for assigning firmware components to SPE or NSPE, with decision criteria (does this component access secure keys directly? does it need hardware crypto? does it run on CM55?) and a reference to the TF-M PSA API call pattern for cross-boundary access.
+
+7. **SCB Peripheral Configuration Reference**
+   A table of all 12 SCBs with their supported modes (I2C/SPI/UART, master/slave), deep sleep capability (SCB0 only), maximum data rates by mode and power mode, and example GPIO/HSIOM routing for common configurations (I2C sensor, SPI flash, UART debug).
+
+8. **MIPI-DSI Hardware Bring-Up Checklist**
+   A step-by-step hardware and firmware checklist for MIPI-DSI bring-up: DSI.REXT resistor (200 Ω to ground, pin J6), power mode requirement (HP only), clk_hf[12] configuration (max 51 MHz), DBI vs DPI mode selection, GPIO pin assignments for DSI dedicated pins, and PDL initialization sequence.
+
+---
+
+## Course Design Notes
+
+### Pedagogical Approach
+
+This course uses a **task-centered instructional design** model, where every subsection is anchored to a decision or action Alex will perform on the job — not a topic to be memorized. The sequence moves from architectural orientation (what is this chip?) through configuration decisions (how do I set it up?) to integration (how do I bring it all together?), mirroring the actual firmware development workflow.
+
+**Spaced retrieval** is built into the learning check questions, which require Alex to apply information from earlier subsections in new contexts — for example, the deep sleep SRAM retention exercise requires applying both the power mode knowledge from Section 2.1 and the current consumption specs from the electrical specifications.
+
+**Worked examples** are used throughout to ground abstract specifications in the face recognition terminal context — every specification (128 MACs/cycle, 20.7 µA IBAT, 25.5 ms wakeup time) is immediately connected to a terminal design decision.
+
+### Assessment Strategy
+
+- **Formative assessments** (learning checks) are embedded in every subsection — they are low-stakes, immediately corrective, and designed to surface misconceptions before they compound
+- **Summative assessment** (5-question final) uses scenario-based questions that require synthesis across modules — no question can be answered by recalling a single fact; each requires applying multiple concepts
+- **Passing threshold** of 4/5 (80%) reflects the high-stakes nature of firmware architecture decisions — a misconfigured power domain or wrong EPC level has real consequences in production
+
+### Accessibility
+
+- All interactive diagrams include text-based alternatives (tables, bulleted lists) for screen reader compatibility
+- Video content includes closed captions and full transcripts
+- Color is never the sole differentiator in diagrams — patterns and labels are used alongside color coding
+- All downloadable job aids are provided in both PDF and accessible HTML formats
+
+### Delivery Format Rationale
+
+- **Interactive block diagrams** are used for architecture content (Modules 1, 3) because spatial relationships between blocks are the core learning — static images are insufficient
+- **Comparison tables** are used for accelerator selection and power mode content because the decision is inherently comparative
+- **Scenario exercises** are used for partitioning and configuration tasks because these are the actual job tasks Alex will perform
+- **Annotated schematics** are used for hardware constraint content (DSI.REXT, power supply diagrams) because the constraint is physical and must be visualized
+
+---
+
+## Alignment to Learning Objectives
+
+| Objective | Module | Section | Subsection(s) |
+|---|---|---|---|
+| **O1:** Decide Ethos-U55 vs NNLite for each inference stage | Module 3 | Section 3.1 | 3.1.1, 3.1.2 |
+| **O2:** Partition firmware tasks across CM55/CM33 using IPC | Module 1, Module 3 | 1.1, 3.2 | 1.1.1, 1.1.2, 3.2.1, 3.2.2 |
+| **O3:** Select power mode and configure clock tree for each operating state | Module 2 | Section 2.1, 2.2 | 2.1.1, 2.2.1, 2.2.2 |
+| **O4:** Select SRAM retention configuration for deep sleep variants | Module 2 | Section 2.1 | 2.1.2 |
+| **O5:** Select EPC2 vs EPC4 and configure TrustZone SPE/NSPE | Module 4 | Section 4.1 | 4.1.1, 4.1.2 |
+| **O6:** Configure MIPI-DSI pipeline and SCB peripheral modes | Module 5 | Section 5.1 | 5.1.1, 5.1.2 |
+
+| Goal | Primary Modules | Supporting Modules |
+|---|---|---|
+| **G1:** Multi-core architecture and ML workload assignment | Module 3 | Module 1 |
+| **G2:** Power domains and clock tree configuration | Module 2 | Module 1 |
+| **G3:** Security subsystem configuration | Module 4 | Module 1 |
+| **G4:** Display pipeline and peripheral configuration | Module 5 | Module 1 |
+
+---
+
+## Course Developer Notes
+
+### Addressing Alex's Pain Points
+
+**Pain Point 1: Peripheral bring-up complexity across a multi-core, multi-domain architecture**
+
+This is addressed structurally throughout the course. Module 1 establishes the domain mental model before any configuration content is introduced — Alex cannot configure peripherals correctly without first understanding which domain owns them. Subsection 1.2.2 explicitly covers the PDL bring-up sequence (clocks → GPIO/HSIOM → peripherals → DMA) and explains why order matters. The SCB configuration subsection (5.1.2) directly addresses the SCB0 deep-sleep constraint, which is a common bring-up mistake. Job Aid #7 (SCB Peripheral Configuration Reference) provides an on-the-job reference for the most common bring-up decisions.
+
+**Pain Point 2: Balancing ML model performance and accuracy against SRAM and latency constraints**
+
+Module 3 is entirely dedicated to this pain point. The Ethos-U55 vs NNLite comparison (Subsections 3.1.1 and 3.1.2) gives Alex the specific capability data (128 MACs/cycle vs 4 MACs/cycle, supported kernel types, power domain constraints) needed to make the accelerator selection decision. Subsection 3.2.2 addresses memory allocation for ML models, including the TCM vs SoCMEM vs SMIF trade-offs. Job Aid #2 (ML Accelerator Selection Decision Tree) provides a structured decision framework for future model integration decisions.
+
+**Pain Point 3: Configuring GPIO, power domains, and clock trees correctly for a feature-rich product**
+
+Module 2 addresses power domains and clock trees directly, with the clock configuration table exercise (Subsection 2.2.2) producing a concrete deliverable Alex can use as a starting point for the actual terminal firmware. The HSIOM routing content in Subsection 5.1.2 addresses GPIO configuration complexity. Job Aids #3 (Clock Configuration Table Template) and #8 (MIPI-DSI Hardware Bring-Up Checklist) provide on-the-job references that reduce the risk of configuration errors.
+
+**Pain Point 4: Ensuring PSA security compliance for an access control device**
+
+Module 4 addresses this directly. The EPC2 vs EPC4 selection subsection (4.1.1) gives Alex a clear decision framework grounded in the documented PSA compliance levels, and connects the decision to the part number ordering table so Alex can specify the correct part. The SPE/NSPE partitioning subsection (4.1.2) gives Alex a concrete model for where each firmware component belongs, with the TF-M PSA API call pattern for cross-boundary access. Job Aids #5 and #6 provide on-the-job references for security architecture decisions.
+
+### Content Gaps and Mitigations
+
+Per the identified content gaps in the learning objectives analysis:
+
+- **Camera/image sensor input pipeline:** The datasheet does not document a MIPI-CSI or camera input interface. This course does not address camera bring-up. Developers should add a note in the Course Introduction directing Alex to consult with the hardware team about the camera interface solution (USB UVC, SPI, or external processor) before beginning firmware development.
+
+- **ML model sizing and latency targets:** The datasheet does not provide specific guidance on maximum supported model sizes for face recognition workloads. The course presents the documented accelerator capabilities (MACs/cycle, supported kernels) but cannot provide concrete SRAM allocation guidance without SME input. Job Aid #2 includes a placeholder for SME-provided model size constraints.
+
+- **ModusToolbox PDL API specifics:** The course references the PDL and its initialization pattern but cannot include API signatures or code examples without the PDL documentation. Subsection 1.2.2 uses pseudocode patterns rather than actual API calls. Developers should supplement this subsection with PDL documentation excerpts or link to the online PDL API reference.
+
+- **EPC2 vs EPC4 provisioning workflow:** The course covers the selection decision but not the provisioning steps (which require AN238041). Add a reference to AN238041 in the Course Introduction and in Job Aid #5.
+
+### Localization Notes
+
+- All current consumption values are cited with their spec IDs (e.g., SIDDSO, SIDDSRA) to enable easy cross-reference with future datasheet revisions
+- Clock frequency limits are cited from Table 20 (Root clock divider frequencies) and Table 3 (CPU maximum frequencies) — update these tables if the datasheet is revised
+- Part numbers in Job Aid #5 are from Table 50 — verify against the current ordering information before each course revision

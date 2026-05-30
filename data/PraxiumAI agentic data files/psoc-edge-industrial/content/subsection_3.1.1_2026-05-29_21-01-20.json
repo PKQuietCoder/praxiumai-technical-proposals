@@ -1,0 +1,359 @@
+{
+  "subsection_id": "3.1.1",
+  "subsection_title": "Analyze Ethos-U55 Capabilities",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Identify the key hardware capabilities of the Ethos-U55 that make it suitable for high-throughput face recognition inference",
+    "Explain how the Ethos-U55 operates alongside the Cortex-M55 to accelerate neural network workloads",
+    "Justify assigning the full face recognition inference workload to the Ethos-U55 rather than running it on the CPU alone"
+  ],
+  "content": {
+    "hook_sentence": "The M55 and U55 together are roughly 50x faster than a Cortex-M7 at the same clock frequency for inference — skip the U55 and you are not just slower, you are in a different performance class entirely.",
+    "introduction": "For your face recognition terminal, the Ethos-U55 is the hardware that makes sub-500ms authentication latency achievable. Before you can decide how to partition inference workloads across the PSOC Edge E8's two accelerators, you need a precise picture of what the U55 actually delivers: its throughput ceiling, how it integrates with the Cortex-M55, and what the firmware execution model looks like at runtime.",
+    "key_points": [
+      {
+        "point": "The Ethos-U55 delivers 128 MACs per clock cycle and runs at up to 320 MHz in the high-performance domain.",
+        "explanation": "The U55 is a dedicated neural network coprocessor tightly coupled to the Cortex-M55 CPU. At 320 MHz with 128 MACs/cycle, the datasheet documents a peak throughput of 51.2 billion operations per second. Both the M55 and U55 share the same clock frequency — when you configure `clk_hf[1]` for the APPCPUSS, that setting governs both processors simultaneously. For face recognition, this throughput matters because a full recognition model involves many convolutional and fully connected layers. The U55 is designed to accelerate exactly these operations, offloading them from the M55 CPU so the CPU remains free for control flow, IPC messaging, and peripheral management during inference.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+            "snippet": "This product line includes an Arm® Ethos-U55 neural net processor, which works in conjunction with the Cortex®-M55 CPU to accelerate neural net (NN) operations. It supports 8-bit weights and weight compression to reduce memory usage. It also performs 128 MACs/clock cycle.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_b7cefb2c-3147-4b25-8a63-f80a20d5af0f_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b1c22e3a-cc38-483f-88d8-7fa6b8e91a7f",
+            "snippet": "Ethos-U55 NN coprocessor with 128 multiply-accumulate operations (MACs) per cycle; 51.2 billion operations per second",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_b1c22e3a-cc38-483f-88d8-7fa6b8e91a7f_0.png",
+            "page_number": 9,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "9a63d279-e06e-4bb1-b60b-64c37a335521",
+            "snippet": "A machine learning (ML) coprocessor with the Cortex®-M55 CPU: the Arm® Ethos-U55 CPU, running at the same clock frequency as the U55",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.text_9a63d279-e06e-4bb1-b60b-64c37a335521_0.png",
+            "page_number": 23,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "7d6e708a-a81f-4154-9579-528b47b5c73d",
+            "snippet": "320 MHz Arm® Ethos-U55 NPU with 128 MACs per cycle",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_0/ChunkType.text_7d6e708a-a81f-4154-9579-528b47b5c73d_0.png",
+            "page_number": 0,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The U55 executes autonomously from a command stream in on-chip memory, freeing the M55 during inference.",
+        "explanation": "The U55 does not require the M55 to supervise each operation. At runtime, the U55 fetches a command stream from on-chip memory and executes it independently, using weights stored in SRAM or system SRAM. It maintains an internal buffer for commands and results, then raises an interrupt when the inference completes. For your firmware architecture, this means the M55 can dispatch an inference job to the U55 and then handle other tasks — updating the display, processing IPC messages from the M33, or managing GPIO — while the U55 runs the model. You do not poll the U55; you respond to its completion interrupt. This interrupt-driven model is important to keep in mind when you structure your inference pipeline. The typical workflow from model training to deployment is: train in TensorFlow, quantize to produce an Int8 `.tflite` file, run an NN optimizer to identify which graph operations the U55 can accelerate, apply lossless compression to reduce the file size, and produce a runtime executable that dispatches supported kernel operations to the U55.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "bbf6ffff-6aff-4260-9cff-a86cabf933ac",
+            "snippet": "The U55 operates on a command stream resident in on-chip memory, which it fetches and executes autonomously, freeing the M55 for other operations, using weights stored in SRAM or system SRAM. It has a buffer for commands and for writing results to. It generates an interrupt after completing the command.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_bbf6ffff-6aff-4260-9cff-a86cabf933ac_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "bbf6ffff-6aff-4260-9cff-a86cabf933ac",
+            "snippet": "the network is trained in TensorFlow and quantized to produce an Int8 TensorFlow lite (*.tflite) file. An NN optimizer identifies graphs to run on the U55; lossless compression is used to reduce the size of the *.tflite file.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_bbf6ffff-6aff-4260-9cff-a86cabf933ac_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The M55 + U55 combination is approximately 50x faster and 25x more energy efficient than a Cortex-M7 at the same clock for inference.",
+        "explanation": "This is not a marginal improvement — it is a qualitative shift in what is feasible on a microcontroller-class device. Running a face recognition model on a Cortex-M7 equivalent (M55 CPU alone, no U55) would require either a much slower inference rate or a much higher clock frequency to hit the same throughput, both of which hurt your power budget. The energy efficiency figure is equally important for your terminal design. The terminal spends most of its time waiting for a user to approach, but when authentication is triggered, it must complete inference quickly and return to idle. A 25x energy efficiency advantage means the active recognition burst consumes far less energy per inference, which directly reduces the average power draw over the terminal's duty cycle. This comparison also clarifies why disabling the U55 to simplify firmware bring-up is a significant trade-off, not a minor one. You lose the acceleration that makes the latency target achievable.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "5b414449-5aea-47c9-9e85-7ff0ccd21544",
+            "snippet": "The combination of the M55 and U55 is roughly 50x faster than a Cortex®-M7 at the same clock frequency for computing inferences, and about 25x more energy efficient.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_5b414449-5aea-47c9-9e85-7ff0ccd21544_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The U55 is physically located in the high-performance domain and can be independently powered down when not needed.",
+        "explanation": "The block diagram places the Ethos-U55 inside the high-performance domain alongside the Cortex-M55, the 4-channel HPDMA, and the graphics subsystem. This has a direct consequence for your power management strategy: when PD1 (the high-performance domain) is powered off during idle monitoring, the U55 is also powered down. The datasheet confirms this explicitly — in configurations where U55 power is listed as Off, the U55 CPU is powered down. This is the correct behavior for your terminal: during idle state, the low-power domain handles presence detection via NNLite, and the U55 only powers up when a full face recognition inference is needed. You can also enable the U55 clock independently via the `APP_MMIO2` peripheral group control (`PERI1_GR2_SL_CTL`). When you need the U55 active but want to keep SoCMEM running, you enable both; when you want SoCMEM without the U55, you disable the U55 clock in that register. This granularity lets you tune power consumption for intermediate operating states.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "dd56155d-02e2-4a40-a8ae-9c0e58042cbd",
+            "snippet": "U55 power | Off | U55 CPU powered down",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_dd56155d-02e2-4a40-a8ae-9c0e58042cbd_0.png",
+            "page_number": 67,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "901c532b-fdec-4777-a0e8-549afe830b9e",
+            "snippet": "APP_MMIO2 (PERI1_GR2_SL_CTL) | Enable only SoCMEM | Enable SoCMEM clock and disable U55 clock",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_68/ChunkType.table_901c532b-fdec-4777-a0e8-549afe830b9e_0.png",
+            "page_number": 68,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+            "snippet": "Arm® Ethos-U55 NPU up to 320 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+            "page_number": 2,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "The U55 supports 8-bit weights with lossless compression, targeting image and object recognition workloads.",
+        "explanation": "The U55 is designed for 8-bit quantized models. This is the standard output of a TensorFlow Lite post-training quantization pass, so your face recognition model needs to be quantized to Int8 before deployment. The U55 also supports weight compression to reduce the memory footprint of the stored model, which matters when you are working within the PSOC Edge E8's SRAM budget. The documented application domains for the U55 include image and object recognition — exactly the category that face recognition falls into. Industrial and consumer applications listed in the datasheet include object recognition and image recognition, confirming that the U55's kernel support set is aligned with the operations a face recognition model requires. This also means the U55 is not a general-purpose compute engine. Operations that fall outside its supported kernel set will still execute on the M55 CPU. The NN optimizer in the toolchain handles this partitioning automatically, routing supported operations to the U55 and leaving unsupported ones on the CPU.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+            "snippet": "It supports 8-bit weights and weight compression to reduce memory usage.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_b7cefb2c-3147-4b25-8a63-f80a20d5af0f_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e7678b64-b1e6-4201-a611-1919d100fefc",
+            "snippet": "Applications for neural net acceleration with Arm® Ethos-U55 includes following but not limited: Industrial applications: vibration detection, anomaly detection, object recognition; Consumer applications: keyword detection, speech recognition, image/object recognition, gesture recognition",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_e7678b64-b1e6-4201-a611-1919d100fefc_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "bbf6ffff-6aff-4260-9cff-a86cabf933ac",
+            "snippet": "An NN optimizer identifies graphs to run on the U55; lossless compression is used to reduce the size of the *.tflite file. Finally a runtime executable file is produced which can utilize U55 to accelerate supported kernel operations.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_bbf6ffff-6aff-4260-9cff-a86cabf933ac_0.png",
+            "page_number": 37,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your team is under schedule pressure and proposes skipping U55 integration for the first firmware build — running the full face recognition model on the Cortex-M55 CPU alone to simplify bring-up. The latency target is sub-500ms. What is the most significant risk with this approach, and is it recoverable later?",
+        "reveal": "Running inference on the M55 CPU alone eliminates the acceleration that makes the latency target achievable. The M55 + U55 combination is approximately 50x faster than a Cortex-M7 at the same clock for inference. Without the U55, you are effectively operating at a fraction of that throughput. Whether the M55 alone can hit 500ms depends entirely on the model size and clock frequency, but the performance gap is large enough that you should treat this as a high-risk assumption rather than a safe simplification. The good news: U55 integration is recoverable. The U55 operates on a command stream and raises a completion interrupt, so you can add it to an existing firmware build without restructuring the inference pipeline from scratch. The NN optimizer handles the graph partitioning. The risk is that if you discover the M55-only path is too slow late in the project, you will need to re-validate inference latency and potentially retune the model quantization.",
+        "hint": "Think about what the 50x figure actually means for a latency-constrained workload."
+      },
+      {
+        "prediction_prompt": "You are configuring the terminal's active recognition state. The U55 is enabled and running a face recognition inference. The M55 is also active. A colleague asks whether the M55 needs to stay in a polling loop waiting for the U55 to finish. What is the correct firmware pattern, and what does the M55 do while the U55 is running?",
+        "reveal": "The M55 does not poll the U55. The U55 fetches its command stream autonomously from on-chip memory and executes it independently. When inference completes, the U55 raises an interrupt. The correct pattern is: the M55 dispatches the inference job (writes the command stream to memory and signals the U55), then returns to its normal task loop — handling IPC messages from the M33, updating the display, or managing peripheral I/O. When the U55 completion interrupt fires, the M55 reads the results from the U55's output buffer and proceeds with the authentication decision. This interrupt-driven model is what allows the M55 to remain productive during the inference window rather than burning cycles waiting.",
+        "hint": "The U55 has its own command buffer and result buffer — what does that imply about synchronization?"
+      }
+    ],
+    "summary": "The Ethos-U55 delivers 128 MACs/cycle at up to 320 MHz, executes autonomously via an interrupt-driven command stream, and provides roughly 50x the inference throughput of a Cortex-M7 equivalent — making it the correct accelerator for your terminal's full face recognition workload. Its placement in the high-performance domain means it powers down with PD1 during idle, which is the behavior you want when NNLite handles presence detection in the low-power domain.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 3,
+        "caption": "The PSOC Edge E8 block diagram shows the Ethos-U55 NPU at 320 MHz located inside the high-performance domain alongside the Cortex-M55, confirming that both processors share the same clock domain and power domain. NNLite appears separately in the low-power domain.",
+        "alt_text": "Detailed block diagram of the PSOC Edge E8 showing three power domains. The high-performance domain at the bottom contains the High Performance CPU Subsystem with a 4-channel HPDMA, Cortex-M55 at 320 MHz with 32 KB I- and D-caches, and Ethos-U55 at 320 MHz. The low-power domain in the middle contains the Low Power CPU Subsystem with Cortex-M33 at 160 MHz and NNLite. The deep sleep domain at the top contains autonomous analog peripherals. System SRAM labeled SoCMEM at 5120 KB is shown between the high-performance and low-power domains.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When the Ethos-U55 completes an inference, the M55 CPU is notified via a ___, rather than by polling the U55 status.",
+      "answer": "completion interrupt",
+      "distractors": [
+        "shared memory flag",
+        "DMA transfer",
+        "IPC message from M33"
+      ],
+      "explanation": "The U55 executes its command stream autonomously and raises an interrupt when done. This interrupt-driven model frees the M55 to handle other tasks during inference rather than waiting in a polling loop."
+    },
+    {
+      "after_key_point": 3,
+      "type": "matching",
+      "stem": "Match each terminal operating state to the correct U55 power configuration:",
+      "pairs": [
+        {
+          "left": "Active face recognition inference running",
+          "right": "U55 powered on, high-performance domain active"
+        },
+        {
+          "left": "Idle monitoring for user presence",
+          "right": "U55 powered down, high-performance domain off"
+        },
+        {
+          "left": "SoCMEM needed but U55 inference not required",
+          "right": "U55 clock disabled via APP_MMIO2, SoCMEM clock enabled"
+        }
+      ],
+      "explanation": "The U55 resides in the high-performance domain and powers down with PD1. The APP_MMIO2 register provides finer control, letting you enable SoCMEM independently of the U55 clock for intermediate power states."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not specify which neural network kernel operations are supported by the U55 versus executed on the M55 CPU fallback path. Learners cannot determine from this source alone whether a specific face recognition model's operations (e.g., depthwise separable convolutions, attention layers) are fully accelerated by the U55 or partially run on the CPU.",
+    "No concrete inference latency figures (in milliseconds) for face recognition models on the U55 are provided in the datasheet. The 51.2 GOPS figure is a peak throughput ceiling, not an end-to-end latency measurement for a specific model architecture."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are a firmware engineer designing a biometric access control terminal using the PSOC Edge E8. The terminal must perform two distinct ML inference stages: (1) a lightweight always-on presence detection task that monitors for a person approaching the terminal, and (2) a full face recognition inference that runs only when a person is detected. The presence detection stage must run continuously at the lowest possible power draw, while the face recognition stage requires high throughput to meet a sub-500ms authentication latency target.",
+        "question_text": "Which accelerator assignment correctly matches each inference stage to the accelerator best suited for its requirements?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Assign both stages to the Ethos-U55, since it operates at up to 320 MHz and delivers 128 MACs/cycle, making it the fastest option for all inference tasks",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Assign presence detection to the NNLite coprocessor in the low-power domain for always-on operation, and assign face recognition to the Ethos-U55 in the high-performance domain for high-throughput inference",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Assign presence detection to the Ethos-U55 to ensure reliable detection, and assign face recognition to the NNLite coprocessor since it runs alongside the Cortex-M33 at up to 160 MHz",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The NNLite coprocessor resides in the low-power domain and is optimized for always-on use cases such as presence or wake detection at the lowest power. The Ethos-U55, paired with the Cortex-M55 in the high-performance domain, delivers 128 MACs/cycle at up to 320 MHz, making it the right choice for the computationally intensive face recognition stage that must meet a strict latency target.",
+        "incorrect": "Review the documented capabilities of each accelerator. The NNLite is explicitly designed for low-to-moderate complexity, always-on inference in the low-power domain, while the Ethos-U55 is the high-performance accelerator with 128 MACs/cycle suited for demanding models. Assigning the high-complexity face recognition workload to NNLite, or running both on Ethos-U55, fails to exploit the power-domain architecture of the PSOC Edge E8."
+      },
+      "references": [
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "It is an ACTIVE state peripheral that accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR)... The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b7cefb2c-3147-4b25-8a63-f80a20d5af0f",
+          "snippet": "This product line includes an Arm® Ethos-U55 neural net processor, which works in conjunction with the Cortex®-M55 CPU to accelerate neural net (NN) operations. It supports 8-bit weights and weight compression to reduce memory usage. It also performs 128 MACs/clock cycle.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_b7cefb2c-3147-4b25-8a63-f80a20d5af0f_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are reviewing the ML inference architecture for a PSOC Edge E8-based face recognition terminal. A colleague proposes running the full face recognition model on the Cortex-M55 CPU alone, without enabling the Ethos-U55, to simplify the firmware bring-up. You need to evaluate whether this trade-off is justified given the system's performance requirements.",
+        "question_text": "What is the most significant consequence of disabling the Ethos-U55 and relying solely on the Cortex-M55 CPU for face recognition inference?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The system loses access to the HPDMA controller, preventing efficient data transfers between SRAM and the camera pipeline during inference",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The NNLite coprocessor in the low-power domain becomes the only available ML accelerator, forcing all inference onto the Cortex-M33",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Inference throughput drops substantially, since the M55 and U55 combination is approximately 50x faster than a Cortex-M7 at the same clock for inference, and removing the U55 eliminates that acceleration advantage",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The documented performance advantage of the M55+U55 combination is approximately 50x faster than a Cortex-M7 at the same clock frequency for inference, and about 25x more energy efficient. Disabling the Ethos-U55 removes the 128 MACs/cycle hardware acceleration, leaving the Cortex-M55 to execute NN operations in software — a significant throughput reduction that would likely violate the real-time latency requirements of face recognition.",
+        "incorrect": "While HPDMA and the NNLite are real system resources, neither is the primary consequence of disabling the Ethos-U55. The HPDMA remains available to the Cortex-M55 regardless of U55 state, and the NNLite is a separate coprocessor paired with the Cortex-M33 — it does not substitute for the Ethos-U55. The critical impact is the loss of the 128 MACs/cycle acceleration that makes high-throughput inference feasible on this platform."
+      },
+      "references": [
+        {
+          "chunk_id": "5b414449-5aea-47c9-9e85-7ff0ccd21544",
+          "snippet": "The combination of the M55 and U55 is roughly 50x faster than a Cortex®-M7 at the same clock frequency for computing inferences, and about 25x more energy efficient.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_5b414449-5aea-47c9-9e85-7ff0ccd21544_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "b1c22e3a-cc38-483f-88d8-7fa6b8e91a7f",
+          "snippet": "Ethos-U55 NN coprocessor with 128 multiply-accumulate operations (MACs) per cycle; 51.2 billion operations per second",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_9/ChunkType.text_b1c22e3a-cc38-483f-88d8-7fa6b8e91a7f_0.png",
+          "page_number": 9,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O1",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are architecting the ML pipeline for a PSOC Edge E8 biometric terminal. The terminal must remain in a low-power idle state between authentication events, waking only when a user approaches. Your team is debating whether to keep the Ethos-U55 powered on continuously to handle both the idle-state presence detection and the active face recognition inference, or to use a split-accelerator approach.",
+        "question_text": "Which argument best justifies using the NNLite coprocessor for presence detection rather than keeping the Ethos-U55 active for that task?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The NNLite runs at up to 160 MHz alongside the Cortex-M33, which is fast enough to handle presence detection without the latency overhead of waking the high-performance domain",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The NNLite resides in the low-power domain and is designed for always-on, low-to-moderate complexity inference, making it the appropriate choice for continuous idle-state monitoring while the high-performance domain remains powered down",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The Ethos-U55 requires 8-bit quantized weights, which are incompatible with the lightweight models typically used for presence detection, so NNLite must be used instead",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The NNLite coprocessor is explicitly documented as residing in the low-power domain and being ideal for always-on use cases at the lowest power, optimized for low-to-moderate complexity models such as wake word detection and human activity recognition. Using it for presence detection allows the high-performance domain — including the Cortex-M55 and Ethos-U55 — to remain powered down during idle periods, directly minimizing system power consumption.",
+        "incorrect": "Option A describes a real characteristic of the NNLite (160 MHz, Cortex-M33 pairing) but the justification is about latency rather than the correct reason: power domain architecture. Option C is factually incorrect — the Ethos-U55 does support 8-bit weights and is compatible with lightweight quantized models; the reason to avoid it for always-on tasks is its placement in the high-performance domain, not weight format incompatibility. The correct justification is the NNLite's low-power domain placement and its design for always-on inference."
+      },
+      "references": [
+        {
+          "chunk_id": "3f545e9c-b3dc-4557-8162-1715dad6c3a1",
+          "snippet": "It is an ACTIVE state peripheral that accelerates specific set of neural network (NN) inference calculations optimized for low to moderate complexity machine learning (ML) models such as wake word detection (WWD), human activity recognition (HAR)... The NNLite coprocessor falls in low-power domain making it ideal for always-ON use cases at lowest power.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_37/ChunkType.text_3f545e9c-b3dc-4557-8162-1715dad6c3a1_0.png",
+          "page_number": 37,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "e4cfc3ad-42df-48f9-aa15-c1795f66646d",
+          "snippet": "High Performance (HP) Domain: Arm® Cortex®-M55 up to 320 MHz ... Arm® Ethos-U55 NPU up to 320 MHz ... Low Power (LP) Domain: Arm® Cortex®-M33 up to 160 MHz ... NNLite NPU up to 160 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_2/ChunkType.table_e4cfc3ad-42df-48f9-aa15-c1795f66646d_0.png",
+          "page_number": 2,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    }
+  ]
+}

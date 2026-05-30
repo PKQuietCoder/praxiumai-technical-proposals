@@ -1,0 +1,480 @@
+{
+  "subsection_id": "2.2.1",
+  "subsection_title": "Understand Clock Sources and DPLLs",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Identify the available clock sources on the PSoC Edge E8 and describe the role each plays in the clock tree",
+    "Distinguish between DPLL_HP and DPLL_LP and select the correct type for a given CPU domain and frequency target",
+    "Apply documented DPLL lock timing and root clock frequency limits to validate a clock tree configuration"
+  ],
+  "content": {
+    "hook_sentence": "Routing a 320 MHz clock through the wrong DPLL type will silently cap your CM55 performance — and the chip will not warn you.",
+    "introduction": "The clock tree is the foundation of every power-performance decision you make for the face recognition terminal. Before you can configure DPLL output frequencies, assign clock paths, or set `clk_hf` dividers, you need a clear mental model of what clock sources exist, which DPLL type serves which domain, and what timing constraints govern the transition back to full speed after a wakeup event. Getting this wrong means either a non-compliant configuration that violates documented frequency limits or a firmware deadlock waiting on a DPLL that has not yet locked.",
+    "key_points": [
+      {
+        "point": "Five clock source types feed the PSoC Edge E8 clock tree, each with a distinct role.",
+        "explanation": "The PSoC Edge E8 provides fully integrated clocks with glitch-free switching between sources. The five source types are: - **IHO (Internal High-Speed Oscillator):** Fixed 50 MHz, ±1% tolerance. This is the default clock source during wakeup — the system runs on IHO while DPLLs are acquiring lock. Operating current is 115 µA typical. - **PILO (Precision Internal Low-Speed Oscillator):** 32 kHz, no external crystal required. Periodic software calibration is supported. Operating current is 1.15 µA typical, startup time to 95% of final frequency is up to 150 µs. - **ECO (External Crystal Oscillator):** Supports 4–38 MHz crystals. Current draw scales with frequency: 180 µA at 4 MHz, 360 µA at 16 MHz, 600 µA at 38 MHz. - **WCO (Watch Crystal Oscillator):** 32.768 kHz, 0.38 µA typical operating current. Startup time up to 1000 ms — relevant if you are using WCO as a DPLL reference. - **External clock input:** Up to 100 MHz, 45–55% duty cycle required. For your face recognition terminal, the IHO is the practical wakeup clock and the primary DPLL input source in the base configuration. The PILO and WCO serve timekeeping and low-power wakeup functions.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "e8cfb6c9-e049-4f26-8fd7-0e065728fb76",
+            "snippet": "The clock sources are: Internal high-speed oscillator (IHO): 50 MHz ±1%... Precision internal low-speed oscillator (PILO): 32 kHz, no external crystal needed... External crystal oscillators (ECO and WCO)... External clock input",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_e8cfb6c9-e049-4f26-8fd7-0e065728fb76_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d91862f-fd35-4f7d-9c76-bcdea0f11775",
+            "snippet": "The IHO operates at a fixed 50 MHz frequency. Its tolerance is ±1%. A high-speed clock can be derived using the IHO plus a DPLL. The IHO is used as the clock source during wakeup.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_5d91862f-fd35-4f7d-9c76-bcdea0f11775_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "085e9a35-de95-497c-be49-bb87a0635af2",
+            "snippet": "IHO Operating current at 50 MHz... 115 µA... PILO Operating current... 1.15 µA... PILO Start-up time to 95% of final frequency... 150 µs",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_110/ChunkType.table_085e9a35-de95-497c-be49-bb87a0635af2_0.png",
+            "page_number": 110,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "79d1bf66-3baf-4987-8598-0d52ec0b79ef",
+            "snippet": "MHz oscillator current at 4 MHz... 180 µA... MHz oscillator current at 16 MHz... 360 µA... MHz oscillator current at 38 MHz... 600 µA",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_111/ChunkType.table_79d1bf66-3baf-4987-8598-0d52ec0b79ef_0.png",
+            "page_number": 111,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Three DPLLs generate high-frequency clocks — one DPLL_HP for the high-performance domain, two DPLL_LP for lower-frequency and power-optimized paths.",
+        "explanation": "The PSoC Edge E8 provides three digital phase-locked loops, split into two types: - **DPLL_HP (one instance):** High-frequency, high-performance. Maximum output is 500 MHz in HP mode, 350 MHz in LP mode. PFD input range is 4–50 MHz. Period jitter in integer operation is ≤3% of $F_{out}$; fractional operation adds up to 4% jitter. This is the correct choice when you need to drive `CLK_HF[1]` (CM55, U55, GPU) at its 320 MHz HP mode maximum. - **DPLL_LP (two instances):** Lower frequency, optimized for power. Maximum output is 500 MHz in HP mode, 350 MHz in LP mode — same ceiling as DPLL_HP, but the PFD input is limited to 4–8 MHz (versus 4–50 MHz for DPLL_HP), and the clock input to the PDIV divider is limited to 4–128 MHz (versus 4–400 MHz for DPLL_HP). Period jitter in integer operation is ≤2% of $F_{out}$. DPLL_LP jitter levels are low enough to support 12-bit SAR ADC operation. In the base configuration, DPLL_LP0 is enabled with IHO as its source and drives `CLK_HF[0]`, `CLK_HF[1]`, `CLK_HF[2]`, and `CLK_HF[3]`. DPLL_HP0 and DPLL_LP1 are disabled unless needed. Both DPLL types operate only in System HP and LP power modes — they are not available in Deep Sleep. The practical implication: when you need `CLK_HF[1]` at 320 MHz for full CM55 performance, you must source it from DPLL_HP. DPLL_LP's narrower PFD input range makes it less suited for the high-performance domain at maximum frequency, even though its output ceiling is nominally the same.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "b4d09481-4aaf-49c5-a1da-c96ded74421b",
+            "snippet": "The DPLLs provide fast wake-up at high clock speeds. DPLL jitter levels are low and allow 12-bit SAR ADC operation. There are two types of DPLL: Two lower frequency and optimized for low power (DPLL LP), One high-frequency and high-performance (DPLL HP)",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_b4d09481-4aaf-49c5-a1da-c96ded74421b_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e8cfb6c9-e049-4f26-8fd7-0e065728fb76",
+            "snippet": "Three digital phase-locked loops (DPLL) are available for clock generation. They operate in the System HP and LP power modes (see Power modes).",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_e8cfb6c9-e049-4f26-8fd7-0e065728fb76_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "79d1bf66-3baf-4987-8598-0d52ec0b79ef",
+            "snippet": "PLL_HP Specifications... Output frequency. HP mode... 500 MHz... Output frequency. LP mode... 350 MHz... Phase Frequency Detector (PFD) input... 4... 50 MHz... Period Jitter in integer operation... 3 %",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_111/ChunkType.table_79d1bf66-3baf-4987-8598-0d52ec0b79ef_0.png",
+            "page_number": 111,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+            "snippet": "PLL_LP Specifications... Output frequency. HP mode... 500 MHz... Output frequency. LP mode... 350 MHz... Phase Frequency Detector (PFD) input... 4... 8 MHz... Clock input... 4... 128 MHz... Period Jitter in integer operation... 2 %",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+            "page_number": 112,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+            "snippet": "DPLL_HP0 state... Disabled... Not used for specification conditions... DPLL_LP0 state... Enabled... DPLL active... DPLL_LP0 source... IHO... clk_hf[0,1,2,3] divider source... DPLL_LPO",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+            "page_number": 66,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Root clock dividers (`clk_hf[0]` through `clk_hf[13]`) distribute DPLL output to each subsystem, each with a documented maximum frequency per power mode.",
+        "explanation": "The DPLL output does not connect directly to CPUs or peripherals. Instead, it feeds a set of high-frequency root clock dividers (`clk_hf[N]`), each dedicated to a specific subsystem. You set the divider ratio to bring the DPLL output down to the target frequency for that subsystem. Key limits in HP and LP modes: - `CLK_HF[0]` (SYSCPUSS, CM33): 160 MHz HP / 80 MHz LP - `CLK_HF[1]` (APPCPUSS, CM55, U55, GPU): 320 MHz HP / 140 MHz LP - `CLK_HF[2]` (SoCMEM): 240 MHz HP / 110 MHz LP - `CLK_HF[3]` (SMIF[0]): 320 MHz HP / 200 MHz LP - `CLK_HF[7]` (I2S, TDM, PDM): 80 MHz HP / 50 MHz LP - `CLK_HF[8]` (USB): 40 MHz HP / 50 MHz LP - `CLK_HF[9]` (Analog, DACs): 80 MHz HP / 50 MHz LP - `CLK_HF[10]` (SCB, CAN, TCPWM, SmartI/O): 80 MHz HP / 40 MHz LP When PD1 is powered off (LP mode, CM55 domain down), `CLK_HF[1]` and `CLK_HF[2]` are gated — the CM55 root clock and SoCMEM root clock stop. `CLK_HF[0]` continues running for the CM33, capped at 80 MHz in LP mode. A common misconfiguration: setting a single DPLL to a high output frequency and leaving all `clk_hf` dividers at 1. If DPLL_LP0 outputs 320 MHz and `CLK_HF[0]` divider is 1, the CM33 receives 320 MHz — twice its 160 MHz HP mode limit. You must set the `CLK_HF[0]` divider to at least 2 in that scenario.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+            "snippet": "CLK_HF[0] – SYSCPUSS, CM33... Max HP 160 MHz, LP 80 MHz... CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55... Max HP 320 MHz, LP 140 MHz... CLK_HF[2] - SoCMEM... Max HP 240 MHz, LP 110 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+            "page_number": 78,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "909f2b51-2d8b-4b15-810f-c00ac316870d",
+            "snippet": "clk_hf[1] state... Disabled... APPCPUSS CM55 root clock gated... clk_hf[2] state... Disabled... SoCMEM root clock gated",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_909f2b51-2d8b-4b15-810f-c00ac316870d_0.png",
+            "page_number": 67,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+            "snippet": "clk_hf[0,1,2,3] divider source... DPLL_LPO... Root clock dividers source set to DPLL_LP0 output... clk_hf[1,2,3] divider... 1... Clk_hf output frequency = input",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+            "page_number": 66,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "DPLL lock timing determines how long your firmware must wait after wakeup before the high-frequency clock is usable.",
+        "explanation": "Because DPLLs are off during Deep Sleep, wakeup always starts on the IHO at 50 MHz. Your firmware must wait for DPLL lock before switching the CPU to its target frequency. Two timing specs govern this: - **Cold start lock time (after boot):** Up to 60 µs for both DPLL_HP and DPLL_LP. This applies when the DPLL starts from a completely unpowered state. - **Frequency change lock time:** Up to 20 µs for both DPLL_HP and DPLL_LP. This applies when you change the DPLL output frequency while it is already running. For your face recognition terminal, the practical wakeup sequence is: system resumes on IHO → firmware initiates DPLL lock → wait up to 60 µs (cold) or 20 µs (frequency change) → switch `clk_hf` source to DPLL output → CM55 ramps to 320 MHz for inference. Clock source switching itself adds a small overhead: the documented switching time is up to $4 \\times T_{clk1} + 3 \\times T_{clk2}$ clock periods. At the frequencies involved, this is sub-microsecond and not the dominant latency. Note that the WCO has a startup time of up to 1000 ms — if your design uses WCO as a DPLL reference rather than IHO, that 1-second startup dominates wakeup latency entirely. For fast wakeup, keep IHO as the DPLL source.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+            "snippet": "PLL Cold Start Lock Time (After Boot)... PLLLOCKCOLD... 60 µs... Time to achieve PLL Lock with frequency change... PLLLOCK... 20 µs",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+            "page_number": 112,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "79d1bf66-3baf-4987-8598-0d52ec0b79ef",
+            "snippet": "PLL Cold Start Lock Time (After Boot)... PLLLOCKCOLD... 60 µs... Time to achieve PLL Lock with frequency change... PLL_LOCK... 20 µs",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_111/ChunkType.table_79d1bf66-3baf-4987-8598-0d52ec0b79ef_0.png",
+            "page_number": 111,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+            "snippet": "Clock switching from clk1 to clk2 in clock periods... TCLKSWITCH... 4 clk1 + 3 clk2 periods",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+            "page_number": 112,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d91862f-fd35-4f7d-9c76-bcdea0f11775",
+            "snippet": "The IHO is used as the clock source during wakeup.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_5d91862f-fd35-4f7d-9c76-bcdea0f11775_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "79d1bf66-3baf-4987-8598-0d52ec0b79ef",
+            "snippet": "WCO AC Specifications... Startup time... Ton_kHz... 1000 ms",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_111/ChunkType.table_79d1bf66-3baf-4987-8598-0d52ec0b79ef_0.png",
+            "page_number": 111,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Peripheral clocks are derived from `clk_hf` outputs through a bank of integer and fractional dividers.",
+        "explanation": "Below the root clock dividers, a set of peripheral clock dividers generates synchronous clocks for analog and digital peripherals. The available dividers are: - Eight 8-bit integer dividers - Sixteen 16-bit integer dividers - Four 16.5-bit fractional dividers - One 24.5-bit fractional divider The 16-bit dividers generate either a 1-in-N clock (where N is the divisor) or an approximately 50% duty cycle clock for analog circuitry. Fractional dividers let you hit non-integer frequency ratios — useful for audio sample rates (I2S, PDM) or precise UART baud rates that do not divide evenly from the `clk_hf` source. For your terminal, the most common use is dividing `CLK_HF[10]` (max 80 MHz HP) down to the SCB baud rate for UART debug or I2C sensor bus, and dividing `CLK_HF[7]` (max 80 MHz HP) for I2S audio if a microphone array is present. You do not need to touch fractional dividers for the core CM55/CM33 clock paths — those are handled entirely by the `clk_hf` integer dividers.",
+        "callout_type": "neutral",
+        "references": [
+          {
+            "chunk_id": "c0a3ee2d-6640-4c9f-83ab-e8ed1f6ae850",
+            "snippet": "Clocks can be divided down to generate synchronous clocks for the analog and digital peripherals. Integer and fractional clock dividers are provided: Eight 8-bit clock dividers, Sixteen 16-bit integer clock dividers, Four 16.5 fractional clock dividers, One 24.5 fractional clock divider",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_c0a3ee2d-6640-4c9f-83ab-e8ed1f6ae850_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "fa9033d3-b417-45fc-964e-a4a865cf1d3f",
+            "snippet": "The 16-bit dividers allow more flexibility in generating fine-grained frequency values. The digital clock dividers generate either 1 in N clocking where N = divisor or an approximately 50% duty cycle clock for the analog circuitry.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_fa9033d3-b417-45fc-964e-a4a865cf1d3f_0.png",
+            "page_number": 27,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+            "snippet": "CLK_HF[7] – I2S, TDM, PDM... Max HP 80 MHz, LP 50 MHz... CLK_HF[10] - SCB [0, 2-11], CAN, TCPWMS, SMARTI/O... Max HP 80 MHz, LP 40 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+            "page_number": 78,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "You are configuring the clock tree for active face recognition (HP mode, PD0 and PD1 both on). You want the CM55 and U55 to run at 320 MHz. You plan to use DPLL_LP0 as the single source for all clk_hf outputs, set DPLL_LP0 to 320 MHz, and leave all clk_hf dividers at 1. Before you commit this configuration, what compliance problem do you expect to find?",
+        "reveal": "CLK_HF[0] would deliver 320 MHz to SYSCPUSS and the CM33 — exactly double the 160 MHz HP mode maximum for that root clock. The CM33 is a low-power domain CPU rated to 160 MHz, not 320 MHz. To fix this, you must set the CLK_HF[0] divider to 2, which halves the 320 MHz DPLL output to 160 MHz for the CM33. CLK_HF[1] at 320 MHz is within its 320 MHz HP mode limit, so that path is compliant. CLK_HF[2] at 320 MHz would also violate SoCMEM's 240 MHz HP mode limit — you would need a divider of at least 2 there as well (yielding 160 MHz, well within the 240 MHz ceiling). The lesson: a single DPLL output frequency does not fit all root clocks without dividers.",
+        "hint": "Check the HP mode maximum for CLK_HF[0] against the DPLL output frequency."
+      },
+      {
+        "prediction_prompt": "Your terminal has just woken from Deep Sleep. The IHO is running at 50 MHz. Your firmware immediately initiates a DPLL_HP cold start to lock at 500 MHz, then plans to divide CLK_HF[1] by 2 to get 250 MHz for the CM55 during a brief pre-processing step. How long must your firmware wait before it can safely switch CLK_HF[1] to the DPLL_HP output, and what clock is the CM55 running on during that wait?",
+        "reveal": "The DPLL_HP cold start lock time is up to 60 µs. During that entire wait, the CM55 (if active) runs on the IHO-derived clock at 50 MHz — or whatever the current clk_hf[1] source is before the switch. Your firmware must poll the DPLL lock status bit (or wait the full 60 µs) before switching the clk_hf[1] source mux to DPLL_HP. Switching before lock risks metastability on the clock path. Once locked, the switch itself takes only 4 × T_clk1 + 3 × T_clk2 periods — sub-microsecond at these frequencies. The 60 µs lock wait dominates the wakeup-to-full-speed latency for the CM55.",
+        "hint": "The IHO is the wakeup clock source. The DPLL needs time to lock before you can use its output."
+      }
+    ],
+    "summary": "For the face recognition terminal, use DPLL_HP to source CLK_HF[1] at 320 MHz for the CM55 and U55 in HP mode, set CLK_HF[0] divider to at least 2 to keep the CM33 within its 160 MHz limit, and budget up to 60 µs after wakeup for DPLL cold start lock before switching away from the IHO.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 1,
+        "caption": "The PSoC Edge E8 system block diagram shows the clock subsystem (PILO, IHO, WCO, ECO, HP and 2x LP DPLLs) in the System Resources panel, and how the high-performance domain (CM55 at 320 MHz, Ethos-U55) and low-power domain (CM33 at 160 MHz) are served by separate clock paths.",
+        "alt_text": "Detailed block diagram of the PSoC Edge E8. The top-left System Resources panel lists clock sources: PILO, IHO, WCO, ECO, and HP plus two LP DPLLs. The diagram is divided into three horizontal domains: Deep Sleep Domain (always-on, containing autonomous analog and SCB), Low Power Domain (CM33 at 160 MHz with 1 MB SRAM and NNLite), and High Performance Domain (CM55 at 320 MHz with Ethos-U55, SoCMEM 5120 KB, graphics subsystem, and MIPI DSI/DBI). Interconnects labeled AHB and AXI/AHB connect the domains.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "matching",
+      "stem": "Match each clock tree requirement to the correct DPLL type:",
+      "pairs": [
+        {
+          "left": "Drive CLK_HF[1] at 320 MHz for CM55 in HP mode",
+          "right": "DPLL_HP"
+        },
+        {
+          "left": "Source a 12-bit SAR ADC clock with low jitter in LP mode",
+          "right": "DPLL_LP"
+        },
+        {
+          "left": "Generate a high-frequency output with a PFD input up to 50 MHz",
+          "right": "DPLL_HP"
+        }
+      ],
+      "explanation": "DPLL_HP has a wider PFD input range (4–50 MHz) and is the high-performance type suited for the CM55 domain. DPLL_LP has lower jitter (≤2% vs ≤3%) and is explicitly documented as suitable for 12-bit SAR ADC operation."
+    },
+    {
+      "after_key_point": 3,
+      "type": "fill_blank",
+      "stem": "After waking from Deep Sleep, your firmware must wait for DPLL ___ before switching the clk_hf source away from the IHO.",
+      "answer": "lock",
+      "distractors": [
+        "reset",
+        "calibration",
+        "divider settling"
+      ],
+      "explanation": "DPLLs require time to achieve frequency lock after startup. Switching the clock source before lock is achieved risks metastability. The IHO serves as the stable wakeup clock during this wait."
+    }
+  ],
+  "content_gaps": [
+    "The datasheet does not document the specific register names or PDL API calls for configuring DPLL output frequency, clock path mux selection, or clk_hf divider ratios. Firmware implementation details require the PSoC Edge E8 Architecture Reference Manual and ModusToolbox PDL documentation.",
+    "The base configuration table shows DPLL_LP0 sourcing all clk_hf outputs, but the datasheet does not explicitly document which clock path register controls the clk_hf source mux or how to switch from DPLL_LP to DPLL_HP at runtime. This procedural detail is needed for objective O3 implementation."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are configuring the clock tree for the PSOC Edge E8 in your face recognition terminal. During active face recognition, the system must run the Cortex-M55 and Ethos-U55 at maximum performance. You plan to use a single DPLL to source all high-frequency root clocks.",
+        "question_text": "You need CLK_HF[1] (which drives the CM55, U55, and GPU) to run at its maximum allowed frequency in HP mode. Which DPLL type should you select as the clock source for CLK_HF[1], and what is the maximum output frequency you can target?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "DPLL_LP, configured to output up to 350 MHz in HP mode, then divided down to 320 MHz via the clk_hf[1] divider",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "DPLL_HP, configured to output up to 500 MHz in HP mode, then divided down to 320 MHz via the clk_hf[1] divider",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "IHO directly, running at 50 MHz, then multiplied up to 320 MHz via the clk_hf[1] divider chain",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The DPLL_HP is the one high-frequency, high-performance PLL capable of outputting up to 500 MHz in HP mode. CLK_HF[1] supports a maximum of 320 MHz in HP mode, so you configure DPLL_HP to output at or above 320 MHz and use the clk_hf[1] divider to reach exactly 320 MHz. The two DPLL_LP units are limited to 350 MHz in HP mode and are optimized for lower power, not peak CM55/U55 performance.",
+        "incorrect": "Review the DPLL type specifications. There are two DPLL_LP units (max 350 MHz in HP mode, optimized for low power) and one DPLL_HP (max 500 MHz in HP mode, optimized for high performance). The IHO is a fixed 50 MHz oscillator — it cannot be multiplied by a clock divider alone; a DPLL is required to generate high-speed clocks from the IHO. CLK_HF[1] has a documented maximum of 320 MHz in HP mode, which requires the DPLL_HP as its source."
+      },
+      "references": [
+        {
+          "chunk_id": "b4d09481-4aaf-49c5-a1da-c96ded74421b",
+          "snippet": "There are two types of DPLL: Two lower frequency and optimized for low power (DPLL LP); One high-frequency and high-performance (DPLL HP)",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_b4d09481-4aaf-49c5-a1da-c96ded74421b_0.png",
+          "page_number": 27,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+          "snippet": "SID306LP H: Output frequency. HP mode. PLL_OUT Max. 500 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+          "page_number": 112,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+          "snippet": "CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55: Max HP 320 MHz, Max LP 140 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O3",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "Your face recognition terminal has transitioned to an idle monitoring state. To save power, you have switched the system from HP mode to LP mode. The Cortex-M33 and NNLite coprocessor remain active for lightweight presence detection, but the high-performance domain (PD1) is powered off.",
+        "question_text": "In this LP mode configuration with PD1 off, you check the clock tree and find that CLK_HF[0] (which drives SYSCPUSS and CM33) is still sourced from DPLL_LP0. What is the maximum frequency CLK_HF[0] can deliver to the CM33 in this state, and what happens to CLK_HF[1]?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "CLK_HF[0] is limited to 80 MHz for the CM33 in LP mode, and CLK_HF[1] is gated because the CM55 domain (PD1) is powered off",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "CLK_HF[0] is limited to 160 MHz for the CM33 in LP mode, and CLK_HF[1] continues running at 140 MHz to keep SoCMEM accessible",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "CLK_HF[0] is limited to 80 MHz for the CM33 in LP mode, and CLK_HF[1] is limited to 140 MHz but remains enabled for SoCMEM access",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. In LP mode, CLK_HF[0] (SYSCPUSS, CM33) is capped at 80 MHz. When PD1 (the high-performance domain) is powered off, CLK_HF[1] — which drives APPCPUSS, CM55, U55, and the GPU — is disabled and gated. The configuration table for PD0=On, PD1=Off explicitly shows CLK_HF[1] state as Disabled.",
+        "incorrect": "Check both the root clock frequency table and the power domain configuration tables. CLK_HF[0] has a documented maximum of 80 MHz in LP mode (not 160 MHz — that is the HP mode limit). When PD1 is powered off, the documentation explicitly shows CLK_HF[1] state as Disabled, because there is no reason to clock a domain that is not powered. CLK_HF[1] does not remain running for SoCMEM; SoCMEM has its own root clock (CLK_HF[2]), which is also gated when PD1 is off."
+      },
+      "references": [
+        {
+          "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+          "snippet": "CLK_HF[0] – SYSCPUSS, CM33: Max HP 160 MHz, Max LP 80 MHz; CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55: Max HP 320 MHz, Max LP 140 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "909f2b51-2d8b-4b15-810f-c00ac316870d",
+          "snippet": "PD0 = On, PD1 = Off: clk_hf[1] state: Disabled — APPCPUSS CM55 root clock gated; clk_hf[2] state: Disabled — SoCMEM root clock gated",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_67/ChunkType.table_909f2b51-2d8b-4b15-810f-c00ac316870d_0.png",
+          "page_number": 67,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are designing the clock configuration for the deep sleep state of your face recognition terminal. In this state, the system must wake up quickly when motion is detected. You recall that the IHO is used as the clock source during wakeup, and that DPLLs require time to achieve lock after a frequency change.",
+        "question_text": "After waking from deep sleep, your firmware needs to ramp the CM55 back up to 320 MHz for face recognition inference. Based on the documented DPLL lock timing, what is the worst-case time your firmware must wait after initiating a DPLL frequency change before the 320 MHz clock is stable and usable?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Up to 20 µs for a frequency change lock, or up to 60 µs for a cold start lock after boot",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Up to 1000 ms, matching the WCO crystal startup time required before the DPLL can lock",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Up to 50 µs for a frequency change lock, because the IHO tolerance of ±1% adds margin to the DPLL acquisition time",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The datasheet specifies a maximum PLL lock time of 20 µs for a frequency change (PLLLOCK) and a maximum cold start lock time of 60 µs after boot (PLLLOCKCOLD). Your firmware must account for the appropriate value depending on whether the DPLL was previously running. The IHO is available immediately on wakeup and serves as the DPLL input, so no crystal startup delay applies.",
+        "incorrect": "Review the PLL electrical specifications table. The 1000 ms figure is the WCO crystal startup time — the WCO is a 32 kHz watch crystal oscillator, not a DPLL input required for high-speed clock generation. The IHO (50 MHz) is used as the clock source during wakeup and as the DPLL input. The documented DPLL lock times are 20 µs maximum for a frequency change and 60 µs maximum for a cold start after boot — not 50 µs."
+      },
+      "references": [
+        {
+          "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+          "snippet": "SID309HP: PLL Cold Start Lock Time (After Boot) PLLLOCKCOLD Max. 60 µs; SID305HP: Time to achieve PLL Lock with frequency change PLLLOCK Max. 20 µs",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+          "page_number": 112,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "5d91862f-fd35-4f7d-9c76-bcdea0f11775",
+          "snippet": "The IHO operates at a fixed 50 MHz frequency. Its tolerance is ±1%. The IHO is used as the clock source during wakeup.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_27/ChunkType.text_5d91862f-fd35-4f7d-9c76-bcdea0f11775_0.png",
+          "page_number": 27,
+          "chunk_type": "text"
+        },
+        {
+          "chunk_id": "79d1bf66-3baf-4987-8598-0d52ec0b79ef",
+          "snippet": "SID320K: Startup time Ton_kHz Max. 1000 ms",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_111/ChunkType.table_79d1bf66-3baf-4987-8598-0d52ec0b79ef_0.png",
+          "page_number": 111,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are reviewing a colleague's clock tree design for the face recognition terminal. In their design, both PD0 and PD1 are powered on (HP mode, active face recognition). They have configured DPLL_LP0 as the single source for CLK_HF[0], CLK_HF[1], and CLK_HF[2], with all three clk_hf dividers set to 1. DPLL_LP0 is set to output 320 MHz.",
+        "question_text": "You identify a compliance problem with this configuration. Which constraint does it violate?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "CLK_HF[0] would run at 320 MHz, exceeding its 160 MHz HP mode maximum for SYSCPUSS and CM33",
+          "is_correct": true,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "DPLL_LP0 cannot output 320 MHz because DPLL_LP units are limited to 140 MHz in HP mode",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "CLK_HF[2] would run at 320 MHz, exceeding its 240 MHz HP mode maximum for SoCMEM",
+          "is_correct": false,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. With DPLL_LP0 outputting 320 MHz and all clk_hf dividers set to 1, CLK_HF[0] would also run at 320 MHz. However, CLK_HF[0] — which drives SYSCPUSS and CM33 — has a documented maximum of 160 MHz in HP mode. This is a direct violation. CLK_HF[2] (SoCMEM) would also be over its 240 MHz limit, but CLK_HF[0] is the first and clearest violation. Note also that DPLL_LP can output up to 500 MHz in HP mode, so the DPLL output itself is not the problem.",
+        "incorrect": "Check the root clock frequency table carefully. DPLL_LP units can output up to 500 MHz in HP mode (350 MHz in LP mode) — so a 320 MHz DPLL_LP0 output is within spec. The problem is downstream: CLK_HF[0] has a maximum of 160 MHz in HP mode, and CLK_HF[2] has a maximum of 240 MHz in HP mode. With dividers set to 1, both would receive the full 320 MHz DPLL output. CLK_HF[0] is the most critical violation because it directly over-clocks the CM33 CPU beyond its documented limit."
+      },
+      "references": [
+        {
+          "chunk_id": "0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a",
+          "snippet": "CLK_HF[0] – SYSCPUSS, CM33: Max HP 160 MHz; CLK_HF[1] – APPCPUSS, GFXSS (GPU, DC), CM55, U55: Max HP 320 MHz; CLK_HF[2] – SoCMEM: Max HP 240 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_78/ChunkType.table_0a5bc75f-4ded-4cf6-94b5-637c4ef5ec0a_0.png",
+          "page_number": 78,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "936371b6-8202-4145-b526-09386171566b",
+          "snippet": "SID306LP H: Output frequency. HP mode. PLL_OUT Max. 500 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_112/ChunkType.table_936371b6-8202-4145-b526-09386171566b_0.png",
+          "page_number": 112,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "27df168e-f46c-476b-ace7-4eeff6a8bec8",
+          "snippet": "clk_hf[0] — Enabled — SYSCPUSS and CM33 root clock; clk_hf[1,2,3] divider — 1 — Clk_hf output frequency = input",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_66/ChunkType.table_27df168e-f46c-476b-ace7-4eeff6a8bec8_0.png",
+          "page_number": 66,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_1"
+    }
+  ]
+}

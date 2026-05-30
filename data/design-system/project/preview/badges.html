@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body{margin:0;font-family:var(--font-sans);background:var(--white);color:var(--fg-1);padding:20px 22px;}
+  h4{font:var(--overline);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin:0 0 12px;}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .badge{font:var(--caption);font-weight:600;padding:3px 10px;border-radius:var(--radius-pill);display:inline-flex;align-items:center;gap:5px;}
+  .badge svg{width:13px;height:13px;}
+  .b-active{background:var(--success-bg);color:#067a39;}
+  .b-new{background:var(--ocean-50);color:var(--ocean-700);}
+  .b-warn{background:var(--warning-bg);color:#9c6200;}
+  .b-eol{background:var(--error-bg);color:#a30026;}
+  .chip{font:var(--caption);font-weight:600;padding:5px 12px;border-radius:var(--radius-pill);border:1.5px solid var(--border-strong);color:var(--fg-2);background:#fff;}
+  .chip.on{background:var(--ocean-400);border-color:var(--ocean-400);color:#fff;}
+</style></head>
+<body>
+  <h4>Status badges</h4>
+  <div class="row">
+    <span class="badge b-active"><i data-lucide="check-circle"></i>Active</span>
+    <span class="badge b-new">New</span>
+    <span class="badge b-warn"><i data-lucide="alert-triangle"></i>NRND</span>
+    <span class="badge b-eol">End of life</span>
+  </div>
+  <h4>Filter chips</h4>
+  <div class="row">
+    <span class="chip on">Automotive</span>
+    <span class="chip">Industrial</span>
+    <span class="chip">Consumer</span>
+    <span class="chip">In stock</span>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

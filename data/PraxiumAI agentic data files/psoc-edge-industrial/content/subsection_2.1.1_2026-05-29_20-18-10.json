@@ -1,0 +1,411 @@
+{
+  "subsection_id": "2.1.1",
+  "subsection_title": "Select System Power Modes",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Select the correct system power mode (HP, LP, Deep Sleep variants, Hibernate) for each operating state of the face recognition terminal",
+    "Identify the CPU frequency limits and core voltage for each system power mode",
+    "Choose the appropriate Deep Sleep sub-mode based on SRAM retention requirements and power budget",
+    "Determine the transition conditions required to enter System Deep Sleep when the high-performance domain is involved"
+  ],
+  "content": {
+    "hook_sentence": "Choosing System HP mode when LP would suffice costs you more than just milliamps — it can cut battery runtime in half before your first firmware optimization.",
+    "introduction": "Every operating state of the face recognition terminal maps to a specific system power mode, and that choice is not reversible at runtime without meeting documented transition conditions. Getting this mapping wrong early means either burning power budget during idle monitoring or starving the Cortex-M55/Ethos-U55 pipeline of the clock headroom it needs for real-time inference. This subsection gives you the decision framework to match each terminal state to the right mode before you write a single line of PDL initialization code.",
+    "key_points": [
+      {
+        "point": "Two active system modes set the performance ceiling for all CPUs and peripherals: System HP and System LP.",
+        "explanation": "**System High Performance (HP)** runs core logic at 0.9 V and unlocks the Cortex-M55/Ethos-U55 at up to 320 MHz and the Cortex-M33/NNLite at up to 160 MHz. **System Low Power (LP)** drops core logic to 0.8 V and caps the M55 at 140 MHz and the M33 at 80 MHz. Every peripheral — SCB, SMIF, MIPI-DSI, USB — is available in both modes, but at reduced speed in LP. For the face recognition terminal, the active inference state requires HP: the Ethos-U55 pipeline needs the full 320 MHz headroom to meet real-time recognition latency. The idle sensor-polling state, where only the M33 runs at 60 MHz, fits comfortably within LP's 80 MHz M33 ceiling while saving meaningful power at 0.8 V core.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+            "snippet": "System High Performance (HP): All peripherals and CPU power modes are available at maximum speed. Core logic runs at 0.9 V. System Low Power (LP): All peripherals and CPU power modes are available at reduced speed. Core logic runs at 0.8 V.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_b8b566a9-8e5c-457a-95d5-20cef6b24c77_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "b1e6ab63-5cf5-4e8d-b387-6968a9a65faf",
+            "snippet": "System power mode | M55/U55 | M33/NNLite — High Performance (HP): 320 MHz | 160 MHz — Low Power (LP): 140 MHz | 80 MHz",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.table_b1e6ab63-5cf5-4e8d-b387-6968a9a65faf_0.png",
+            "page_number": 23,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "CPU power modes (Active, Sleep, Deep Sleep) operate within the active system mode and do not change the system voltage or peripheral availability on their own.",
+        "explanation": "CPU Active, Sleep, and Deep Sleep are standard Arm-defined modes that control whether the CPU clock is running, not the system voltage rail. In CPU Sleep, the CPU clock is gated but the system remains in HP or LP — peripherals stay available. In CPU Deep Sleep, the CPU additionally asserts its System Deep Sleep request signal, which is a prerequisite for the system to transition to System Deep Sleep. This distinction matters for your terminal design: you can halt the M55 with CPU Sleep during a display-only frame while keeping the graphics subsystem and MIPI-DSI active, without dropping to a lower system mode. The system only enters System Deep Sleep when both CPUs have asserted their Deep Sleep requests — or when the high-performance domain is powered off and the M33 alone enters CPU Deep Sleep.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+            "snippet": "CPU Sleep: CPU code execution is halted — the CPU clock is gated off — in system HP or LP mode. CPU Deep Sleep: Same as CPU Sleep; in addition the CPU's System Deep Sleep request signal is activated.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_b8b566a9-8e5c-457a-95d5-20cef6b24c77_0.png",
+            "page_number": 17,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "c70e944c-85a8-4af7-b588-21749518a2de",
+            "snippet": "CPU Active, Sleep, and Deep Sleep are standard Arm® defined power modes supported by the Arm® CPU instruction set architecture (ISA). System HP, LP, Deep Sleep and Hibernate modes are additional power modes provided by the device.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_c70e944c-85a8-4af7-b588-21749518a2de_0.png",
+            "page_number": 18,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "18b85f7d-8129-4fb6-8287-6c33a398242a",
+            "snippet": "The device transitions to System Deep Sleep mode only when either of the following conditions are met: Both CPUs are in Deep Sleep mode; The high-performance domain is powered OFF, and the Cortex®-M33 is in Deep Sleep mode",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_18b85f7d-8129-4fb6-8287-6c33a398242a_0.png",
+            "page_number": 18,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "System Deep Sleep has three sub-modes that trade SRAM retention against current draw — choose based on your wakeup context size and power budget.",
+        "explanation": "Once both CPUs assert Deep Sleep (or the HP domain is off and the M33 asserts Deep Sleep), the system can enter one of three Deep Sleep variants: - **System Deep Sleep**: SRAM retention is programmable (select banks on, others off). The IHO is gated; only Deep Sleep-capable peripherals remain active. Wakeup resumes execution in under 20 µs. - **System Deep Sleep-RAM**: SRAM is selectively retained; the CPU powers off. Wakeup is a warm boot (longer than plain Deep Sleep resume). - **System Deep Sleep-OFF**: No SRAM retention; the CPU powers off. Wakeup is a cold boot/reset. For the face recognition terminal's between-event sleep state, the wakeup context is small (64 KB). System Deep Sleep-RAM with 64 KB retention (spec ID SIDDSRA) draws approximately 21.7 µA typical battery current — well within a 25 µA budget — and preserves the context needed for a warm boot. System Deep Sleep-OFF (SIDDSO) saves a further ~1 µA but forces a cold boot, losing all wakeup context. Plain System Deep Sleep with larger retention (SIDDSD, 64 KB + 1024 KB) draws approximately 41.6 µA, which exceeds the budget unnecessarily.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+            "snippet": "System Deep Sleep-RAM: Wake action: Warm boot... System Deep Sleep-Off: Wake action: Reset/cold boot... System Deep Sleep: Wake time: < 20 µs",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+            "snippet": "SIDDSO: System Deep Sleep-OFF, PD1 Disabled | IBAT Typical: 20.7 µA... SIDDSRA: System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 21.7 µA... SIDDSD: System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled | IBAT Typical: 41.6 µA",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+            "page_number": 73,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "18b85f7d-8129-4fb6-8287-6c33a398242a",
+            "snippet": "System Deep Sleep: Only Deep Sleep-capable peripherals are available after both CPUs enter CPU Deep Sleep mode. This mode has two sub-modes: System Deep Sleep RAM and System Deep Sleep Off.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_18b85f7d-8129-4fb6-8287-6c33a398242a_0.png",
+            "page_number": 18,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "System Hibernate is the lowest-current mode but wakes as a cold boot — reserve it for states where losing all runtime context is acceptable.",
+        "explanation": "In System Hibernate, almost all functionality is powered off. Only the RTC, WDT, and low-power comparators (LPComp) remain active, along with a limited set of wakeup pins and 16 backup registers for retaining critical application data. GPIO states are retained. Wakeup is equivalent to a cold boot (POR + cold boot, under 1 ms), so your firmware must reinitialize everything from scratch. For the face recognition terminal, Hibernate is appropriate only if the terminal will be unpowered for an extended period (e.g., overnight shutdown) and no wakeup context needs to survive. Do not use it for between-event sleep states where you need to resume quickly — the cold boot latency and full reinitialization cost will violate any real-time access control response requirement.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "18b85f7d-8129-4fb6-8287-6c33a398242a",
+            "snippet": "System Hibernate: This is the lowest current mode. Almost all functionality is powered off in this mode except for the RTC, watchdog timer (WDT), and low-power comparators (LPCOMP)... Wakeup is tantamount to a cold boot. GPIO states are retained in this mode.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_18b85f7d-8129-4fb6-8287-6c33a398242a_0.png",
+            "page_number": 18,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+            "snippet": "System Hibernate: Wake source: RTC/HIB peripherals; Wake action: Reset; Wake time: POR+coldboot; < 1 ms",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+            "page_number": 18,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Most fixed-function peripherals — including MIPI-DSI, the graphics subsystem, and SCB1–SCB11 — are unavailable in System Deep Sleep and Hibernate; plan your wakeup sources accordingly.",
+        "explanation": "Building on the SCB0 Deep Sleep capability established in the previous section, the block power mode table confirms the broader picture: MIPI-DSI, the graphics subsystem, USB, SMIF, CAN FD, Ethernet, and all SCB instances except SCB0 are off in System Deep Sleep. SCB0 remains the only SCB that can operate in Deep Sleep (as I2C slave or SPI slave with an external clock). What does remain active in Deep Sleep is useful for wakeup: GPIO, WDT, MCWDT, RTC, backup registers, LPComp, SAR ADC (duty-cycled), DAC, and Smart I/O. For the terminal, this means your wakeup trigger from Deep Sleep must come from one of these blocks — for example, a GPIO interrupt from a proximity sensor or an RTC alarm — not from the I2C sensor bus on SCB2.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "d8d71563-9d11-4593-be32-fadf6923bb40",
+            "snippet": "SCB: CPU Active: Y; CPU Sleep: Y; System Deep Sleep: N, SCB0 is supported in System Deep Sleep power mode; System Hibernate: N",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_19/ChunkType.table_d8d71563-9d11-4593-be32-fadf6923bb40_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "d8d71563-9d11-4593-be32-fadf6923bb40",
+            "snippet": "MIPI-DSI: CPU Active: Y; CPU Sleep: Y; System Deep Sleep: N; System Hibernate: N... Graphics subsystem: CPU Active: Y; CPU Sleep: Y; System Deep Sleep: N; System Hibernate: N",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_19/ChunkType.table_d8d71563-9d11-4593-be32-fadf6923bb40_0.png",
+            "page_number": 19,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "38e1bb78-44d3-41e9-a897-8acf66817693",
+            "snippet": "GPIO: CPU Active: Y; CPU Sleep: Y; System Deep Sleep: Y; System Hibernate: Y... WDT: Y; Y; Y; Y... RTC: Y; Y; Y; Y... Backup registers: Y; Y; Y; Y",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_20/ChunkType.table_38e1bb78-44d3-41e9-a897-8acf66817693_0.png",
+            "page_number": 20,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "afbfb489-29e7-41fd-8b5b-59bdee24fb02",
+            "snippet": "blocks that do not support low power modes such as System Deep Sleep and System Hibernate cannot wake up the CPUs from these modes.",
+            "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_afbfb489-29e7-41fd-8b5b-59bdee24fb02_0.png",
+            "page_number": 18,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "Your face recognition terminal has just completed a successful recognition event. The M55/Ethos-U55 pipeline is idle, and the next event is not expected for at least 30 seconds. You want to drop into the lowest-power sleep state that still allows a sub-100 ms wakeup and resume without a full firmware reinitialization. The wakeup context fits in 64 KB of SRAM. Which system power mode and sub-mode do you select, and what wakeup source do you configure?",
+        "reveal": "System Deep Sleep-RAM with 64 KB SRAM retention is the correct choice. It draws approximately 21.7 µA typical (SIDDSRA), well under most idle power budgets, and wakes via a warm boot — no full firmware reinitialization required. System Deep Sleep-OFF would save ~1 µA more but forces a cold boot, violating the sub-100 ms resume requirement once you account for firmware reinitialization time. Plain System Deep Sleep with larger retention draws more current than necessary for a 64 KB context. For the wakeup source, you configure a GPIO interrupt (e.g., from a proximity sensor) or an RTC alarm — both remain active in Deep Sleep. You cannot use the I2C sensor bus (SCB2) as a wakeup source because SCB1–SCB11 are off in System Deep Sleep.",
+        "hint": "Consider both the current consumption and the wakeup action (resume vs. warm boot vs. cold boot) for each Deep Sleep variant."
+      },
+      {
+        "prediction_prompt": "After a recognition event completes, you want to power down the high-performance domain (M55 + Ethos-U55 + graphics subsystem) while keeping the M33 running low-power sensor monitoring at 60 MHz. You need the system to enter System Deep Sleep so the HP domain is fully off. What exact condition must be true before the device will transition to System Deep Sleep in this scenario?",
+        "reveal": "The high-performance domain must be powered OFF and the Cortex-M33 must enter CPU Deep Sleep mode. The documentation states the device transitions to System Deep Sleep when either both CPUs are in Deep Sleep mode, or the high-performance domain is powered off and the M33 is in Deep Sleep. In this scenario, since the HP domain is already powered down, only the M33 needs to assert its CPU Deep Sleep request. Once that condition is met, the system transitions and the M33 resumes from Deep Sleep when a wakeup event occurs — in under 20 µs for plain System Deep Sleep.",
+        "hint": "The transition condition has two alternative paths — one requires both CPUs, the other requires only the M33 under a specific domain state."
+      }
+    ],
+    "summary": "Map each terminal operating state to its system power mode before writing PDL code: use System HP for active inference (M55 at 320 MHz, 0.9 V core), System LP for idle M33 sensor polling (up to 80 MHz, 0.8 V core), System Deep Sleep-RAM for between-event sleep with minimal SRAM retention, and System Hibernate only when a cold boot on wakeup is acceptable.",
+    "figures": [
+      {
+        "chunk_id": "b7362612-eef9-4de6-a9bf-249d60152c29",
+        "after_key_point": 0,
+        "caption": "The PSOC Edge E8 block diagram shows the three power domains — Deep Sleep (true always-on), Low Power, and High Performance — and which blocks reside in each. The System Power Modes Legend in the top-left corner maps HP/LP, Deep Sleep, and Hibernate to the domain color coding used throughout the diagram.",
+        "alt_text": "Detailed PSOC Edge E8 block diagram with a System Power Modes Legend in the top-left showing HP/LP, Deep Sleep, and Hibernate mode indicators. The diagram is divided into three horizontal sections: Deep Sleep Domain (true always-on) at the top containing LPComp, autonomous analog blocks, SAR ADC, DAC, and one SCB for Deep Sleep I2C/SPI; Low Power Domain (virtual always-on) in the middle containing the Cortex-M33 CPU subsystem at 160 MHz, NNLite, 11x SCB, GPIO, TCPWM, Crypto, Ethernet, CAN FD, and 2x 16-channel DMA; and High Performance Domain at the bottom containing the Cortex-M55 at 320 MHz, Ethos-U55, 4-channel HPDMA, graphics subsystem with MIPI DSI/DBI, SD host controllers, SMIF, and USB. System SRAM (SoCMEM, 5120 KB) is shown between the low-power and high-performance domains.",
+        "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_7/ChunkType.figure_b7362612-eef9-4de6-a9bf-249d60152c29_0.png",
+        "page_number": 7
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 1,
+      "type": "fill_blank",
+      "stem": "When the high-performance domain is powered off and only the Cortex-M33 needs to sleep, the condition that triggers a System Deep Sleep transition is the M33 entering ___ mode.",
+      "answer": "CPU Deep Sleep",
+      "distractors": [
+        "CPU Sleep",
+        "System LP",
+        "System Hibernate"
+      ],
+      "explanation": "The device enters System Deep Sleep when either both CPUs assert Deep Sleep, or the HP domain is powered off and the M33 alone asserts CPU Deep Sleep. CPU Sleep is not sufficient — it gates the clock but does not assert the System Deep Sleep request signal."
+    },
+    {
+      "after_key_point": 2,
+      "type": "matching",
+      "stem": "Match each between-event sleep scenario to the correct Deep Sleep sub-mode:",
+      "pairs": [
+        {
+          "left": "64 KB wakeup context, warm boot acceptable, tight power budget",
+          "right": "System Deep Sleep-RAM (64 KB retention)"
+        },
+        {
+          "left": "No wakeup context needed, cold boot acceptable, lowest possible current",
+          "right": "System Deep Sleep-OFF"
+        },
+        {
+          "left": "Large wakeup context (64 KB + 1024 KB), resume in under 20 µs required",
+          "right": "System Deep Sleep (programmable SRAM retention)"
+        }
+      ],
+      "explanation": "The three Deep Sleep sub-modes differ in SRAM retention, wakeup action (resume vs. warm boot vs. cold boot), and current draw. Matching the minimum required retention to the sub-mode avoids paying the current cost of retaining SRAM that the wakeup context does not need."
+    }
+  ],
+  "content_gaps": [
+    "Application-specific power budget targets (mA or µA targets for each terminal operating state) are not provided in the datasheet. The lesson uses the assessment question's 25 µA example as a worked scenario, but real design decisions require SME-provided power budgets.",
+    "Transition time specifications for HP-to-LP and LP-to-HP (65 µs and 49 µs typical respectively, from Table 21) were not incorporated into the lesson content as they were not tested by the assessment questions and would extend the subsection beyond the 5-minute target. These are available in the source material if needed."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are bringing up the face recognition terminal firmware on PSOC Edge E8. During active face recognition, the Cortex-M55 must run the Ethos-U55 inference pipeline at maximum throughput. You need to select the correct system power mode to support this requirement.",
+        "question_text": "Your face recognition pipeline requires the Cortex-M55/Ethos-U55 to operate at up to 320 MHz. Which system power mode should you configure, and what is the corresponding core logic voltage?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Low Power (LP), with core logic running at 0.8 V",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System High Performance (HP), with core logic running at 0.9 V",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "CPU Deep Sleep, with core logic running at 0.9 V",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. System HP mode runs core logic at 0.9 V and allows the M55/U55 to reach its maximum 320 MHz frequency. System LP caps the M55/U55 at 140 MHz, which is insufficient for maximum-throughput inference.",
+        "incorrect": "System LP limits the M55/U55 to 140 MHz at 0.8 V — not enough for maximum inference throughput. CPU Deep Sleep halts CPU execution entirely and is not an active processing mode. Only System HP at 0.9 V unlocks the full 320 MHz for M55/U55. Review the CPU maximum frequencies table and power mode descriptions."
+      },
+      "references": [
+        {
+          "chunk_id": "b1e6ab63-5cf5-4e8d-b387-6968a9a65faf",
+          "snippet": "System power mode | M55/U55 | M33/NNLite — High Performance (HP): 320 MHz | 160 MHz — Low Power (LP): 140 MHz | 80 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.table_b1e6ab63-5cf5-4e8d-b387-6968a9a65faf_0.png",
+          "page_number": 23,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+          "snippet": "System High Performance (HP): All peripherals and CPU power modes are available at maximum speed. Core logic runs at 0.9 V. System Low Power (LP): All peripherals and CPU power modes are available at reduced speed. Core logic runs at 0.8 V.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_b8b566a9-8e5c-457a-95d5-20cef6b24c77_0.png",
+          "page_number": 17,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O3",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "Your face recognition terminal has an idle monitoring state where no active inference is running. The Cortex-M33 handles low-power sensor polling at 60 MHz, and the Cortex-M55 is not needed. You want to reduce power consumption while keeping the M33 operational.",
+        "question_text": "You need to select a system power mode that keeps the Cortex-M33 running at 60 MHz while minimizing power draw. Which mode satisfies this requirement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Deep Sleep, because it retains CPU state and allows DS peripherals to remain active",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System High Performance (HP), because it supports all CPU frequencies including 60 MHz on the M33",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "System Low Power (LP), because it supports M33 operation up to 80 MHz at reduced core voltage",
+          "is_correct": true,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. System LP supports M33/NNLite up to 80 MHz, which covers the 60 MHz requirement, while running core logic at 0.8 V to reduce power consumption compared to HP mode.",
+        "incorrect": "System Deep Sleep halts CPU execution — the M33 cannot actively execute code in that mode. System HP would work functionally but runs at 0.9 V unnecessarily, consuming more power than needed. System LP at 0.8 V supports M33 up to 80 MHz, making it the correct choice for this idle monitoring state. Review the power mode descriptions and CPU frequency table."
+      },
+      "references": [
+        {
+          "chunk_id": "b1e6ab63-5cf5-4e8d-b387-6968a9a65faf",
+          "snippet": "System power mode | M55/U55 | M33/NNLite — High Performance (HP): 320 MHz | 160 MHz — Low Power (LP): 140 MHz | 80 MHz",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_23/ChunkType.table_b1e6ab63-5cf5-4e8d-b387-6968a9a65faf_0.png",
+          "page_number": 23,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "b8b566a9-8e5c-457a-95d5-20cef6b24c77",
+          "snippet": "System Low Power (LP): All peripherals and CPU power modes are available at reduced speed. Core logic runs at 0.8 V.",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_17/ChunkType.text_b8b566a9-8e5c-457a-95d5-20cef6b24c77_0.png",
+          "page_number": 17,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_3"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "Your face recognition terminal enters a deep sleep state between access events. The wakeup context requires only 64 KB of SRAM to restore state, and your power budget for this sleep state is 25 µA (IBAT typical). You are choosing between System Deep Sleep, System Deep Sleep-RAM (64 KB retention), and System Deep Sleep-OFF.",
+        "question_text": "Given the 25 µA power budget and the 64 KB wakeup context requirement, which deep sleep variant should you select?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "System Deep Sleep-OFF (SIDDSO), because it consumes 20.7 µA typical and requires a cold boot on wakeup",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "System Deep Sleep-RAM with 64 KB retention (SIDDSRA), because it consumes 21.7 µA typical and retains the required wakeup context",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "System Deep Sleep with 64 KB + 1024 KB retention (SIDDSD), because it retains more SRAM and consumes 41.6 µA typical",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. System Deep Sleep-RAM with 64 KB retention (SIDDSRA) consumes 21.7 µA typical — within the 25 µA budget — and retains exactly the SRAM needed for wakeup context. Deep Sleep-OFF at 20.7 µA saves slightly more power but triggers a cold boot, losing the wakeup context. Deep Sleep (SIDDSD) at 41.6 µA exceeds the power budget.",
+        "incorrect": "Deep Sleep-OFF (20.7 µA) is within budget but performs a cold boot on wakeup, which loses the 64 KB wakeup context. Deep Sleep (SIDDSD) at 41.6 µA exceeds the 25 µA budget. Deep Sleep-RAM (SIDDSRA) at 21.7 µA is the only option that stays within budget while retaining the required SRAM. Review the deep sleep current consumption table and wakeup action descriptions."
+      },
+      "references": [
+        {
+          "chunk_id": "6e67da4d-c423-4a0a-8646-ab79296ed672",
+          "snippet": "SIDDSO: System Deep Sleep-OFF, PD1 Disabled | IBAT Typical: 20.7 µA... SIDDSRA: System Deep Sleep-RAM, 64 KB SRAM retention, PD1 Disabled | IBAT Typical: 21.7 µA... SIDDSD: System Deep Sleep, 64 KB SRAM + 1024 KB System SRAM+TCM retention, PD1 and CM55 Enabled | IBAT Typical: 41.6 µA",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_73/ChunkType.table_6e67da4d-c423-4a0a-8646-ab79296ed672_0.png",
+          "page_number": 73,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "e479fe1a-205f-4f04-8d7a-84724ad25c34",
+          "snippet": "Wake action — System Deep Sleep-Off: Reset/cold boot — System Deep Sleep-RAM: Warm boot — System Deep Sleep: Resume",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.table_e479fe1a-205f-4f04-8d7a-84724ad25c34_0.png",
+          "page_number": 18,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    },
+    {
+      "mcq_id": "MCQ4",
+      "objective_id": "O3",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are designing the power mode transition strategy for the face recognition terminal. After a recognition event completes, the high-performance domain needs to be powered down while the Cortex-M33 continues running low-power sensor monitoring. You consult the documentation to understand the transition conditions.",
+        "question_text": "According to the PSOC Edge E8 documentation, which condition allows the device to transition to System Deep Sleep mode when the high-performance domain is involved?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The Cortex-M55 enters CPU Sleep mode and the Cortex-M33 enters CPU Deep Sleep mode",
+          "is_correct": false,
+          "id": "MCQ4_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Both the Cortex-M55 and Cortex-M33 enter CPU Deep Sleep mode simultaneously",
+          "is_correct": false,
+          "id": "MCQ4_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The high-performance domain is powered OFF and the Cortex-M33 enters CPU Deep Sleep mode",
+          "is_correct": true,
+          "id": "MCQ4_opt_3"
+        }
+      ],
+      "correct_answer": "c",
+      "feedback": {
+        "correct": "Correct. The documentation states that System Deep Sleep is entered when either both CPUs are in Deep Sleep mode, or the high-performance domain is powered OFF and the Cortex-M33 is in Deep Sleep mode. This second condition allows the HP domain to be shut down independently while the M33 manages the transition.",
+        "incorrect": "CPU Sleep on the M55 is not sufficient — it only gates the CPU clock but does not activate the Deep Sleep request signal. Both CPUs entering Deep Sleep simultaneously is one valid condition, but the documentation also explicitly supports the scenario where the HP domain is powered OFF and only the M33 enters Deep Sleep. Review the System Deep Sleep transition conditions in the power modes section."
+      },
+      "references": [
+        {
+          "chunk_id": "18b85f7d-8129-4fb6-8287-6c33a398242a",
+          "snippet": "The device transitions to System Deep Sleep mode only when either of the following conditions are met: Both CPUs are in Deep Sleep mode; The high-performance domain is powered OFF, and the Cortex-M33 is in Deep Sleep mode",
+          "image_path": "/courses/22078acd-76c2-49ea-aedf-44d1cc68700b/grounding/page_18/ChunkType.text_18b85f7d-8129-4fb6-8287-6c33a398242a_0.png",
+          "page_number": 18,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ4_opt_3"
+    }
+  ]
+}

@@ -1,0 +1,291 @@
+{
+  "subsection_id": "3.1.1",
+  "subsection_title": "Address Card Compatibility Questions by Frequency and Type",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Distinguish which card types and RF frequencies each FaceStation 2 model variant supports",
+    "Select and justify the correct model variant (FS2-D or FS2-AWB) by mapping customer credential and connectivity requirements to model-specific specifications"
+  ],
+  "content": {
+    "hook_sentence": "Recommending the wrong model variant to a customer mid-deployment — because HID Prox and iCLASS SE look interchangeable on a feature list — can force a full hardware swap before the project closes.",
+    "introduction": "Card compatibility questions are among the most frequent and consequential inquiries you'll field as product owner. Sales engineers and solutions architects need a fast, accurate answer about which model handles which credentials — and the FS2-D versus FS2-AWB distinction is exactly where that answer lives. Getting this mapping right protects the customer from a mid-migration hardware swap and protects you from a credibility gap in cross-functional reviews.",
+    "key_points": [
+      {
+        "point": "Both models share a dual-band RF foundation, but their supported card lists diverge at the credential types that matter most in enterprise and government deployments.",
+        "explanation": "The FaceStation 2 reads cards across two RF bands: LF at 125kHz and HF at 13.56MHz. Both the FS2-D and FS2-AWB operate on this dual-band architecture, so common card types like MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, and NFC are available on either model. The divergence starts at the credential types that legacy enterprise and government sites depend on: - **FS2-D** supports 125kHz EM and 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, and NFC. No HID Prox, no iCLASS, no BLE. - **FS2-AWB** adds 125kHz HID Prox and 13.56MHz iCLASS SE/SR/Seos on top of everything the FS2-D supports, plus 2.4GHz BLE for mobile credentials. When a customer's existing infrastructure runs HID Prox or iCLASS, the FS2-D cannot serve them — full stop. That single credential gap is the most common source of model selection errors in the field.",
+        "callout_type": "definition",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "688aa197-361a-41a2-af2c-4ba2a4019ff2",
+            "snippet": "LF(125kHz), HF(13.56MHz) dual-band. Reads all card types that HID multiCLASS supports (EM/HID Prox/MIFARE/ICLASS/DESFire/FeliCa/NFC)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_688aa197-361a-41a2-af2c-4ba2a4019ff2_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "The FS2-AWB is the only model that supports HID Prox, iCLASS SE/SR/Seos, BLE, and Wi-Fi — making it the required choice whenever any of those four capabilities appear in a customer's requirements.",
+        "explanation": "Think of the FS2-AWB as the model for customers with legacy HID infrastructure, iCLASS-based high-security deployments, mobile credential roadmaps, or wireless connectivity constraints. Any one of these requirements is sufficient to eliminate the FS2-D from consideration: - **HID Prox (125kHz):** Widely deployed in older enterprise facilities. The FS2-D does not support it. - **iCLASS SE/SR/Seos (13.56MHz):** Common in government and high-security sites. FS2-D does not support any iCLASS variant. - **BLE (2.4GHz):** Required for mobile credential deployments. Exclusive to FS2-AWB. - **Wi-Fi (IEEE 802.11 b/g):** Required when wired Ethernet to every door is not feasible. Exclusive to FS2-AWB. When a customer lists any of these four as a requirement, your recommendation is FS2-AWB — and your rationale is the specific credential or connectivity gap that the FS2-D cannot close.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "688aa197-361a-41a2-af2c-4ba2a4019ff2",
+            "snippet": "Reads all card types that HID multiCLASS supports (EM/HID Prox/MIFARE/ICLASS/DESFire/FeliCa/NFC)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_688aa197-361a-41a2-af2c-4ba2a4019ff2_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "When no HID Prox, iCLASS, BLE, or Wi-Fi requirement exists, the FS2-D is the defensible choice — and recommending the FS2-AWB without a stated requirement is an overreach you should avoid.",
+        "explanation": "The FS2-D covers EM 125kHz, MIFARE, MIFARE Plus, DESFire EV1/EV2, FeliCa, and NFC — a broad credential set that satisfies most deployments that have not standardized on HID or iCLASS. For customers with straightforward card requirements and wired Ethernet infrastructure, the FS2-D is sufficient. A common mistake in cross-functional discussions is defaulting to the FS2-AWB as a \"safe\" recommendation because it supports more. That reasoning is not defensible if the customer has no stated need for the additional capabilities. Your job is to match requirements to specifications, not to upsell features the deployment does not need. Note also that DESFire EV2 is supported on both models through backward compatibility with DESFire EV1 — so a customer migrating from EV1 to EV2 does not need to change models, provided they have no iCLASS requirement alongside that migration.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC. DESFire EV2 cards are supported by having backward compatibility of DESFire EV1 cards.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "RF read range is consistent across both models and varies by card technology, not by model variant — a detail that prevents a separate category of stakeholder confusion.",
+        "explanation": "Regardless of which model you recommend, the RF read range figures are the same: MIFARE, DESFire, and iCLASS read at up to 50mm; EM, HID Prox, and FeliCa read at up to 30mm; BLE reads at up to 50mm. Stakeholders sometimes assume the FS2-AWB reads cards at a longer range because it supports more card types. That assumption is incorrect. Read range is a function of card technology and installation environment, not model variant. When a stakeholder raises a read range concern, address it with the card-type-specific figures and note that actual range will vary depending on the installation environment — which is the specification's own qualifier.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "RF Read Range*: MIFARE/DESFire/iCLASS: 50 mm. EM/HID Prox/FeliCa: 30 mm, BLE: 50 mm. RF read range will vary depending on the installation environment.",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "A solutions architect asks you whether a customer currently running iCLASS SE cards can migrate to DESFire EV2 over 18 months without swapping hardware. The customer wants to buy one model now and use it through the full migration. Which model do you recommend, and what do you tell the architect about the FS2-D's ability to meet this requirement?",
+        "reveal": "You recommend the FS2-AWB. The FS2-D supports DESFire EV2 (via backward compatibility with EV1), but it does not support iCLASS SE — so it cannot serve the customer during the first phase of the migration when iCLASS SE is still in use. The FS2-AWB supports both iCLASS SE/SR/Seos and DESFire EV1/EV2, covering the customer through the entire transition without a hardware swap. The FS2-D fails the requirement at the iCLASS SE gap, not at the DESFire side.",
+        "hint": "Check both ends of the migration timeline: what card is in use today, and what card will be in use at the end?"
+      },
+      {
+        "prediction_prompt": "A regional sales manager is preparing a proposal for a government facility that requires EM 125kHz, MIFARE, and FeliCa card reading. The facility has no BLE, Wi-Fi, or iCLASS requirement and is budget-sensitive. The manager asks whether the FS2-AWB is necessary. What do you recommend, and why?",
+        "reveal": "You recommend the FS2-D. All three required card types — EM 125kHz, MIFARE, and FeliCa — are supported by the FS2-D. The customer has no stated need for HID Prox, iCLASS, BLE, or Wi-Fi, which are the capabilities exclusive to the FS2-AWB. Recommending the FS2-AWB here would not be defensible against the customer's stated requirements. The FS2-D is the accurate, specification-grounded recommendation.",
+        "hint": "Map each stated requirement to the specification table before considering cost. Does the FS2-D cover all three card types?"
+      }
+    ],
+    "summary": "Model selection for card compatibility comes down to four FS2-AWB-exclusive capabilities: HID Prox, iCLASS SE/SR/Seos, BLE, and Wi-Fi. When any of those appear in a customer's requirements, the FS2-AWB is the only defensible choice; when none appear, the FS2-D covers the requirement and the FS2-AWB recommendation is unsupported.",
+    "figures": []
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "matching",
+      "stem": "Match each customer credential requirement to the model variant that supports it:",
+      "pairs": [
+        {
+          "left": "HID Prox (125kHz)",
+          "right": "FS2-AWB only"
+        },
+        {
+          "left": "MIFARE and FeliCa",
+          "right": "Both FS2-D and FS2-AWB"
+        },
+        {
+          "left": "iCLASS SE",
+          "right": "FS2-AWB only"
+        },
+        {
+          "left": "BLE mobile credentials",
+          "right": "FS2-AWB only"
+        }
+      ],
+      "explanation": "HID Prox, iCLASS SE, and BLE are exclusive to the FS2-AWB. MIFARE and FeliCa appear in both models' RF options, so either model satisfies those credential types."
+    },
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When a customer has no requirement for HID Prox, iCLASS, BLE, or Wi-Fi, the defensible model recommendation is ___.",
+      "answer": "FS2-D",
+      "distractors": [
+        "FS2-AWB",
+        "either model",
+        "neither model without further review"
+      ],
+      "explanation": "Recommending the FS2-AWB without a stated requirement for its exclusive features is not specification-grounded. The FS2-D covers the remaining credential types and is the accurate recommendation when none of the four FS2-AWB-exclusive capabilities are needed."
+    }
+  ],
+  "content_gaps": [
+    "The specification document does not clarify pricing differences between FS2-D and FS2-AWB, which would strengthen cost-justification rationale in budget-sensitive scenarios.",
+    "The document does not specify which card types are most commonly encountered in specific verticals (enterprise, government, healthcare), which would help prioritize which credential gaps to emphasize in stakeholder discussions.",
+    "SME input is needed to confirm whether the FS2-D versus FS2-AWB distinction is a known source of internal confusion and whether additional misconception-correction content is warranted."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O4",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales engineer contacts you about a new enterprise customer whose existing access control infrastructure uses HID Prox cards throughout their facility. The customer also wants to future-proof their deployment by adding BLE mobile credentials and needs wireless connectivity to avoid running Ethernet to every door.",
+        "question_text": "Based on the customer's credential and connectivity requirements, which FaceStation 2 model should you recommend, and what is the primary reason?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "FS2-D, because it supports 125kHz EM and 13.56MHz MIFARE cards, covering the most common card types in enterprise deployments",
+          "is_correct": false,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "FS2-AWB, because it supports HID Prox at 125kHz, BLE at 2.4GHz, and includes Wi-Fi — directly matching all three of the customer's stated requirements",
+          "is_correct": true,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Either model, because both support dual-band RF reading and can be configured for wireless connectivity through an external adapter",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FS2-AWB is the only model that supports HID Prox (125kHz), BLE (2.4GHz), and Wi-Fi (IEEE 802.11 b/g). The FS2-D does not support HID Prox, BLE, or Wi-Fi, making it unable to meet any of the three customer requirements that differentiate this deployment.",
+        "incorrect": "Review the RF Options and connectivity specifications for each model variant. The FS2-D supports 125kHz EM and 13.56MHz cards but does not include HID Prox, BLE, or Wi-Fi — all of which are required by this customer. Wi-Fi is exclusive to the FS2-AWB and cannot be added via an external adapter."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE. Wi-Fi: IEEE 802.11 b/g (FS2-AWB only)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_2"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O4",
+      "bloom_level": "Analyze",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a product review, a solutions architect asks whether the FaceStation 2 can support a customer who currently uses iCLASS SE cards and is evaluating a migration to DESFire EV2 cards over the next 18 months. The architect wants to know which model supports both card types so the customer avoids a hardware swap mid-migration.",
+        "question_text": "Which model variant supports both iCLASS SE and DESFire EV2, and what should you tell the architect about the FS2-D's ability to meet this requirement?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Only the FS2-AWB supports both; the FS2-D supports DESFire EV2 but not iCLASS SE, so it cannot serve the customer through the full migration",
+          "is_correct": true,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Both models support iCLASS SE and DESFire EV2 through the dual-band RF reader, so either model meets the migration requirement",
+          "is_correct": false,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Only the FS2-D supports both; the FS2-AWB is limited to BLE and NFC credentials and does not include legacy HF card support",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The FS2-AWB supports iCLASS SE/SR/Seos in addition to DESFire EV1/EV2, making it the only model that covers both the customer's current and target credentials. The FS2-D supports DESFire EV2 but does not include iCLASS SE, which means it would fail at the start of the migration when iCLASS SE cards are still in use.",
+        "incorrect": "Check the RF Options column in the specifications table carefully. iCLASS SE/SR/Seos is listed only under the FS2-AWB, not the FS2-D. The FS2-D does support DESFire EV1/EV2, but the absence of iCLASS SE support means it cannot bridge the customer's migration window without a hardware replacement."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        },
+        {
+          "chunk_id": "688aa197-361a-41a2-af2c-4ba2a4019ff2",
+          "snippet": "LF(125kHz), HF(13.56MHz) dual-band. Reads all card types that HID multiCLASS supports (EM/HID Prox/MIFARE/ICLASS/DESFire/FeliCa/NFC)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_688aa197-361a-41a2-af2c-4ba2a4019ff2_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_1"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O4",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A regional sales manager is preparing a proposal for a government facility that requires multi-technology card reading — specifically EM 125kHz, MIFARE, and FeliCa — but has a strict budget and no requirement for BLE, Wi-Fi, or iCLASS. The sales manager asks whether the higher-cost FS2-AWB is necessary or whether the FS2-D is sufficient for this deployment.",
+        "question_text": "What is the most accurate and defensible recommendation you can make based on the customer's stated requirements?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Recommend the FS2-AWB to ensure future flexibility, since the additional credential and connectivity features justify the cost premium for any government deployment",
+          "is_correct": false,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "Recommend the FS2-D, since it supports EM 125kHz, MIFARE, and FeliCa — all three required card types — and the customer has no stated need for the features exclusive to the FS2-AWB",
+          "is_correct": true,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Defer the decision to the customer's IT team, since card compatibility depends on the specific card firmware versions in use at the facility",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FS2-D explicitly supports 125kHz EM, 13.56MHz MIFARE, and FeliCa — covering all three of the customer's required card types. Since the customer has no requirement for HID Prox, iCLASS SE, BLE, or Wi-Fi, recommending the FS2-AWB would add cost without addressing any stated need. A defensible product recommendation maps requirements to specifications, not assumptions about future needs.",
+        "incorrect": "The specification table provides a clear basis for this decision. The FS2-D supports EM, MIFARE, and FeliCa — the three card types the customer requires. Recommending the FS2-AWB without a requirement that justifies its additional features is not defensible on specification grounds. Deferring to the IT team is also incorrect here, since card type compatibility — not firmware — is the relevant specification dimension."
+      },
+      "references": [
+        {
+          "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+          "snippet": "RF Options: FS2-D: 125kHz EM & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, NFC; FS2-AWB: 125kHz EM, HID Prox & 13.56MHz MIFARE, MIFARE Plus, DESFire EV1/EV2*, FeliCa, ICLASS SE/SR/Seos, NFC & 2.4GHz BLE",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+          "page_number": 1,
+          "chunk_type": "table"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_2"
+    }
+  ]
+}

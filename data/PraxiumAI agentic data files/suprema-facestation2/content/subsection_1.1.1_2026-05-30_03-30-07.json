@@ -1,0 +1,261 @@
+{
+  "subsection_id": "1.1.1",
+  "subsection_title": "Apply Performance Figures to Stakeholder Questions",
+  "duration_minutes": 5,
+  "format": "Interactive content",
+  "learning_objectives": [
+    "Apply matching speed, group matching speed, and user capacity figures to directly resolve performance-related stakeholder questions",
+    "Distinguish between 1:1 verification and 1:N identification modes and their respective capacity limits",
+    "Counter spoofing concerns by connecting IR-based live face detection and the Android 5.0 security layer to the specific vulnerability raised"
+  ],
+  "content": {
+    "hook_sentence": "Most stakeholders who question FaceStation 2's performance are actually asking two different questions at once — and quoting the wrong number for either one will cost you the room.",
+    "introduction": "As the product owner, you will field performance questions from engineering, sales, and leadership in real time. The difference between a confident answer and a fumbled one comes down to knowing which of the three performance figures applies to the specific scenario being described — and being able to connect each figure to what it actually means for the deployment at hand.",
+    "key_points": [
+      {
+        "point": "1:1 verification and 1:N identification have separate user capacity ceilings — cite the right one for the scenario.",
+        "explanation": "FaceStation 2 supports two distinct recognition modes, and each has its own capacity limit. In **1:1 verification**, the device compares a presented face against a single stored template (the user claims an identity first, then the device confirms it). This mode supports up to 30,000 users. In **1:N identification**, the device compares a presented face against every stored template to find a match without a prior identity claim. This mode supports up to 4,000 users. When a stakeholder asks about a large corporate deployment where employees badge in by face alone (no PIN, no card swipe), that is a 1:N scenario — and the 4,000-user ceiling applies. When employees present a card or PIN first and the face is just the confirming factor, that is 1:1 — and the 30,000-user ceiling applies. Misquoting these figures is the most common performance error in cross-functional discussions. Before you answer any capacity question, confirm which mode the deployment actually uses.",
+        "callout_type": "warning",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          },
+          {
+            "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+            "snippet": "Max. User: 30,000 (1:1), 4,000(1:N)",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.table_5d33614c-70a7-45a2-ae2b-044ddd77c2e2_0.png",
+            "page_number": 1,
+            "chunk_type": "table"
+          }
+        ]
+      },
+      {
+        "point": "Standard matching speed and group matching speed are different figures — use group matching speed for high-throughput identification scenarios.",
+        "explanation": "FaceStation 2 has two matching speed specifications, and they answer different questions. - **Standard matching speed**: 1:4,000 match/sec. This is the general figure for one-to-one or routine identification operations. - **Group matching speed**: 1:5,000 match/sec. This applies specifically to high-throughput scenarios where the device is identifying faces against a large group simultaneously. When a sales director asks what number to quote a prospect running a high-volume lobby — hundreds of people arriving in the same window, all being identified against a large enrolled group — the correct figure is the group matching speed of 1:5,000 match/sec, not the standard 1:4,000 match/sec. The distinction matters because quoting the lower number undersells the device's capability in exactly the scenario where performance is the deciding factor. Conversely, quoting the group matching speed for a routine 1:1 deployment overstates what the stakeholder actually needs — which erodes your credibility when the numbers are scrutinized.",
+        "callout_type": "insight",
+        "references": [
+          {
+            "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+            "snippet": "Matching Speed: 1:4,000 match/sec. *Group Matching: 1:5,000 match/sec",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      },
+      {
+        "point": "Counter spoofing concerns by connecting IR-based live face detection and the Android 5.0 security layer directly to the vulnerability raised.",
+        "explanation": "When a security engineer or skeptical stakeholder raises spoofing as a concern — someone holding up a printed photo or an LCD screen showing a face — you have two specific, documentable defenses to cite. First, FaceStation 2 uses **IR-based live face detection**. The device analyzes infrared image data, not just visible-light camera input. Printed images and LCD screens do not reflect IR light the way a real human face does, so the device can distinguish a live face from a spoofing artifact at the image analysis layer. Second, the device runs on **Android 5.0 Lollipop**, which adds a platform-level security layer on top of the biometric authentication logic. This is not just a marketing claim — Android 5.0 introduced full-disk encryption by default and a hardened application sandbox, which reduces the attack surface at the OS level. When you respond to a spoofing concern, connect each feature to the specific attack vector the stakeholder described. If they mentioned photos and screens, lead with IR-based live face detection. If they raised concerns about software-level tampering or credential theft, bring in the Android 5.0 layer. Citing both together gives a complete answer that addresses both the physical and platform dimensions of the concern.",
+        "callout_type": "tip",
+        "references": [
+          {
+            "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+            "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+            "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+            "page_number": 1,
+            "chunk_type": "text"
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "prediction_prompt": "During a sprint review, the engineering lead says: 'We're scoping a deployment for a corporate campus with 28,000 employees. Each employee will have a single enrolled face template, and they'll verify by presenting their access card first, then confirming with their face. Can the FaceStation 2 handle that user base?' Before reading the reveal — which capacity figure applies here, and does the deployment fit within it?",
+        "reveal": "The card-first, face-confirm workflow is 1:1 verification: the employee presents a card to claim their identity, and the device matches their face against that single stored template. The 1:1 capacity ceiling is 30,000 users. A 28,000-employee deployment falls within that limit with roughly 2,000 users of headroom. Your answer to the engineering lead: 'Yes — this is a 1:1 verification deployment, and the device supports up to 30,000 users in that mode. 28,000 employees fits comfortably within spec.' The key move here is naming the mode explicitly, not just quoting the number. That shows you understand the architecture, not just the datasheet.",
+        "hint": "Ask yourself whether the employee is claiming an identity before the face scan, or whether the face scan alone has to find them in the database."
+      },
+      {
+        "prediction_prompt": "A sales director asks: 'A prospect is running a high-throughput lobby — hundreds of people arriving in the same window. They want face-only access, no cards, no PINs. They want to know how fast the device can match faces against their enrolled group. What number do we quote?' Which matching speed figure do you cite, and why does the other figure not apply here?",
+        "reveal": "Face-only access with no prior identity claim is 1:N identification — the device must search the full enrolled group for every person who walks up. For this scenario, you cite the group matching speed: 1:5,000 match/sec. The standard matching speed of 1:4,000 match/sec is the general figure and would undersell the device's capability in exactly the high-throughput group scenario the prospect is describing. Your answer: 'For a high-throughput lobby running face-only identification against a large enrolled group, the figure to quote is 1:5,000 match/sec — that's the group matching speed.' Note also that the 1:N user capacity ceiling of 4,000 users is relevant here — if the prospect's enrolled population exceeds 4,000, that becomes a separate conversation about deployment architecture.",
+        "hint": "Think about whether the device is searching one template or many, and which spec was specifically defined for the large-group scenario."
+      }
+    ],
+    "summary": "Three figures — 30,000 users (1:1), 4,000 users (1:N), and 1:5,000 group matching speed — each answer a different stakeholder question; pairing the right figure to the right scenario, and connecting IR-based live face detection and the Android 5.0 layer to specific spoofing concerns, is what separates a credible product owner response from a datasheet recitation.",
+    "figures": [
+      {
+        "chunk_id": "0467afd2-d191-4ede-a009-658fb50331db",
+        "after_key_point": 0,
+        "caption": "The FaceStation 2 terminal houses dual camera lenses below the touchscreen — one visible-light camera and one IR camera — which together enable the IR-based live face detection that underpins both performance and anti-spoofing capabilities.",
+        "alt_text": "Front view of the FaceStation 2 terminal, a black rectangular device with a 4-inch color touchscreen displaying the FaceStation 2 logo alongside a time and date readout of 09:15 AM on 03/24 FRI. Below the screen, two camera lenses are mounted side by side in a horizontal housing. The Suprema brand name appears at the bottom of the device. An RFID reader symbol is visible at the top.",
+        "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_0/ChunkType.figure_0467afd2-d191-4ede-a009-658fb50331db_0.png",
+        "page_number": 0
+      }
+    ]
+  },
+  "micro_checks": [
+    {
+      "after_key_point": 0,
+      "type": "matching",
+      "stem": "Match each deployment scenario to the correct user capacity ceiling that applies:",
+      "pairs": [
+        {
+          "left": "Employee presents a PIN, then face confirms identity",
+          "right": "30,000-user ceiling (1:1 verification)"
+        },
+        {
+          "left": "Employee walks up and face alone finds them in the database",
+          "right": "4,000-user ceiling (1:N identification)"
+        },
+        {
+          "left": "Employee taps an access card, then face confirms identity",
+          "right": "30,000-user ceiling (1:1 verification)"
+        }
+      ],
+      "explanation": "The capacity ceiling depends on the recognition mode, not the size of the deployment. Any workflow where the user claims an identity first (card, PIN) before the face scan is 1:1 and supports up to 30,000 users. Face-only identification against the full enrolled database is 1:N and is capped at 4,000 users."
+    },
+    {
+      "after_key_point": 2,
+      "type": "fill_blank",
+      "stem": "When a stakeholder raises concern about someone using a printed photo to bypass face recognition, the most directly relevant FaceStation 2 defense to cite first is ___.",
+      "answer": "IR-based live face detection",
+      "distractors": [
+        "Android 5.0 security layer",
+        "high-quality image logging",
+        "group matching speed"
+      ],
+      "explanation": "IR-based live face detection specifically targets the physical spoofing attack described — printed images and LCD screens do not replicate the infrared reflection signature of a real face. The Android 5.0 layer addresses platform-level security, not the physical spoofing vector."
+    }
+  ],
+  "content_gaps": [
+    "The source document does not define the technical distinction between standard matching speed and group matching speed at an algorithmic level — if engineering stakeholders probe the underlying difference, SME input is needed to explain what changes in the matching process for group scenarios.",
+    "The document does not specify whether the 1:N capacity limit of 4,000 users can be extended through distributed configuration or server-side offloading — SME confirmation is needed before making any claims about scaling 1:N deployments beyond 4,000 users."
+  ],
+  "mcqs": [
+    {
+      "mcq_id": "MCQ1",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a sprint review, the engineering lead asks: 'We're scoping a deployment for a corporate campus with 28,000 employees. Each employee will have a single enrolled face template. Can the FaceStation 2 handle that user base in a 1:1 verification mode?'",
+        "question_text": "How do you respond to directly address the engineering lead's capacity question?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "Yes — the device supports up to 30,000 users in 1:1 mode, so a 28,000-employee deployment falls within its capacity.",
+          "is_correct": true,
+          "id": "MCQ1_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "No — the device supports up to 4,000 users in 1:1 mode, so a 28,000-employee deployment would require multiple units networked together.",
+          "is_correct": false,
+          "id": "MCQ1_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "Yes — the device supports up to 30,000 users in 1:N mode, so a 28,000-employee deployment is within its capacity.",
+          "is_correct": false,
+          "id": "MCQ1_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The FaceStation 2 supports a maximum of 30,000 users in 1:1 (verification) mode, which comfortably covers a 28,000-employee deployment. The 4,000-user limit applies to 1:N (identification) mode, not 1:1.",
+        "incorrect": "Review the user capacity specifications carefully. The FaceStation 2 supports up to 30,000 users in 1:1 mode and up to 4,000 users in 1:N mode — these are distinct figures for distinct authentication modes. Applying the wrong figure to the wrong mode leads to an incorrect answer."
+      },
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ1_opt_1"
+    },
+    {
+      "mcq_id": "MCQ2",
+      "objective_id": "O1",
+      "bloom_level": "Apply",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. A sales director asks during a product review: 'A prospect is running a high-throughput lobby with hundreds of people arriving in the same time window. They want to know how fast the device can match faces against a large group — not just one-to-one. What's the number we should be quoting them?'",
+        "question_text": "Which matching speed figure should you cite to directly answer the sales director's question about high-throughput group scenarios?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "1:4,000 match/sec — this is the standard matching speed that applies to all recognition scenarios.",
+          "is_correct": false,
+          "id": "MCQ2_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "1:5,000 match/sec — this is the group matching speed, which applies to high-throughput identification against a large group.",
+          "is_correct": true,
+          "id": "MCQ2_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "4,000 users — this is the maximum user capacity for identification mode, which defines throughput limits.",
+          "is_correct": false,
+          "id": "MCQ2_opt_3"
+        }
+      ],
+      "correct_answer": "b",
+      "feedback": {
+        "correct": "Correct. The FaceStation 2's group matching speed is 1:5,000 match/sec, which is the relevant figure for high-throughput scenarios where the device identifies individuals against a large group. The 1:4,000 match/sec figure is the standard matching speed, and 4,000 users is a capacity limit — neither directly answers a throughput question about group matching.",
+        "incorrect": "The question asks specifically about group matching throughput. The FaceStation 2 has two distinct speed figures: 1:4,000 match/sec for standard matching and 1:5,000 match/sec for group matching. User capacity (4,000 users in 1:N mode) is a storage limit, not a speed figure. Citing the wrong figure in a sales conversation could misrepresent the product's capabilities."
+      },
+      "references": [
+        {
+          "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+          "snippet": "Matching Speed: 1:4,000 match/sec, Group Matching: 1:5,000 match/sec, User Capacity: Max 30,000 users (1:1), 4,000 users (1:N)",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_000a98fd-dafa-4eff-9e1a-3e4093095518_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ2_opt_2"
+    },
+    {
+      "mcq_id": "MCQ3",
+      "objective_id": "O3",
+      "bloom_level": "Evaluate",
+      "stem": {
+        "scenario_context": "You are the Hardware Product Owner for FaceStation 2. During a customer-facing product review, a security engineer raises a concern: 'Face recognition systems are notoriously easy to spoof — someone could just hold up a photo or use a screen showing someone's face to gain access. Why should we trust this device for a secure facility?'",
+        "question_text": "Which response most accurately and completely addresses the security engineer's spoofing concern using FaceStation 2's documented security features?"
+      },
+      "options": [
+        {
+          "letter": "a",
+          "text": "The device uses IR-based live face detection to distinguish real faces from printed images and LCD screens, and the Android 5.0 Lollipop platform adds an additional security layer — both features directly address the spoofing risk you've described.",
+          "is_correct": true,
+          "id": "MCQ3_opt_1"
+        },
+        {
+          "letter": "b",
+          "text": "The device captures high-quality image logs of every authentication attempt, creating an audit trail that allows security teams to review and flag any suspicious access events after the fact.",
+          "is_correct": false,
+          "id": "MCQ3_opt_2"
+        },
+        {
+          "letter": "c",
+          "text": "The device operates across a wide illuminance range from 0 lx to 25,000 lx, ensuring reliable face capture even in challenging lighting — which reduces the likelihood of false acceptances caused by poor image quality.",
+          "is_correct": false,
+          "id": "MCQ3_opt_3"
+        }
+      ],
+      "correct_answer": "a",
+      "feedback": {
+        "correct": "Correct. The engineer's concern is active spoofing — using a photo or screen to impersonate someone. IR-based live face detection directly prevents this by analyzing whether the presented face is real, and the Android 5.0 security layer reinforces the platform's overall security posture. Both features are directly connected to the vulnerability raised.",
+        "incorrect": "The engineer asked specifically about spoofing attacks using printed images or LCD screens. Image logging (option b) is a reactive audit tool, not a spoofing prevention mechanism. Illuminance range (option c) addresses lighting reliability, not authentication security. Only IR-based live face detection and the Android 5.0 security layer directly counter the spoofing vulnerability described."
+      },
+      "references": [
+        {
+          "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+          "snippet": "Live face detection: IR-based image analysis to prevent spoofing by printed images and LCDs. Enhanced security by Android 5.0 Lollipop. High quality Image log",
+          "image_path": "/courses/cd08004b-3fe0-4e50-a7b2-b8da6fc0dc1b/grounding/page_1/ChunkType.text_f7bf27be-f36c-4d8d-b947-42076d0cab8b_0.png",
+          "page_number": 1,
+          "chunk_type": "text"
+        }
+      ],
+      "correct_option_id": "MCQ3_opt_1"
+    }
+  ]
+}

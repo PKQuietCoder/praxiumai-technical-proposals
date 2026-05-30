@@ -1,0 +1,76 @@
+{
+  "instructional_goal": "Given a cross-functional product discussion or stakeholder inquiry, you will apply FaceStation 2 technical specifications — including matching performance, user capacity, illuminance range, credential options, interface capabilities, and model variant differences — to accurately answer product questions and justify product decisions without referencing external support.",
+  "audience": "Hardware Product Owners and internal product stakeholders responsible for the Suprema FaceStation 2 biometric access control terminal",
+  "conditions": [
+    "During cross-functional meetings (engineering, sales, support, or leadership) where FaceStation 2 capabilities are questioned or compared",
+    "When responding to internal or customer-facing product inquiries that require accurate specification recall or trade-off explanation",
+    "When making or defending product prioritization decisions based on hardware capabilities and constraints"
+  ],
+  "tools_and_resources": [
+    "Suprema FaceStation 2 product datasheet and specification table",
+    "System configuration diagram (BioStar 2 integration scenarios)",
+    "Quick-reference job aid summarizing key specs and model variant differences (FS2-D vs. FS2-AWB)"
+  ],
+  "boundaries": {
+    "in_scope": [
+      "Key performance specifications: matching speed, user capacity, and operating illuminance range",
+      "Credential and card compatibility: supported RF card types, frequencies, and read ranges by model variant",
+      "Hardware interfaces and connectivity options: Ethernet, Wi-Fi, RS-485, Wiegand, USB, Relay, TTL",
+      "Model variant differentiation: FS2-D vs. FS2-AWB feature and credential differences",
+      "Security features: live face detection, anti-spoofing, Android 5.0 security layer",
+      "System configuration options: standalone, standalone-secure, and distributed access control setups"
+    ],
+    "out_of_scope": [
+      "Physical installation, mounting, or wiring procedures",
+      "BioStar 2 software administration, user enrollment workflows, or firmware management",
+      "Troubleshooting, diagnostics, or device repair procedures",
+      "Competitive benchmarking or pricing and commercial terms"
+    ]
+  },
+  "assumptions": [
+    "Alex has foundational familiarity with biometric access control concepts (e.g., 1:1 vs. 1:N matching, RFID card types) but has not yet mastered FaceStation 2-specific specifications",
+    "Alex regularly participates in cross-functional discussions where accurate product specification knowledge is expected without look-up delays",
+    "Alex does not require hands-on device operation skills — the performance need is decisional and communicative, not technical-operational",
+    "The 30-minute course will be supplemented by a leave-behind job aid or reference document for ongoing use post-training",
+    "Alex has access to the FaceStation 2 datasheet as a reference resource but needs structured instruction to internalize and apply the most decision-critical specifications"
+  ],
+  "evidence": [
+    {
+      "chunk_id": "000a98fd-dafa-4eff-9e1a-3e4093095518",
+      "relevance": "Defines ultra-performance specifications (matching speed 1:4,000/sec, user capacity 30,000/4,000) that Alex must be able to cite and apply in product discussions"
+    },
+    {
+      "chunk_id": "127ac179-a85d-4ceb-9d41-ba3e443baafe",
+      "relevance": "Covers the operating illuminance range (0–25,000 lx), a key differentiating capability Alex must articulate to stakeholders evaluating deployment environments"
+    },
+    {
+      "chunk_id": "688aa197-361a-41a2-af2c-4ba2a4019ff2",
+      "relevance": "Describes multi-RFID card reading capabilities across dual frequency bands, directly relevant to credential compatibility questions from sales and engineering"
+    },
+    {
+      "chunk_id": "5d33614c-70a7-45a2-ae2b-044ddd77c2e2",
+      "relevance": "Full specification table covering both FS2-D and FS2-AWB model variants across all categories — the primary reference for model differentiation decisions"
+    },
+    {
+      "chunk_id": "f7bf27be-f36c-4d8d-b947-42076d0cab8b",
+      "relevance": "Details enhanced security features (live face detection, anti-spoofing) that Alex must be able to explain when justifying security-related product decisions"
+    },
+    {
+      "chunk_id": "4b911e80-3a91-4b73-bb45-8ae2d5c77b85",
+      "relevance": "System configuration diagram illustrating standalone, standalone-secure, and distributed deployment scenarios — essential for Alex to match product capabilities to customer use cases"
+    },
+    {
+      "chunk_id": "7eaa95c8-1c2a-4f8b-a12d-169de89bea4d",
+      "relevance": "Ergonomics and usability features (height range, tilt bracket, GUI) that Alex must reference when addressing accessibility or usability requirements from diverse stakeholders"
+    }
+  ],
+  "confidence": "high",
+  "confidence_rationale": "The technical documentation provides comprehensive, well-structured specification data directly aligned with the persona's stated needs. The persona's pain points (stakeholder alignment, translating specs into decisions) map clearly to a performance-oriented goal around applying specifications. The 30-minute duration is realistic for a focused specification-mastery goal scoped to a single product's datasheet content. The only uncertainty is whether the course should also address BioStar 2 integration depth, which the SME should clarify.",
+  "questions_for_sme": [
+    "Should the course address how FaceStation 2 integrates with BioStar 2 software at a conceptual level, or is that covered in a separate training module?",
+    "Are there specific stakeholder scenarios (e.g., a sales objection, an engineering trade-off, a support escalation) that Alex most frequently encounters and that should anchor the instructional examples?",
+    "Is the FS2-D vs. FS2-AWB model differentiation a frequent source of confusion or misalignment internally, and should it receive disproportionate instructional emphasis?",
+    "Are there any specifications in the datasheet that are commonly misquoted or misunderstood by internal teams — areas where misconceptions need to be explicitly corrected?",
+    "Will learners have access to the FaceStation 2 datasheet as a job aid during and after the course, or is the expectation that they recall specifications from memory in real-world situations?"
+  ]
+}
