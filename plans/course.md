@@ -76,7 +76,7 @@ The end-to-end workflow and toolchain:
 ## 10. (🔹 Adv) Build your own agentic workflow
 
 - Design an end-to-end pipeline on PraxiumAI data for your own docs.
-- The way we built PraxiumAI.
+- Extending and building on PraxiumAI's agentic system
 
 ## 11. Tool & cost tradeoffs
 
