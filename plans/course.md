@@ -36,7 +36,7 @@ The end-to-end workflow and toolchain:
 
 *Tool: Claude Design*
 
-- Professional, on-brand docs and web pages: color, typography, and logo.
+- Passable, on-brand docs and web pages: color, typography, and logo.
 - Brand tokens.
 - A reusable style / Skill.
 

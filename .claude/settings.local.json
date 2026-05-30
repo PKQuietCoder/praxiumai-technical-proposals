@@ -5,7 +5,10 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(git commit -q -m ' *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(git *)",
+      "Bash(git status *)",
+      "Read(//tmp/**)"
     ]
   }
 }
