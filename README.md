@@ -1,5 +1,6 @@
 # Course Outline
 
+
 An end-to-end course on building traceable, branded, multimedia technical proposals with agentic tools.
 
 > **Legend:** 🔹 **Adv** marks advanced modules.
@@ -24,11 +25,12 @@ The end-to-end workflow and toolchain:
 - Co-create a basic proposal with agents, with light branding (Claude Design).
 - Hit the review & verifiability wall: hallucination and untraceable claims.
 
-## 3. Building rigorous proposals
+## 3. Building rigorous proposals with Coding Agents
 
 *Tools: Claude Code & Codex*
 
 - Understand agentic data formats and work with PraxiumAI agentic data.
+- 0-to-10 with Claude Code (no prior experience required, no code will be read or written)
 - Apply the **GLCCVP** framework: Gather → Learn → Compare → Co-Create → Verify → Propose via coding agents.
 - Outcome: traceable, branded, multimedia proposals.
 
@@ -37,8 +39,8 @@ The end-to-end workflow and toolchain:
 *Tools: Replit / Cowork / Codex*
 
 - De-AI the text: kill em-dashes, repetitive rhythm/cadence, hedging, clichés, and emoji overuse.
-- Visuals: Figures, Slides, and Diagrams
-- Videos: Narrated videos, Synthetic Avatar videos, 
+- Creating visuals: Figures, Slides, and Diagrams
+- Creating videos: Narrated videos, Synthetic Avatar videos, 
 - Overcome agent limitations:  wrong labels, broken layout, etc.
 
 ## 5. Branding deep-dive
@@ -46,7 +48,7 @@ The end-to-end workflow and toolchain:
 *Tool: Claude Design*
 
 - Passable, on-brand docs and web pages: color, typography, and logo.
-- Automated Marketing assets: LinkedIn Carousel PDFs, Illustrations, 
+- Automated Marketing assets: LinkedIn Carousel PDFs, Illustrations, etc.
 - Marketing and Sales using Learning Science: Earning Trust by Teaching, Not Selling
 
 ## 6. Personalize learning using PraxiumAI
@@ -65,15 +67,15 @@ The end-to-end workflow and toolchain:
 
 *Tool: Claude Skills*
 
-- Spec-driven development
 - Evals for technical definitions, facts, procedures, troubleshooting, math/quants/formulas, visuals and coherence.
 - Add Quality Control guardrails for verifiability, traceability, and accuracy.
 - Understand the limits of Skills and when to use prompts instead.
 
 ## 9. Build your own agentic workflow
 
-- Design an end-to-end pipeline on PraxiumAI data for your own docs.
-- Extending and building on PraxiumAI's agentic system
+- Outcome-driven development
+- Prompt scaffolding,Agents, Subagents, & Team of agents.
+- Extending and building on PraxiumAI's agentic system.
 - Version proposals using GitHub as customer requirements change.
 - Capture review comments and re-run the pipeline without starting over.
 
