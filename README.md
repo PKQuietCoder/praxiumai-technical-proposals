@@ -1,9 +1,14 @@
 # Course Outline
 
+"Hands-on: Co-creating Technical Hardware & Science Proposals with Agents"
 
-An end-to-end course on building traceable, branded, multimedia technical proposals with agentic tools.
+This repo will show some methods on how to turn your product, competitor, and customer datasheets into sales proposals shaped by learning science, using agentic tools  Claude Cowork, OpenAI Codex, and PraxiumAI. These methods also work for any scientific or engineering proposal, but I needed one concrete example we can use to work together...
 
-> **Legend:** 🔹 **Adv** marks advanced modules.
+I'll update the links to the videos here as they come live. 
+
+In the past couple of years, my journey took me from consumer/B2B hardware and science, to prototyping and vibe coding on Replit, all the way to deploying production AI/SaaS on AWS/Bedrock/Agent SDKs. Along the way I learned that AI/software and hardware/science aren't the same world.
+
+In software, code is the source-of-truth. In hardware, often, it's the datasheet; software/AI almost never ships with one! Even words have different meaning: "quality" could mean statistical process control and control charts in hardware, but generalization error and hallucinations in AI. We will together learn how to operate in these different worlds, by creating.
 
 ---
 
