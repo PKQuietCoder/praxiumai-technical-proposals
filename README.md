@@ -22,7 +22,7 @@ The end-to-end workflow and toolchain:
 - **Claude Code / Codex**
 - **Replit**
 
-The course runs the same three-lesson arc twice — first with desktop agents, then with coding agents — so you feel the difference between the two ways of working before moving on.
+The course runs the same three-lesson arc twice: first with desktop agents, then with coding agents, so you feel the difference between the two ways of working before moving on.
 
 ---
 
@@ -32,23 +32,32 @@ The course runs the same three-lesson arc twice — first with desktop agents, t
 
 ### Video 1: Overview & co-creating a proposal
 
-- Course overview: the worlds of hardware/science vs. AI/software, and where agents fit.
-- Agentic prompts
-- Co-create a basic proposal with agents, with light branding (Claude Design).
-- Hit the review & verifiability wall: hallucination and untraceable claims.
+**By the end, you can** co-create a basic, lightly-branded proposal with a desktop agent, and spot where it breaks.
+
+You'll learn:
+- Where agents fit: hardware/science vs. AI/software.
+- Driving ingest & drafting with agentic prompts.
+- Light branding with Claude Design.
+- The review & verifiability wall: hallucination and untraceable claims.
 
 ### Video 2: Quality control
 
-- Evals for technical definitions, facts, procedures, troubleshooting, math/quants/formulas, visuals and coherence.
-- Add Quality Control guardrails for verifiability, traceability, and accuracy.
-- Understand the limits of desktop agents and when to reach for coding agents instead.
+**By the end, you can** catch errors in an agent-made proposal and apply QC methods to generate accurate content.
+
+You'll learn:
+- Evals for technical definitions, facts, procedures, troubleshooting, math/quants/formulas, visuals, and coherence.
+- Adding QC guardrails for verifiability, traceability, and accuracy.
+- The limits of desktop agents, and when to reach for coding agents instead.
 
 ### Video 3: Co-creating a multimedia proposal
 
-- Using PraxiumAI's agentic data for Multimedia docs, and grounded generation.
-- Creating visuals: Figures, Slides, and Diagrams.
-- Creating videos
-- Overcome agent limitations: wrong labels, broken layout, etc.
+**By the end, you can** produce a grounded multimedia proposal — visuals, diagrams, and video — from PraxiumAI agentic data.
+
+You'll learn:
+- Using PraxiumAI's agentic data for multimedia docs and grounded generation.
+- Creating visuals: figures, slides, and diagrams.
+- Creating videos.
+- Working around agent limitations: wrong labels, broken layout, etc.
 
 ---
 
@@ -60,22 +69,31 @@ The same three lessons, now with coding agents and Replit to produce traceable, 
 
 ### Video 4: Overview & co-creating a proposal
 
-- Why move from desktop agents to coding agents: source-of-truth, traceability, and interactivity.
-- 0-to-10 with Claude Code (no prior experience required, no code will be read or written).
-- Understand agentic data formats and work with PraxiumAI agentic data.
-- Apply the **GLCCVP** framework: Gather → Learn → Compare → Co-Create → Verify → Propose via coding agents.
+**By the end, you can** stand up a proposal with a coding agent using the GLCCVP framework — no coding experience needed.
+
+You'll learn:
+- Why coding agents: source-of-truth, traceability, and interactivity.
+- Going 0-to-10 with Claude Code (no prior experience, no code read or written).
+- Agentic data formats and working with PraxiumAI agentic data.
+- The **GLCCVP** framework: Gather → Learn → Compare → Co-Create → Verify → Propose.
 
 ### Video 5: Co-creating a multimedia proposal
 
-- Turn technical content into live, interactive webpages using multiple agents and sub-agents: **Replit + Claude Code + Codex**.
+**By the end, you can** turn technical content into a live, interactive multimedia webpage using a team of coding agents.
+
+You'll learn:
+- Orchestrating multiple agents and sub-agents: **Replit + Claude Code + Codex**.
 - Rich multimedia in an interactive document: visuals, diagrams, and embedded video.
-- How to decide between Chat / Desktop agents (Cowork/Codex) / Coding agents.
+- Choosing between Chat / Desktop agents (Cowork/Codex) / Coding agents.
 
 ### Video 6: Quality control
 
-- Evals and Quality Control guardrails wired into the coding-agent pipeline.
+**By the end, you can** wire evals and guardrails into a coding-agent pipeline that's verifiable by construction.
+
+You'll learn:
+- Building evals and QC guardrails into the coding-agent pipeline.
 - Verifiability & traceability by construction, with the datasheet as source-of-truth.
-- Understand the limits of Skills and when to use prompts instead.
+- The limits of Skills — and when to use prompts instead.
 
 ---
 
@@ -85,21 +103,30 @@ The same three lessons, now with coding agents and Replit to produce traceable, 
 
 *Tool: Claude Design*
 
-- Passable, on-brand docs and web pages: color, typography, and logo.
-- Automated Marketing assets: LinkedIn Carousel PDFs, Illustrations, etc.
-- Marketing and Sales using Learning Science: Earning Trust by Teaching, Not Selling.
+**By the end, you can** produce on-brand docs, pages, and marketing assets that earn trust by teaching.
+
+You'll learn:
+- On-brand docs and web pages: color, typography, and logo.
+- Automating marketing assets: LinkedIn carousel PDFs, illustrations, etc.
+- Marketing and sales with learning science: earning trust by teaching, not selling.
 
 ### Video 8: Personalize learning using PraxiumAI
 
-- Tailor learning to a specific customer/persona, use case, and goal.
-- Understand learning-science-driven content creation.
-- Downloading and using PraxiumAI data for your agentic workflow.
-- Verifiability & traceability.
+**By the end, you can** tailor a proposal's content to a specific customer, persona, and goal using PraxiumAI data.
+
+You'll learn:
+- Tailoring learning to a specific customer/persona, use case, and goal.
+- Learning-science-driven content creation.
+- Downloading and using PraxiumAI data in your agentic workflow.
+- Keeping it verifiable and traceable.
 
 ### Video 9: Build your own agentic workflow
 
+**By the end, you can** build and extend your own agentic proposal workflow — versioned and re-runnable as requirements change.
+
+You'll learn:
 - Outcome-driven development.
-- Prompt scaffolding, Agents, Subagents, & Team of agents.
+- Prompt scaffolding: agents, subagents, and teams of agents.
 - Extending and building on PraxiumAI's agentic system.
-- Version proposals using GitHub as customer requirements change.
-- Capture review comments and re-run the pipeline without starting over.
+- Versioning proposals with GitHub as customer requirements change.
+- Capturing review comments and re-running the pipeline without starting over.
