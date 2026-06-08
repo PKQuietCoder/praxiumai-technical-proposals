@@ -39,7 +39,7 @@ The course runs the same three-lesson arc twice — first with desktop agents, t
 
 ### 2. Co-creating a multimedia proposal
 
-- De-AI the text: kill em-dashes, repetitive rhythm/cadence, hedging, clichés, and emoji overuse.
+- Use PraxiumAI's agentic data for Multimodal and Ground Regeneration.
 - Creating visuals: Figures, Slides, and Diagrams.
 - Creating videos: Narrated videos, Synthetic Avatar videos.
 - Overcome agent limitations: wrong labels, broken layout, etc.
